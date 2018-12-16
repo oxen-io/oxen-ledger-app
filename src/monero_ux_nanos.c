@@ -415,7 +415,7 @@ void ui_menu_settings_display(unsigned int value) {
 #define XSTR(x) STR(x)
 
 const ux_menu_entry_t ui_menu_info[] = {
-  {NULL,  NULL,                 -1, NULL,          "Monero",                   NULL, 0, 0},
+  {NULL,  NULL,                 -1, NULL,          "Swap",                     NULL, 0, 0},
   {NULL,  NULL,                 -1, NULL,          "(c) Ledger SAS",           NULL, 0, 0},
   {NULL,  NULL,                 -1, NULL,          "Spec  " XSTR(SPEC_VERSION),NULL, 0, 0},
   {NULL,  NULL,                 -1, NULL,          "App  " XSTR(MONERO_VERSION),  NULL, 0, 0},
@@ -440,10 +440,10 @@ const bagl_element_t* ui_menu_main_preprocessor(const ux_menu_entry_t* entry, ba
   if (entry == &ui_menu_main[0]) {
     if(element->component.userid==0x20) {  
       os_memset(G_monero_vstate.ux_menu, 0, sizeof(G_monero_vstate.ux_menu));
-      os_memmove(G_monero_vstate.ux_menu, "< Monero: ", 10);
-      monero_base58_public_key(G_monero_vstate.ux_menu+10, G_monero_vstate.A,G_monero_vstate.B, 0);
-      G_monero_vstate.ux_menu[10+95+0] = ' ';
-      G_monero_vstate.ux_menu[10+95+1] = '>';
+      os_memmove(G_monero_vstate.ux_menu, "< Swap: ", 8);
+      monero_base58_public_key(G_monero_vstate.ux_menu+8, G_monero_vstate.A,G_monero_vstate.B, 0);
+      G_monero_vstate.ux_menu[8+95+0] = ' ';
+      G_monero_vstate.ux_menu[8+95+1] = '>';
       
       element->component.stroke = 10; // 1 second stop in each way
       element->component.icon_id = 48; // roundtrip speed in pixel/s
