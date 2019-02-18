@@ -100,38 +100,17 @@ System Configuration
 Linux
 ~~~~~
 
-The following packages must be installed: pcsc-tools pcscd libpcsclite1:amd64 .
-
-You have to have to add the NanoS to /etc/libccid_Info.plist
-
-    In  <key>ifdVendorID</key>      add the entry  <string>0x2C97</string>
-    In  <key>ifdProductID</key>     add the entry  <string>0x0001</string>
-    In  <key>ifdFriendlyName</key>  add the entry  <string>Ledger Token</string>
-  
-These 3 entries must be added at the end of each list.
+TO BE REWRITE FOR HID 
 
 MAC
 ~~~
 
-The SmartCard service must be installed. See https://smartcardservices.github.io/
-
-1. First it is necessary to [disable SIP](https://developer.apple.com/library/mac/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html) That doesn't allow the editing of files in /usr/.
-
-2. You have to add the Nano S to /usr/libexec/SmartCardServices/drivers/ifd-ccid.bundle/Contents/Info.plist
-
-
-       In  <key>ifdVendorID</key>      add the entry  <string>0x2C97</string>
-       In  <key>ifdProductID</key>     add the entry  <string>0x0001</string>
-       In  <key>ifdFriendlyName</key>  add the entry  <string>Ledger Token</string>
-  
-This 3 entries must be added at the end of each list.
-
-3. [Enable SIP](https://developer.apple.com/library/content/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html)
+TO BE REWRITE FOR HID 
 
 Windows
 ~~~~~~~
 
-SmartCard service should be already installed. Maybe you have to start it.
+TO BE REWRITE FOR HID 
 
 
 
