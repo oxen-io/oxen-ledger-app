@@ -4,7 +4,43 @@
 Monero wallet application for Ledger Blue and Nano S
 
 
-# Revision 
+# Revision
+
+## v1.1.3
+
+- Remove rolling address display
+- Allow STEALTH instruction outside TX
+- Doc fix
+
+## v1.1.2
+
+Fix stack overflow for 1.5.5 SDK
+
+## v1.1.1
+
+Allow transaction parsing when screen is locked
+
+## v1.1.0
+
+Initial Release
+
+Targeted Client: Monero 0.13.0.0+
+
+- Security fix: Screen lock management
+- Optimisation: New protocol V2 for future
+- Fix bug in large amount display that was truncated
+- Remove confirmation for zero amount (fake sweep change)
+- Better handling for change address to not display them
+- Dual id (PIN based) management
+- Add onscreen seed words display
+
+
+## v1.0.0
+
+Initial Release
+
+Targeted Client: Monero 0.13.0.0+
+
 
 ## v 0.12.4 / Beta 5
 
@@ -30,7 +66,7 @@ Targeted Client: Monero 0.12.1
 ## v 0.12.1 / Beta 2
 
 Targeted Client: Monero 0.12.1
-    
+
 - Add second PIN support
 - Remove key storage  in NVRAM, always recompute secret key at boot
 - Export secret viewkey, with agreement of user, to speed up tx scan

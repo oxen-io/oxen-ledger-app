@@ -45,6 +45,7 @@ void monero_main(void) {
       }
       CATCH_OTHER(e) {
         monero_io_discard(1);
+        monero_reset_tx();
         if ( (e & 0xFFFF0000) ||
              ( ((e&0xF000)!=0x6000) && ((e&0xF000)!=0x9000) ) ) {
           monero_io_insert_u32(e);
@@ -117,7 +118,8 @@ unsigned char io_event(unsigned char channel) {
     if (s_after == PIN_VERIFIED) {
       monero_init_private_key();
     } else {
-      monero_wipe_private_key();
+      ;//do nothing, allowing TX parsing in lock mode 
+      //monero_wipe_private_key();
     }
   }
   
