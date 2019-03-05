@@ -427,7 +427,7 @@ const ux_menu_entry_t ui_menu_info[] = {
 void ui_menu_pubaddr_action(unsigned int value);
 
 const ux_menu_entry_t ui_menu_pubaddr[] = {
-  {NULL,  NULL,                  3,          NULL,  "XMR",  "?addr.1?",   0, 0},
+  {NULL,  NULL,                  3,          NULL,  "XWP",  "?addr.1?",   0, 0},
   {NULL,  NULL,                  4,          NULL,  "?addr.2?",     "?addr.2?",   0, 0},
   {NULL,  NULL,                  5,          NULL,  "?addr.3?",     "?addr.3?",   0, 0},
   {NULL,  NULL,                  6,          NULL,  "?addr.4?",     "?addr.4?",   0, 0},
