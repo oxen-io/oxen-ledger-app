@@ -20,7 +20,8 @@
 
 #if CX_APILEVEL == 8
 #define PIN_VERIFIED (!0)
-#elif CX_APILEVEL == 9
+#elif CX_APILEVEL == 9 ||  CX_APILEVEL == 10
+
 #define PIN_VERIFIED BOLOS_UX_OK
 #else
 #error CX_APILEVEL not  supported
@@ -141,6 +142,7 @@ struct monero_v_state_s {
    unsigned int tx_in_progress: 1;
    unsigned int tx_state: 4;
   };
+  unsigned int   tx_output_cnt;
 
   /* Tx key */
   unsigned char R[32];
@@ -162,6 +164,12 @@ struct monero_v_state_s {
   /* ------------------------------------------ */
   /* ---               UI/UX                --- */
   /* ------------------------------------------ */
+
+  #ifdef UI_NANO_X
+  char            ux_wallet_public_address[96];
+  char            ux_wallet_public_short_address[5+2+5+1];
+  #endif
+
   union {
     struct {
       /* menu 0: 95-chars + "<monero: >"  + null */
@@ -172,8 +180,13 @@ struct monero_v_state_s {
       char            ux_amount[23];
     };
     struct {
-      char words[340];
+      unsigned char tmp[340];
     };
+    #ifdef UI_NANO_X
+    struct {
+      char ux_words[520];
+    };
+    #endif
   };
 };
 typedef struct  monero_v_state_s monero_v_state_t;
@@ -238,6 +251,10 @@ typedef struct  monero_v_state_s monero_v_state_t;
 #define INS_MLSAG                           0x7E
 #define INS_CLOSE_TX                        0x80
 
+#define INS_GET_TX_PROOF                    0xA0
+#define INS_GEN_SIGNATURE                   0xA2
+#define INS_GEN_RING_SIGNATURE              0xA4
+
 
 
 #define INS_GET_RESPONSE                    0xc0
@@ -281,6 +298,9 @@ typedef struct  monero_v_state_s monero_v_state_t;
 #define SW_SECURITY_AMOUNT_CHAIN_CONTROL     0x6912
 #define SW_SECURITY_COMMITMENT_CHAIN_CONTROL 0x6913
 #define SW_SECURITY_OUTKEYS_CHAIN_CONTROL    0x6914
+#define SW_SECURITY_MAXOUTPUT_REACHED        0x6915
+
+#define SW_CLIENT_NOT_SUPPORTED              0x6930
 
 #define SW_SECURITY_STATUS_NOT_SATISFIED     0x6982
 #define SW_FILE_INVALID                      0x6983
