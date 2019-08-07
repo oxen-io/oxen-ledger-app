@@ -60,7 +60,7 @@ endif
 #DEFINES += IOCRYPT
 ## Debug options
 #DEFINES   += DEBUG_HWDEVICE
-#DEFINES   += IODUMMYCRYPT
+DEFINES   += IODUMMYCRYPT
 #DEFINES   += IONOCRYPT
 
 ################
