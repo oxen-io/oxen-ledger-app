@@ -195,7 +195,7 @@ UX_STEP_NOCB(
   ux_menu_validation_1_step,
   bn,
   {
-    "Amout",
+    "Amount",
     G_monero_vstate.ux_amount
   });
 
