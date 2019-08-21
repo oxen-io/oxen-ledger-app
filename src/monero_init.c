@@ -48,9 +48,9 @@ void monero_init() {
   G_monero_vstate.state = STATE_IDLE;
 }
 
-#define MONERO_SUPPORTED_CLIENT_SIZE 3
+#define MONERO_SUPPORTED_CLIENT_SIZE 5
 const char * const monero_supported_client[MONERO_SUPPORTED_CLIENT_SIZE] = {
-  "3.0.0", "3.0.1", "3.1.0",
+  "3.0.0", "3.0.1", "3.0.2", "3.0.3", "3.1.0"
 };
 
 int monero_apdu_reset() {
