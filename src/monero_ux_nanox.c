@@ -195,7 +195,7 @@ UX_STEP_NOCB(
   ux_menu_validation_1_step,
   bn,
   {
-    "Amout",
+    "Amount",
     G_monero_vstate.ux_amount
   });
 
@@ -484,7 +484,7 @@ UX_STEP_NOCB(
   ux_menu_info_1_step,
   bnnn,
   {
-    "Monero",
+    "Loki Network",
     "(c) Ledger SAS",
     "Spec  " XSTR(SPEC_VERSION),
     "App  " XSTR(MONERO_VERSION),
@@ -520,7 +520,7 @@ UX_STEP_NOCB(
   ux_menu_pubaddr_1_step,
   bnnn_paging,
   {
-    .title = "XMR",
+    .title = "LOKI",
     .text = G_monero_vstate.ux_wallet_public_address
   });
 
@@ -551,7 +551,7 @@ UX_STEP_CB(
   ui_menu_pubaddr_display(0),
   {
     &C_icon_monero,
-    "XMR",
+    "LOKI",
     G_monero_vstate.ux_wallet_public_short_address
   });
 

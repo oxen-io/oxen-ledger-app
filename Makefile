@@ -23,16 +23,16 @@ $(error Environment variable BOLOS_SDK is not set)
 endif
 include $(BOLOS_SDK)/Makefile.defines
 
-#Monero /44'/128'
+#Loki /44'/240'
 APP_LOAD_PARAMS=  --path "2147483692/2147483776" --curve secp256k1 $(COMMON_LOAD_PARAMS) --appFlags 0x240
-APPNAME = "Monero"
+APPNAME = "Loki"
 
 ifeq ($(TARGET_NAME),TARGET_BLUE)
-ICONNAME = images/icon_monero_blue.gif
+ICONNAME = images/icon_loki_blue.gif
 else ifeq ($(TARGET_NAME),TARGET_NANOX)
-ICONNAME = images/icon_monero_nanox.gif
+ICONNAME = images/icon_loki_nanox.gif
 else
-ICONNAME = images/icon_monero.gif
+ICONNAME = images/icon_loki.gif
 endif
 
 APPVERSION_M=1
@@ -60,7 +60,7 @@ endif
 #DEFINES += IOCRYPT
 ## Debug options
 #DEFINES   += DEBUG_HWDEVICE
-#DEFINES   += IODUMMYCRYPT
+DEFINES   += IODUMMYCRYPT
 #DEFINES   += IONOCRYPT
 
 ################
