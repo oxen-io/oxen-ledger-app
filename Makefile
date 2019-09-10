@@ -24,7 +24,7 @@ endif
 include $(BOLOS_SDK)/Makefile.defines
 
 #Loki /44'/240'
-APP_LOAD_PARAMS=  --path "2147483692/2147483776" --curve secp256k1 $(COMMON_LOAD_PARAMS) --appFlags 0x240
+APP_LOAD_PARAMS=  --path "2147483692/34359738608" --curve secp256k1 $(COMMON_LOAD_PARAMS) --appFlags 0x240
 APPNAME = "Loki"
 
 ifeq ($(TARGET_NAME),TARGET_BLUE)
