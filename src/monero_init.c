@@ -48,9 +48,9 @@ void monero_init() {
   G_monero_vstate.state = STATE_IDLE;
 }
 
-#define MONERO_SUPPORTED_CLIENT_SIZE 5
+#define MONERO_SUPPORTED_CLIENT_SIZE 1
 const char * const monero_supported_client[MONERO_SUPPORTED_CLIENT_SIZE] = {
-  "1.2.3",
+  "1.2.3"
 };
 
 int monero_apdu_reset() {
@@ -102,10 +102,9 @@ void monero_init_private_key() {
 
   //generate account keys
 
-  // m / purpose' / coin_type' / account' / change / address_index
-  // m / 44'      / 240'       / 0'       / 0      / 0
+  // m/44'/240'/0'/0/0
   path[0] = 0x8000002C;
-  path[1] = 0x800000f0;
+  path[1] = 0x800000F0;
   path[2] = 0x80000000;
   path[3] = 0x00000000;
   path[4] = 0x00000000;

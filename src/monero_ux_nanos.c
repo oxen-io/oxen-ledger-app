@@ -422,7 +422,7 @@ void ui_menu_settings_display(unsigned int value) {
 #define XSTR(x) STR(x)
 
 const ux_menu_entry_t ui_menu_info[] = {
-  {NULL,  NULL,                 -1, NULL,          "Loki Network",                   NULL, 0, 0},
+  {NULL,  NULL,                 -1, NULL,          "Loki Network",                     NULL, 0, 0},
   {NULL,  NULL,                 -1, NULL,          "(c) Ledger SAS",           NULL, 0, 0},
   {NULL,  NULL,                 -1, NULL,          "Spec  " XSTR(SPEC_VERSION),NULL, 0, 0},
   {NULL,  NULL,                 -1, NULL,          "App  " XSTR(MONERO_VERSION),  NULL, 0, 0},

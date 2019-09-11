@@ -23,8 +23,8 @@ $(error Environment variable BOLOS_SDK is not set)
 endif
 include $(BOLOS_SDK)/Makefile.defines
 
-#Swap /44'/240'
-APP_LOAD_PARAMS=  --path "44'/240'" --curve secp256k1 $(COMMON_LOAD_PARAMS) --appFlags 0x40
+#Loki /44'/240'
+APP_LOAD_PARAMS=  --path "2147483692/2147483888" --curve secp256k1 $(COMMON_LOAD_PARAMS) --appFlags 0x40
 APPNAME = "Loki"
 
 ifeq ($(TARGET_NAME),TARGET_BLUE)
