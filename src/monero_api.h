@@ -16,6 +16,7 @@
 #ifndef MONERO_API_H
 #define  MONERO_API_H
 
+int monero_apdu_reset();
 
 void monero_install(unsigned char netId);
 void monero_init(void);
@@ -27,6 +28,7 @@ int monero_dispatch(void);
 
 int monero_apdu_put_key(void);
 int monero_apdu_get_key(void);
+int monero_apdu_display_address(void);
 int monero_apdu_manage_seedwords() ;
 int monero_apdu_verify_key(void);
 int monero_apdu_get_chacha8_prekey(void);
@@ -67,12 +69,20 @@ int monero_apdu_mlsag_hash(void);
 int monero_apdu_mlsag_sign(void);
 int monero_apdu_close_tx(void);
 
+void ui_init(void);
+void ui_main_display(unsigned int value);
+void monero_ux_user_validation();
+void ui_export_viewkey_display(unsigned int value);
+void ui_menu_any_pubaddr_display(unsigned int value);
+void ui_menu_pubaddr_display(unsigned int value);
+
+
 /* ----------------------------------------------------------------------- */
 /* ---                               MISC                             ---- */
 /* ----------------------------------------------------------------------- */
 #define OFFSETOF(type, field)    ((unsigned int)&(((type*)NULL)->field))
 
-int monero_base58_public_key( char* str_b58, unsigned char *view, unsigned char *spend, unsigned char is_subbadress);
+int monero_base58_public_key( char* str_b58, unsigned char *view, unsigned char *spend, unsigned char is_subbadress, unsigned char *paymanetID);
 
 /** unsigned varint amount to uint64 */
 uint64_t monero_vamount2uint64(unsigned char *binary);
@@ -94,6 +104,12 @@ void ui_menu_change_validation_display(unsigned int value) ;
 /* ----------------------------------------------------------------------- */
 /* ---                          KEYS & ADDRESS                        ---- */
 /* ----------------------------------------------------------------------- */
+extern const unsigned char C_FAKE_SEC_VIEW_KEY[32];
+extern const unsigned char C_FAKE_SEC_SPEND_KEY[32];
+
+int is_fake_view_key(unsigned char *s);
+int is_fake_spend_key(unsigned char *s);
+
 void monero_sc_add(unsigned char *r, unsigned char *s1, unsigned char *s2);
 void monero_hash_to_scalar(unsigned char *scalar, unsigned char *raw, unsigned int len);
 void monero_hash_to_ec(unsigned char *ec, unsigned char *ec_pub);
@@ -255,7 +271,7 @@ void monero_multm_8(unsigned char *r, unsigned char *a);
 void monero_reduce(unsigned char *r, unsigned char *a);
 
 
-void monero_rng(unsigned char *r,  int len) ;
+void monero_rng_mod_order(unsigned char *r);
 /* ----------------------------------------------------------------------- */
 /* ---                                IO                              ---- */
 /* ----------------------------------------------------------------------- */
@@ -269,6 +285,7 @@ void monero_io_hole(unsigned int sz) ;
 void monero_io_inserted(unsigned int len);
 void monero_io_insert(unsigned char const * buffer, unsigned int len) ;
 void monero_io_insert_encrypt(unsigned char* buffer, int len);
+void monero_io_insert_hmac_for(unsigned char* buffer, int len);
 
 void monero_io_insert_u32(unsigned  int v32) ;
 void monero_io_insert_u24(unsigned  int v24) ;

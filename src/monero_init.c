@@ -27,6 +27,15 @@ const unsigned char C_MAGIC[8] = {
  'M','O','N','E','R','O','H','W'
 };
 
+const unsigned char C_FAKE_SEC_VIEW_KEY[32] = {
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+};
+const unsigned char C_FAKE_SEC_SPEND_KEY[32] = {
+  0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+  0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
+};
+
 /* ----------------------------------------------------------------------- */
 /* --- Boot                                                            --- */
 /* ----------------------------------------------------------------------- */
@@ -34,8 +43,12 @@ void monero_init() {
   os_memset(&G_monero_vstate, 0, sizeof(monero_v_state_t));
 
   //first init ?
-  if (os_memcmp(N_monero_pstate->magic, (void*)C_MAGIC, sizeof(C_MAGIC)) != 0) {
+  if (os_memcmp((void*)N_monero_pstate->magic, (void*)C_MAGIC, sizeof(C_MAGIC)) != 0) {
+    #ifdef MONERO_ALPHA
+    monero_install(STAGENET);
+    #else
     monero_install(MAINNET);
+    #endif
   }
 
   G_monero_vstate.protocol = 0xff;
@@ -46,41 +59,6 @@ void monero_init() {
   monero_init_ux();
   // Let's go!
   G_monero_vstate.state = STATE_IDLE;
-}
-
-#define MONERO_SUPPORTED_CLIENT_SIZE 2
-const char * const monero_supported_client[MONERO_SUPPORTED_CLIENT_SIZE] = {
-  "5.1.1", "5.1.2"
-};
-
-int monero_apdu_reset() {
-
-  unsigned int client_version_len;
-  char client_version[10];
-  client_version_len = G_monero_vstate.io_length - G_monero_vstate.io_offset;
-  if (client_version_len > 10) {
-    THROW(SW_CLIENT_NOT_SUPPORTED+1);
-  }
-  monero_io_fetch(client_version, client_version_len);
-
-  unsigned int i = 0;
-  while(i < MONERO_SUPPORTED_CLIENT_SIZE) {
-    if ((strlen(PIC(monero_supported_client[i])) == client_version_len) &&
-        (os_memcmp(PIC(monero_supported_client[i]), client_version, client_version_len)==0) ) {
-      break;
-    }
-    i++;
-  }
-  if (i == MONERO_SUPPORTED_CLIENT_SIZE) {
-    THROW(SW_CLIENT_NOT_SUPPORTED);
-  }
-
-  monero_io_discard(0);
-  monero_init();
-  monero_io_insert_u8(MONERO_VERSION_MAJOR);
-  monero_io_insert_u8(MONERO_VERSION_MINOR);
-  monero_io_insert_u8(MONERO_VERSION_MICRO);
-  return 0x9000;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -120,8 +98,8 @@ void monero_init_private_key() {
     break;
 
   case KEY_MODE_EXTERNAL:
-    os_memmove(G_monero_vstate.a,  N_monero_pstate->a, 32);
-    os_memmove(G_monero_vstate.b,  N_monero_pstate->b, 32);
+    os_memmove(G_monero_vstate.a,  (void*)N_monero_pstate->a, 32);
+    os_memmove(G_monero_vstate.b,  (void*)N_monero_pstate->b, 32);
     break;
 
   default :
@@ -144,7 +122,7 @@ void monero_init_private_key() {
 /* ----------------------------------------------------------------------- */
 void monero_init_ux() {
   #ifdef UI_NANO_X
-  monero_base58_public_key(G_monero_vstate.ux_wallet_public_address, G_monero_vstate.A,G_monero_vstate.B, 0);
+  monero_base58_public_key(G_monero_vstate.ux_wallet_public_address, G_monero_vstate.A,G_monero_vstate.B, 0, NULL);
   os_memset(G_monero_vstate.ux_wallet_public_short_address, '.', sizeof(G_monero_vstate.ux_wallet_public_short_address));
   os_memmove(G_monero_vstate.ux_wallet_public_short_address, G_monero_vstate.ux_wallet_public_address,5);
   os_memmove(G_monero_vstate.ux_wallet_public_short_address+7, G_monero_vstate.ux_wallet_public_address+95-5,5);
@@ -159,15 +137,53 @@ void monero_install(unsigned char netId) {
   unsigned char c;
 
   //full reset data
-  monero_nvm_write(N_monero_pstate, NULL, sizeof(monero_nv_state_t));
+  monero_nvm_write((void*)N_monero_pstate, NULL, sizeof(monero_nv_state_t));
 
   //set mode key
   c = KEY_MODE_SEED;
-  nvm_write(&N_monero_pstate->key_mode, &c, 1);
+  nvm_write((void*)&N_monero_pstate->key_mode, &c, 1);
 
   //set net id
-  monero_nvm_write(&N_monero_pstate->network_id, &netId, 1);
+  monero_nvm_write((void*)&N_monero_pstate->network_id, &netId, 1);
 
   //write magic
-  monero_nvm_write(N_monero_pstate->magic, (void*)C_MAGIC, sizeof(C_MAGIC));
+  monero_nvm_write((void*)N_monero_pstate->magic, (void*)C_MAGIC, sizeof(C_MAGIC));
+}
+
+/* ----------------------------------------------------------------------- */
+/* --- Reset                                                           --- */
+/* ----------------------------------------------------------------------- */
+#define MONERO_SUPPORTED_CLIENT_SIZE 2
+const char * const monero_supported_client[MONERO_SUPPORTED_CLIENT_SIZE] = {
+  "5.1.1", "5.1.2"
+};
+
+int monero_apdu_reset() {
+
+  unsigned int client_version_len;
+  char client_version[16];
+  client_version_len = G_monero_vstate.io_length - G_monero_vstate.io_offset;
+  if (client_version_len > 15) {
+    THROW(SW_CLIENT_NOT_SUPPORTED+1);
+  }
+  monero_io_fetch((unsigned char*)&client_version[0], client_version_len);
+  client_version[client_version_len] = 0;
+  unsigned int i = 0;
+  while(i < MONERO_SUPPORTED_CLIENT_SIZE) {
+    if ((strlen((char*)PIC(monero_supported_client[i])) == client_version_len) &&
+        (os_memcmp((char*)PIC(monero_supported_client[i]), client_version, client_version_len)==0) ) {
+      break;
+    }
+    i++;
+  }
+  if (i == MONERO_SUPPORTED_CLIENT_SIZE) {
+    THROW(SW_CLIENT_NOT_SUPPORTED);
+  }
+
+  monero_io_discard(0);
+  monero_init();
+  monero_io_insert_u8(MONERO_VERSION_MAJOR);
+  monero_io_insert_u8(MONERO_VERSION_MINOR);
+  monero_io_insert_u8(MONERO_VERSION_MICRO);
+  return 0x9000;
 }

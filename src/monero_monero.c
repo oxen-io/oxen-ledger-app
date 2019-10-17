@@ -17,9 +17,11 @@
 #include "monero_api.h"
 #include "monero_vars.h"
 
+#ifndef MONERO_ALPHA
 const unsigned char C_MAINNET_NETWORK_ID[] = {
     0x46 ,0x61, 0x72, 0x62 ,0x61, 0x75, 0x74, 0x69, 0x2a, 0x4c, 0x61, 0x75, 0x66, 0x65, 0x79, 0x00
 };
+#endif
 const unsigned char C_TESTNET_NETWORK_ID[] =  {
     0x5f, 0x3a, 0x78, 0x65, 0xe1, 0x6f, 0xca, 0xb8, 0x02, 0xa1, 0xdc, 0x17, 0x61, 0x64, 0x15, 0xbe
 };
@@ -29,23 +31,23 @@ const unsigned char C_STAGENET_NETWORK_ID[] =  {
 
 
 // Copyright (c) 2014-2017, The Monero Project
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
-// 
+//
 // 1. Redistributions of source code must retain the above copyright notice, this list of
 //    conditions and the following disclaimer.
-// 
+//
 // 2. Redistributions in binary form must reproduce the above copyright notice, this list
 //    of conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
-// 
+//
 // 3. Neither the name of the copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -75,7 +77,7 @@ static uint64_t uint_8be_to_64(const unsigned char* data, size_t size) {
     case 5: res <<= 8; res |= *data++;
     case 6: res <<= 8; res |= *data++;
     case 7: res <<= 8; res |= *data++;
-    case 8: res <<= 8; res |= *data; 
+    case 8: res <<= 8; res |= *data;
     break;
     }
 
@@ -93,32 +95,58 @@ static void encode_block(const unsigned char* block, unsigned int  size,  char* 
     }
 }
 
-int monero_base58_public_key(char* str_b58, unsigned char *view, unsigned char *spend, unsigned char is_subbadress) {
-    unsigned char data[72];
+int monero_base58_public_key(char* str_b58, unsigned char *view, unsigned char *spend, unsigned char is_subbadress, unsigned char *paymanetID) {
+    unsigned char data[72+8];
     unsigned int offset;
     unsigned int prefix;
 
     //data[0] = N_monero_pstate->network_id;
     switch(N_monero_pstate->network_id) {
         case TESTNET:
-            prefix = is_subbadress ? TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX : TESTNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
+            if (paymanetID) {
+                prefix = TESTNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
+            } else if (is_subbadress) {
+                prefix = TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
+            } else {
+                prefix = TESTNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
+            }
             break;
         case STAGENET:
-            prefix = is_subbadress ? STAGENET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX : STAGENET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
+            if (paymanetID) {
+                prefix = STAGENET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
+            } else if (is_subbadress) {
+                prefix = STAGENET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
+            } else {
+                prefix = STAGENET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
+            }
             break;
+        #ifndef MONERO_ALPHA
         case MAINNET:
-            prefix = is_subbadress ? MAINNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX : MAINNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
+            if (paymanetID) {
+                prefix = MAINNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
+            } else if (is_subbadress) {
+                prefix = MAINNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
+            } else {
+                prefix = MAINNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
+            }
             break;
+        #endif
     }
     offset = monero_encode_varint(data, prefix);
-    
+
     os_memmove(data+offset,spend,32);
     os_memmove(data+offset+32,view,32);
-    monero_keccak_F(data, offset+64, G_monero_vstate.H);
-    os_memmove(data+offset+32+32, G_monero_vstate.H, 4);
+    offset += 64;
+    if (paymanetID) {
+        os_memmove(data+offset, paymanetID, 8);
+        offset += 8;
+    }
+    monero_keccak_F(data, offset, G_monero_vstate.H);
+    os_memmove(data+offset, G_monero_vstate.H, 4);
+    offset += 4;
 
-    unsigned int full_block_count = (offset+32+32+4) / FULL_BLOCK_SIZE;
-    unsigned int last_block_size  = (offset+32+32+4) % FULL_BLOCK_SIZE;
+    unsigned int full_block_count = (offset) / FULL_BLOCK_SIZE;
+    unsigned int last_block_size  = (offset) % FULL_BLOCK_SIZE;
     for (size_t i = 0; i < full_block_count; ++i) {
         encode_block(data + i * FULL_BLOCK_SIZE, FULL_BLOCK_SIZE, &str_b58[i * FULL_ENCODED_BLOCK_SIZE]);
     }

@@ -1,6 +1,6 @@
 #*******************************************************************************
 #   Ledger Nano S
-#   (c) 2016 Ledger
+#   (c) 2016-2019 Ledger
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -35,9 +35,11 @@ else
 ICONNAME = images/icon_loki.gif
 endif
 
+#DEFINES += MONERO_ALPHA
+
 APPVERSION_M=1
-APPVERSION_N=3
-APPVERSION_P=2
+APPVERSION_N=4
+APPVERSION_P=0
 
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 SPECVERSION="alpha"
@@ -101,6 +103,8 @@ DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
 DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
 DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
 DEFINES		  += HAVE_UX_FLOW
+DEFINES       += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000
+DEFINES       += HAVE_BLE_APDU # basic ledger apdu transport over BLE
 else
 DEFINES		  += IO_SEPROXYHAL_BUFFER_SIZE_B=128
 endif
@@ -110,13 +114,18 @@ endif
 DEBUG = 0
 ifneq ($(DEBUG),0)
 
-        ifeq ($(TARGET_NAME),TARGET_NANOX)
-                DEFINES   += HAVE_PRINTF PRINTF=mcu_usb_printf
-        else
-                DEFINES   += HAVE_PRINTF PRINTF=screen_printf
-        endif
+	ifeq ($(TARGET_NAME),TARGET_NANOX)
+		DEFINES   += HAVE_PRINTF PRINTF=mcu_usb_printf
+	else
+		DEFINES   += HAVE_PRINTF PRINTF=screen_printf
+	endif
+	DEFINES += PLINE="PRINTF(\"FILE:%s..LINE:%d\n\",__FILE__,__LINE__)"
+
 else
-        DEFINES   += PRINTF\(...\)=
+
+	DEFINES   += PRINTF\(...\)=
+	DEFINES   += PLINE\(...\)=
+
 endif
 
 
@@ -161,6 +170,7 @@ SDK_SOURCE_PATH  += lib_stusb lib_stusb_impl lib_u2f
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 SDK_SOURCE_PATH  += lib_ux
+SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
 endif
 
 load: all
@@ -176,5 +186,5 @@ include $(BOLOS_SDK)/Makefile.rules
 #add dependency on custom makefile filename
 dep/%.d: %.c Makefile
 
-
-#obj/usbd_impl.o: CFLAGS+=-DTARGET_NANOS
+listvariants:
+	@echo VARIANTS COIN monero
