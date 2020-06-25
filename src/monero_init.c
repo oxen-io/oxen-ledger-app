@@ -173,7 +173,7 @@ void monero_install(unsigned char netId) {
 /* ----------------------------------------------------------------------- */
 #define MONERO_SUPPORTED_CLIENT_SIZE 1
 const char * const monero_supported_client[MONERO_SUPPORTED_CLIENT_SIZE] = {
-  "6.",
+  "7.",
 };
 
 int monero_apdu_reset() {
