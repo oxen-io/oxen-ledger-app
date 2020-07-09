@@ -21,7 +21,7 @@
 #include "loki_api.h"
 #include "loki_vars.h"
 
-#ifndef MONERO_ALPHA
+#ifndef LOKI_ALPHA
 const unsigned char C_MAINNET_NETWORK_ID[] = {0x46 ,0x61, 0x72, 0x62 ,0x61, 0x75, 0x74, 0x69,
                                               0x2a, 0x4c, 0x61, 0x75, 0x66, 0x65, 0x79, 0x00};
 #endif
@@ -133,7 +133,7 @@ int monero_base58_public_key(char* str_b58, unsigned char* view, unsigned char* 
                 prefix = STAGENET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
             }
             break;
-#ifndef MONERO_ALPHA
+#ifndef LOKI_ALPHA
         case MAINNET:
             if (paymanetID) {
                 prefix = MAINNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;

@@ -42,8 +42,8 @@ void monero_init() {
 
     // first init ?
     if (os_memcmp((void*)N_monero_pstate->magic, (void*)C_MAGIC, sizeof(C_MAGIC)) != 0) {
-#if defined(MONERO_ALPHA) || defined(MONERO_BETA)
-        monero_install(STAGENET);
+#if defined(LOKI_ALPHA) || defined(LOKI_BETA)
+        monero_install(TESTNET);
 #else
         monero_install(MAINNET);
 #endif
@@ -187,9 +187,9 @@ int monero_apdu_reset() {
 
     monero_io_discard(0);
     monero_init();
-    monero_io_insert_u8(MONERO_VERSION_MAJOR);
-    monero_io_insert_u8(MONERO_VERSION_MINOR);
-    monero_io_insert_u8(MONERO_VERSION_MICRO);
+    monero_io_insert_u8(LOKI_VERSION_MAJOR);
+    monero_io_insert_u8(LOKI_VERSION_MINOR);
+    monero_io_insert_u8(LOKI_VERSION_MICRO);
     return SW_OK;
 }
 

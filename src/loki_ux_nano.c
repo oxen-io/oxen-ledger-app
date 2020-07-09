@@ -355,19 +355,19 @@ void settings_change_account(void) { ui_menu_account_display(0); }
 /* -------------------------------- NETWORK UX --------------------------------- */
 
 const char* const network_submenu_getter_values[] = {
-#ifdef MONERO_ALPHA
+#ifdef LOKI_ALPHA
     "Unvailable",
 #else
     "Main Network",
 #endif
-    "Stage Network", "Test Network", "Abort"};
+    "Test Network", "Abort"};
 const char* const network_submenu_getter_values_selected[] = {
-#ifdef MONERO_ALPHA
+#ifdef LOKI_ALPHA
     "Unvailable",
 #else
     "Main Network *",
 #endif
-    "Stage Network *", "Test Network *", "Abort"};
+    "Test Network *", "Abort"};
 
 const char* network_submenu_getter(unsigned int idx) {
     if (idx >= ARRAYLEN(network_submenu_getter_values)) {
@@ -376,16 +376,13 @@ const char* network_submenu_getter(unsigned int idx) {
     int net;
     switch (idx) {
         case 0:
-#ifdef MONERO_ALPHA
+#ifdef LOKI_ALPHA
             net = -1;
 #else
             net = MAINNET;
 #endif
             break;
         case 1:
-            net = STAGENET;
-            break;
-        case 2:
             net = TESTNET;
             break;
         default:
@@ -409,14 +406,11 @@ static void network_set_net(unsigned int network) {
 void network_submenu_selector(unsigned int idx) {
     switch (idx) {
         case 0:
-#ifndef MONERO_ALPHA
+#ifndef LOKI_ALPHA
             network_set_net(MAINNET);
 #endif
             break;
         case 1:
-            network_set_net(STAGENET);
-            break;
-        case 2:
             network_set_net(TESTNET);
             break;
         default:
@@ -612,7 +606,7 @@ UX_STEP_CB(
 UX_STEP_NOCB(
     ux_menu_main_3_step,
     bn,
-    {"Version", MONERO_VERSION_STRING}
+    {"Version", LOKI_VERSION_STRING}
 );
 
 UX_STEP_CB(

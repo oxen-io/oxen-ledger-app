@@ -56,7 +56,7 @@
 #define TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX         158
 
 enum network_type {
-#ifndef MONERO_ALPHA
+#ifndef LOKI_ALPHA
     MAINNET = 0,
 #endif
     TESTNET = 1,
