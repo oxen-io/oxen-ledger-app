@@ -18,12 +18,18 @@
 
 #include "os.h"
 #include "cx.h"
-#include "monero_types.h"
-#include "monero_api.h"
-#include "monero_vars.h"
+#include "loki_types.h"
+#include "loki_api.h"
+#include "loki_vars.h"
 
-#ifdef TARGET_NANOX
-const monero_nv_state_t N_state_pic;
-#else
-monero_nv_state_t N_state_pic;
-#endif
+#include "os_io_seproxyhal.h"
+
+unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
+
+#include "ux.h"
+ux_state_t G_ux;
+bolos_ux_params_t G_ux_params;
+
+monero_v_state_t G_monero_vstate;
+
+//_Static_assert(sizeof(G_monero_vstate) == 2088, "unexpected size");

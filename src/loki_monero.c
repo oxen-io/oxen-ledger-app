@@ -17,9 +17,9 @@
  *****************************************************************************/
 
 #include "os.h"
-#include "monero_types.h"
-#include "monero_api.h"
-#include "monero_vars.h"
+#include "loki_types.h"
+#include "loki_api.h"
+#include "loki_vars.h"
 
 #ifndef MONERO_ALPHA
 const unsigned char C_MAINNET_NETWORK_ID[] = {0x46 ,0x61, 0x72, 0x62 ,0x61, 0x75, 0x74, 0x69,

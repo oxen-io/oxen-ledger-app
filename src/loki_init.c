@@ -18,9 +18,9 @@
 
 #include "os.h"
 #include "cx.h"
-#include "monero_types.h"
-#include "monero_api.h"
-#include "monero_vars.h"
+#include "loki_types.h"
+#include "loki_api.h"
+#include "loki_vars.h"
 
 /* ----------------------*/
 /* -- A Kind of Magic -- */
@@ -124,34 +124,12 @@ void monero_init_ux() {
     os_memset(G_monero_vstate.ux_wallet_public_short_address, '.',
               sizeof(G_monero_vstate.ux_wallet_public_short_address));
 
-#ifdef HAVE_UX_FLOW
-
-#ifdef UI_NANO_X
     snprintf(G_monero_vstate.ux_wallet_account_name, sizeof(G_monero_vstate.ux_wallet_account_name),
              "LOKI / %d", N_monero_pstate->account_id);
     os_memmove(G_monero_vstate.ux_wallet_public_short_address, G_monero_vstate.ux_address, 5);
     os_memmove(G_monero_vstate.ux_wallet_public_short_address + 7,
                G_monero_vstate.ux_address + 95 - 5, 5);
     G_monero_vstate.ux_wallet_public_short_address[12] = 0;
-#else
-    snprintf(G_monero_vstate.ux_wallet_account_name, sizeof(G_monero_vstate.ux_wallet_account_name),
-             "     LOKI / %d", N_monero_pstate->account_id);
-    os_memmove(G_monero_vstate.ux_wallet_public_short_address, G_monero_vstate.ux_address, 4);
-    os_memmove(G_monero_vstate.ux_wallet_public_short_address + 6,
-               G_monero_vstate.ux_address + 95 - 4, 4);
-    G_monero_vstate.ux_wallet_public_short_address[10] = 0;
-#endif
-
-#else
-
-    snprintf(G_monero_vstate.ux_wallet_account_name, sizeof(G_monero_vstate.ux_wallet_account_name),
-             "LOKI / %d", N_monero_pstate->account_id);
-    os_memmove(G_monero_vstate.ux_wallet_public_short_address, G_monero_vstate.ux_address, 5);
-    os_memmove(G_monero_vstate.ux_wallet_public_short_address + 7,
-               G_monero_vstate.ux_address + 95 - 5, 5);
-    G_monero_vstate.ux_wallet_public_short_address[12] = 0;
-
-#endif
 }
 
 /* ----------------------------------------------------------------------- */

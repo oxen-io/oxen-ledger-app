@@ -94,10 +94,8 @@ struct monero_nv_state_s {
 
 typedef struct monero_nv_state_s monero_nv_state_t;
 
-#define MONERO_IO_BUFFER_LENGTH (300)
+#define MONERO_IO_BUFFER_LENGTH 288
 enum device_mode { NONE, TRANSACTION_CREATE_REAL, TRANSACTION_CREATE_FAKE, TRANSACTION_PARSE };
-
-#define EXPORT_VIEW_KEY 0xC001BEEF
 
 #define DISP_MAIN       0x51
 #define DISP_SUB        0x52
@@ -123,13 +121,13 @@ struct monero_v_state_s {
     unsigned short io_mark;
     unsigned char io_buffer[MONERO_IO_BUFFER_LENGTH];
 
-    unsigned int options;
+    unsigned char options;
 
     /* ------------------------------------------ */
     /* ---            State Machine           --- */
     /* ------------------------------------------ */
-    unsigned int export_view_key;
-    unsigned char key_set;
+    unsigned char export_view_key : 1;
+    unsigned char key_set : 1;
 
 /* protocol guard */
 #define PROTOCOL_LOCKED            0x42
@@ -138,7 +136,7 @@ struct monero_v_state_s {
     unsigned char protocol_barrier;
 
     /* Tx state machine */
-    unsigned char tx_in_progress;
+    unsigned char tx_in_progress : 1;
     unsigned char tx_cnt;
     unsigned char tx_sig_mode;
     unsigned char tx_state_ins;
@@ -184,7 +182,7 @@ struct monero_v_state_s {
     /* ------------------------------------------ */
     /* ---               UI/UX                --- */
     /* ------------------------------------------ */
-    char ux_wallet_public_short_address[5 + 2 + 5 + 1];
+    char ux_wallet_public_short_address[5 + 2 + 5 + 1]; // first 5, two dots, last 5, null
     char ux_wallet_account_name[14];
 
     union {
@@ -194,19 +192,28 @@ struct monero_v_state_s {
             /* menu */
             char ux_menu[16];
             // address to display: 95/106-chars + null
-            char ux_address[160];
-            // xmr to display: max pow(2,64) unit, aka 20-chars + '0' + dot + null
-            char ux_amount[23];
+            char ux_address[107];
+            // Address type string; max 15 chars + null
+            char ux_addr_type[16];
             // addr mode
             unsigned char disp_addr_mode;
-            // M.m address
-            unsigned int disp_addr_M;
-            unsigned int disp_addr_m;
-            // payment id
-            char payment_id[16];
+            union {
+                // Address extra info (e.g. maj/min; payment id); max 31 chars + null
+                char ux_addr_info[32];
+                // Payment ID, which gets copied into the above for display
+                char payment_id[16];
+                struct {
+                    // Major/minor addr indicies for subaddresses (copied into ux_addr_info for display)
+                    unsigned int disp_addr_M;
+                    unsigned int disp_addr_m;
+                };
+            };
+            // LOKI to display: max pow(2,64) uint, aka 20-chars + dot + null (there can also be a
+            // 0, but won't be if the value is greater than 9 digits).
+            char ux_amount[22];
         };
         struct {
-            unsigned char tmp[340];
+            unsigned char tmp[160]; // Used in loki_proof for temporary calcs
         };
     };
 };

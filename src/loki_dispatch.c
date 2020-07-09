@@ -18,9 +18,9 @@
 
 #include "os.h"
 #include "cx.h"
-#include "monero_types.h"
-#include "monero_api.h"
-#include "monero_vars.h"
+#include "loki_types.h"
+#include "loki_api.h"
+#include "loki_vars.h"
 
 void update_protocol() {
     G_monero_vstate.tx_state_ins = G_monero_vstate.io_ins;

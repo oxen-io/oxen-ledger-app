@@ -18,26 +18,8 @@
 
 #include "os.h"
 #include "cx.h"
-#include "monero_types.h"
-#include "monero_api.h"
-#include "monero_vars.h"
+#include "loki_types.h"
+#include "loki_api.h"
+#include "loki_vars.h"
 
-#include "os_io_seproxyhal.h"
-
-unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
-
-#ifdef HAVE_UX_FLOW
-/* --- "NANO-X" and "NANO-S flow" config --- */
-
-#include "ux.h"
-ux_state_t G_ux;
-bolos_ux_params_t G_ux_params;
-
-#else
-/* --- "NANO-S legacy" config --- */
-
-ux_state_t ux;
-
-#endif
-
-monero_v_state_t G_monero_vstate;
+monero_nv_state_t N_state_pic;

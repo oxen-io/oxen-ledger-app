@@ -18,9 +18,9 @@
 
 #include "os.h"
 #include "cx.h"
-#include "monero_types.h"
-#include "monero_api.h"
-#include "monero_vars.h"
+#include "loki_types.h"
+#include "loki_api.h"
+#include "loki_vars.h"
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
@@ -45,7 +45,7 @@ int monero_apdu_get_tx_proof() {
     unsigned char XY[32];
     unsigned char sig_c[32];
     unsigned char sig_r[32];
-#define k (G_monero_vstate.tmp + 256)
+#define k (G_monero_vstate.tmp + 128) // We go 32 bytes into this
 
     msg = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
     monero_io_fetch(NULL, 32);

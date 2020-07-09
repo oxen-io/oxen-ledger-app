@@ -20,20 +20,15 @@
 
 #include "os.h"
 #include "cx.h"
-#include "monero_types.h"
-#include "monero_api.h"
-#include "monero_vars.h"
+#include "loki_types.h"
+#include "loki_api.h"
+#include "loki_vars.h"
 
 #include "os_io_seproxyhal.h"
 #include "string.h"
 #include "glyphs.h"
 
-#ifdef HAVE_UX_FLOW
 #include "ux.h"
-#endif
-#ifdef TARGET_NANOX
-#include "balenos_ble.h"
-#endif
 
 /* ----------------------------------------------------------------------- */
 /* ---                            Application Entry                    --- */
@@ -195,12 +190,6 @@ __attribute__((section(".boot"))) int main(void) {
 
 #ifdef HAVE_USB_CLASS_CCID
                 io_usb_ccid_set_card_inserted(1);
-#endif
-
-#ifdef TARGET_NANOX
-                G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
-                BLE_power(0, NULL);
-                BLE_power(1, "Nano X - Monero");
 #endif
 
                 monero_init();

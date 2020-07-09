@@ -16,11 +16,12 @@
  *  limitations under the License.
  *****************************************************************************/
 
+#include <stdbool.h>
 #include "os.h"
 #include "cx.h"
-#include "monero_types.h"
-#include "monero_api.h"
-#include "monero_vars.h"
+#include "loki_types.h"
+#include "loki_api.h"
+#include "loki_vars.h"
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
@@ -102,21 +103,30 @@ unsigned int monero_encode_varint(unsigned char *varint, unsigned int max_len, u
 /* --- assert: max_len>0                                               --- */
 /* ----------------------------------------------------------------------- */
 unsigned int monero_decode_varint(unsigned char *varint, unsigned int max_len, uint64_t *value) {
-    uint64_t v;
-    int len;
-    v = 0;
-    len = 0;
-    while ((varint[len]) & 0x80) {
-        if (len == (max_len - 1)) {
-            THROW(SW_WRONG_DATA_RANGE);
-        }
-        v = v + (((varint[len]) & 0x7f) << (len * 7));
-        len++;
-    }
+    const unsigned int bits = max_len < 8 ? max_len*8 : 64;
 
-    v = v + (((varint[len]) & 0x7f) << (len * 7));
-    *value = v;
-    return len + 1;
+    bool more = true;
+    unsigned int read = 0;
+    for (unsigned int shift = 0; more && read < max_len; shift += 7, ++read, ++varint) {
+
+        // if all 0 bits *and* shifting we have something invalid: we have a final, most-significant
+        // byte of all 0s, but that isn't allowed (the previous byte should not have had a
+        // continuation bit set).
+        if (*varint == 0 && shift)
+            THROW(SW_WRONG_DATA);
+
+        // If we have <= 7 bits of space remaining then the value must fit and must not have a continuation bit
+        unsigned int bits_avail = bits - shift;
+        if (bits_avail <= 7 && *varint >= 1 << bits_avail)
+            break; // more is still set, so will throw below
+
+        more = *varint & 0x80;
+        *value |= (*varint & 0x7f) << shift; // 7-bit value
+    }
+    if (more)
+        THROW(SW_WRONG_DATA_RANGE);
+
+    return read;
 }
 
 /* ----------------------------------------------------------------------- */

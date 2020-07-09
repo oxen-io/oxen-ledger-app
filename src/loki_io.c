@@ -18,9 +18,9 @@
 
 #include "os.h"
 #include "cx.h"
-#include "monero_types.h"
-#include "monero_api.h"
-#include "monero_vars.h"
+#include "loki_types.h"
+#include "loki_api.h"
+#include "loki_vars.h"
 
 #if defined(IODUMMYCRYPT)
 #warning IODUMMYCRYPT activated

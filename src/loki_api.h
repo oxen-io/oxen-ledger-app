@@ -349,7 +349,7 @@ int monero_io_do(unsigned int io_flags);
 /* ----------------------------------------------------------------------- */
 #ifdef MONERO_DEBUG
 
-#include "monero_debug.h"
+#include "loki_debug.h"
 
 #else
 

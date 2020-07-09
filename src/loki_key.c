@@ -18,9 +18,9 @@
 
 #include "os.h"
 #include "cx.h"
-#include "monero_types.h"
-#include "monero_api.h"
-#include "monero_vars.h"
+#include "loki_types.h"
+#include "loki_api.h"
+#include "loki_vars.h"
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
@@ -150,7 +150,6 @@ int monero_apdu_manage_seedwords() {
                 monero_nvm_write((void *)N_monero_pstate->words[24],
                                  (void *)N_monero_pstate->words[w_start], WORDS_MAX_LENGTH);
 
-#ifdef HAVE_UX_FLOW
                 // transform to list ready to display
                 unsigned char word[21];
                 w_start = 0;
@@ -162,7 +161,6 @@ int monero_apdu_manage_seedwords() {
                     monero_nvm_write(N_monero_pstate->words_list + w_start, word, w_end);
                     w_start += w_end;
                 }
-#endif
             }
 
             break;
@@ -308,7 +306,7 @@ int monero_apdu_get_key() {
         // get private
         case 2:
             // view key
-            if (G_monero_vstate.export_view_key == EXPORT_VIEW_KEY) {
+            if (G_monero_vstate.export_view_key) {
                 monero_io_insert(G_monero_vstate.a, 32);
             } else {
                 ui_export_viewkey_display(0);
