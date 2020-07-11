@@ -99,19 +99,19 @@ void ui_menu_pubaddr_display(unsigned int value);
 unsigned char loki_wallet_address(char *str_b58, unsigned char *view, unsigned char *spend,
                                   unsigned char is_subbadress, unsigned char *paymentID);
 
-/** unsigned varint amount to uint64 */
-uint64_t monero_vamount2uint64(unsigned char *binary);
-/** binary little endian unsigned  int amount to uint64 */
+/** binary little endian unsigned int amount to uint64 */
 uint64_t monero_bamount2uint64(unsigned char *binary);
-/** unsigned varint amount to str */
-int monero_vamount2str(unsigned char *binary, char *str, unsigned int str_len);
-/** binary little endian unsigned  int amount to str */
-int monero_bamount2str(unsigned char *binary, char *str, unsigned int str_len);
-/** uint64  amount to str */
-int monero_amount2str(uint64_t xmr, char *str, unsigned int str_len);
 
-/** uint64  amount to str */
-void monero_uint642str(uint64_t val, char *str, unsigned int str_len);
+/** uint64 atomic currency amount to human-readable currency amount string. `str` must be at least
+ * 22 chars long. */
+void loki_currency_str(uint64_t atomic_loki, char *str);
+
+/** unsigned varint-encoded atomic currency value to human-readable currency string. `str` must
+ * be at least 22 chars long. */
+void loki_varint_currency_str(unsigned char *binary, char *str);
+
+/** uint64 amount to str */
+void monero_uint642str(uint64_t val, char *str);
 
 int monero_abort_tx();
 int monero_unblind(unsigned char *v, unsigned char *k, unsigned char *AKout,

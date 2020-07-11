@@ -844,108 +844,102 @@ void monero_rng_mod_order(unsigned char *r) {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-/* return 0 if ok, 1 if missing decimal */
-void monero_uint642str(uint64_t val, char *str, unsigned int str_len) {
-    char stramount[22];
-    unsigned int offset, len;
+// str must be size >= 21
+void monero_uint642str(uint64_t val, char *str) {
+    unsigned char len, i, j;
+    char tmp;
 
-    os_memset(str, 0, str_len);
+    len = 0;
 
-    offset = 22;
-    while (val) {
-        offset--;
-        stramount[offset] = '0' + val % 10;
-        val = val / 10;
+    // Write it out in reverse, then swap it (because until we write it out we won't know the
+    // length)
+    do {
+        str[len++] = '0' + val % 10;
+        val /= 10;
+    } while (val);
+
+    // Reverse it
+    for (i = 0, j = len - 1; i < j; ++i, --j) {
+        tmp = str[i];
+        str[i] = str[j];
+        str[j] = tmp;
     }
-    len = sizeof(stramount) - offset;
-    if (len > str_len) {
-        THROW(SW_WRONG_DATA_RANGE);
-    }
-    os_memmove(str, stramount + offset, len);
+
+    // Terminate it
+    str[len] = 0;
 }
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-/* return 0 if ok, 1 if missing decimal */
-int monero_amount2str(uint64_t xmr, char *str, unsigned int str_len) {
+// str must be length >= 22
+void loki_currency_str(uint64_t atomic_loki, char *str) {
     // max uint64 is 18446744073709551616, aka 20 char, plus dot
-    char stramount[22];
-    unsigned int offset, len, ov;
+    unsigned char len, i, j;
+    char tmp;
 
-    os_memset(str, 0, str_len);
-
-    os_memset(stramount, '0', sizeof(stramount));
-    stramount[21] = 0;
-    // special case
-    if (xmr == 0) {
+    // Special case short circuit for 0 LOKI
+    if (atomic_loki == 0) {
         str[0] = '0';
-        return 1;
+        str[1] = 0;
+        return;
     }
 
-    // uint64 units to str
-    // offset: 0 | 1-20     | 21
-    // ----------------------
-    // value:  0 | xmrunits | 0
+    // Write the value out in reverse; this is a bit easier since we don't know the length yet
+    for (len = 0; atomic_loki; ++len) {
+        if (len == COIN_DECIMAL)
+            str[len++] = '.';
+        str[len] = '0' + atomic_loki % 10;
+        atomic_loki /= 10;
+    }
+    if (len <= COIN_DECIMAL) {
+        // The value is less than 1 LOKI so add any needed significant 0's and add the '.0'
+        while (len < COIN_DECIMAL)
+            str[len++] = '0';
+        str[len++] = '.';
+        str[len++] = '0';
+    }
 
-    offset = 20;
-    while (xmr) {
-        stramount[offset] = '0' + xmr % 10;
-        xmr = xmr / 10;
-        offset--;
+    // We've now converted an atomic loki value such as:
+    //     12345678 to "876543210.0"
+    //     1234567890 to "098765432.1"
+    //     12345000000000 to "000000000.54321"
+    // Reverse it, so that we get:
+    //     "0.012345678"
+    //     "1.234567890"
+    //     "12345.000000000"
+    for (i = 0, j = len - 1; i < j; ++i, --j) {
+        tmp = str[i];
+        str[i] = str[j];
+        str[j] = tmp;
     }
-    // offset: 0-7 | 8 | 9-20 |21
-    // ----------------------
-    // value:  xmr | . | units| 0
-    os_memmove(stramount, stramount + 1, 8);
-    stramount[8] = '.';
-    offset = 0;
-    while ((stramount[offset] == '0') && (stramount[offset] != '.')) {
-        offset++;
-    }
-    if (stramount[offset] == '.') {
-        offset--;
-    }
-    len = 20;
-    while ((stramount[len] == '0') && (stramount[len] != '.')) {
-        len--;
-    }
-    len = len - offset + 1;
-    ov = 0;
-    if (len > (str_len - 1)) {
-        len = str_len - 1;
-        ov = 1;
-    }
-    os_memmove(str, stramount + offset, len);
-    return ov;
+
+    // Drop insignificant 0's (and the '.' if everything after is insignificant), so that we get the
+    // final display amount:
+    //     "0.012345678"
+    //     "1.23456789"
+    //     "12345"
+    while (str[len - 1] == '0')
+        str[--len] = 0;
+    if (str[len - 1] == '.') // If the loop ended at the '.' then remove it, too.
+        str[--len] = 0;
+    str[len] = 0;
+}
+
+/* Converts a varint-encoded binary currency value to a string.  The given output str location
+ * must be at least 22 character long. */
+void loki_varint_currency_str(unsigned char *binary, char *str) {
+    uint64_t amount;
+    monero_decode_varint(binary, 10, &amount);
+    loki_currency_str(amount, str);
 }
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 uint64_t monero_bamount2uint64(unsigned char *binary) {
+    // Value is already little endian, so just copy it directly from the bytes:
     uint64_t xmr;
-    int i;
-    xmr = 0;
-    for (i = 7; i >= 0; i--) {
-        xmr = xmr * 256 + binary[i];
-    }
+    os_memmove(&xmr, binary, 8);
     return xmr;
-}
-
-/* ----------------------------------------------------------------------- */
-/* ---                                                                 --- */
-/* ----------------------------------------------------------------------- */
-int monero_bamount2str(unsigned char *binary, char *str, unsigned int str_len) {
-    return monero_amount2str(monero_bamount2uint64(binary), str, str_len);
-}
-
-/* ----------------------------------------------------------------------- */
-/* ---                                                                 --- */
-/* ----------------------------------------------------------------------- */
-int monero_vamount2str(unsigned char *binary, char *str, unsigned int str_len) {
-    // return monero_amount2str(monero_vamount2uint64(binary), str,str_len);
-    uint64_t amount;
-    monero_decode_varint(binary, 8, &amount);
-    return monero_amount2str(amount, str, str_len);
 }

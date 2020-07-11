@@ -44,8 +44,8 @@ int monero_apdu_mlsag_prehash_init() {
         // skip type
         monero_io_fetch_u8();
         // fee str
-        monero_vamount2str(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
-                           G_monero_vstate.ux_amount, 15);
+        loki_varint_currency_str(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
+                                 G_monero_vstate.ux_amount);
         // ask user
         monero_io_discard(1);
         ui_menu_fee_validation_display(0);
@@ -143,7 +143,7 @@ int monero_apdu_mlsag_prehash_update() {
         uint64_t amount;
         amount = monero_bamount2uint64(v);
         if (amount) {
-            monero_amount2str(amount, G_monero_vstate.ux_amount, 15);
+            loki_currency_str(amount, G_monero_vstate.ux_amount);
             if (!is_change) {
                 ui_menu_validation_display(0);
             } else {

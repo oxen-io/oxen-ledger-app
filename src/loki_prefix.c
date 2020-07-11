@@ -44,7 +44,7 @@ int monero_apdu_prefix_hash_init() {
         // ask user
         monero_io_discard(1);
         if (timelock != 0) {
-            monero_uint642str(timelock, G_monero_vstate.ux_amount, 15);
+            monero_uint642str(timelock, G_monero_vstate.ux_amount);
             ui_menu_timelock_validation_display(0);
             return 0;
         } else {
