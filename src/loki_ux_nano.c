@@ -66,11 +66,7 @@ void ui_menu_words_clear(unsigned int value);
 void ui_menu_words_back(unsigned int value);
 
 UX_STEP_NOCB(ux_menu_words_1_step,
-#ifdef UI_NANO_X
-             bnnn_paging,
-#else
-             bn_paging,
-#endif
+             paging,
              {
                  .title = "Electrum Seed",
                  .text = "NOTSET",
@@ -572,7 +568,7 @@ void ui_menu_any_pubaddr_display(unsigned int value, unsigned char* pub_view,
     }
 
     loki_wallet_address(G_monero_vstate.ux_address, pub_view, pub_spend, is_subbadress, paymentID);
-    ux_layout_bnnn_paging_reset();
+    ux_layout_paging_reset();
     ux_flow_init(0, ux_flow_pubaddr, NULL);
 }
 
