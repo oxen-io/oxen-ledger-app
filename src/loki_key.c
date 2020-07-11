@@ -296,10 +296,10 @@ int monero_apdu_get_key() {
             monero_io_insert(G_monero_vstate.view_pub, 32);
             monero_io_insert(G_monero_vstate.spend_pub, 32);
             // public base address
-            loki_wallet_address(
+            unsigned char wallet_len = loki_wallet_address(
                     (char *)G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
                     G_monero_vstate.view_pub, G_monero_vstate.spend_pub, 0, NULL);
-            monero_io_inserted(95);
+            monero_io_inserted(wallet_len);
             break;
 
         // get private

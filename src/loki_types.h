@@ -187,7 +187,7 @@ struct monero_v_state_s {
     /* ------------------------------------------ */
     /* ---               UI/UX                --- */
     /* ------------------------------------------ */
-    char ux_wallet_public_short_address[5 + 2 + 5 + 1]; // first 5, two dots, last 5, null
+    char ux_wallet_public_short_address[7 + 2 + 3 + 1]; // first 7, two dots, last 3, null
     char ux_wallet_account_name[14];
 
     union {
@@ -196,8 +196,8 @@ struct monero_v_state_s {
             char ux_info2[14];
             /* menu */
             char ux_menu[16];
-            // address to display: 95/106-chars + null
-            char ux_address[107];
+            // address to display: 95/106-chars for mainnet, 97/108 for testnet + null
+            char ux_address[109];
             // Address type string; max 15 chars + null
             char ux_addr_type[16];
             // addr mode

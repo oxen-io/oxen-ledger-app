@@ -60,10 +60,9 @@ const unsigned char C_STAGENET_NETWORK_ID[] = {0xbb ,0x37, 0x9B, 0x22 , 0x0A, 0x
 
 const char alphabet[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 #define alphabet_size (sizeof(alphabet) - 1)
-const unsigned int encoded_block_sizes[] = {0, 2, 3, 5, 6, 7, 9, 10, 11};
+const unsigned char encoded_block_sizes[] = {0, 2, 3, 5, 6, 7, 9, 10, 11};
 #define FULL_BLOCK_SIZE         8  //(sizeof(encoded_block_sizes) / sizeof(encoded_block_sizes[0]) - 1)
 #define FULL_ENCODED_BLOCK_SIZE 11  // encoded_block_sizes[full_block_size];
-#define ADDR_CHECKSUM_SIZE      4
 
 static uint64_t uint_8be_to_64(const unsigned char* data, size_t size) {
     uint64_t res = 0;
@@ -107,16 +106,16 @@ static void encode_block(const unsigned char* block, unsigned int size, char* re
     }
 }
 
-int monero_base58_public_key(char* str_b58, unsigned char* view, unsigned char* spend,
-                             unsigned char is_subbadress, unsigned char* paymanetID) {
-    unsigned char data[72 + 8];
-    unsigned int offset;
-    unsigned int prefix;
+unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned char* spend,
+                                  unsigned char is_subbadress, unsigned char* paymentID) {
+    unsigned char data[2/*nettype*/ + 32/*spend pubkey*/ + 32/*view pubkey*/ + 8/*paymentid*/ + 4/*checksum*/];
+    unsigned char offset;
+    unsigned char prefix;
 
     // data[0] = N_monero_pstate->network_id;
     switch (N_monero_pstate->network_id) {
         case TESTNET:
-            if (paymanetID) {
+            if (paymentID) {
                 prefix = TESTNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
             } else if (is_subbadress) {
                 prefix = TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
@@ -125,7 +124,7 @@ int monero_base58_public_key(char* str_b58, unsigned char* view, unsigned char* 
             }
             break;
         case STAGENET:
-            if (paymanetID) {
+            if (paymentID) {
                 prefix = STAGENET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
             } else if (is_subbadress) {
                 prefix = STAGENET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
@@ -135,7 +134,7 @@ int monero_base58_public_key(char* str_b58, unsigned char* view, unsigned char* 
             break;
 #ifndef LOKI_ALPHA
         case MAINNET:
-            if (paymanetID) {
+            if (paymentID) {
                 prefix = MAINNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
             } else if (is_subbadress) {
                 prefix = MAINNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
@@ -150,25 +149,25 @@ int monero_base58_public_key(char* str_b58, unsigned char* view, unsigned char* 
     os_memmove(data + offset, spend, 32);
     os_memmove(data + offset + 32, view, 32);
     offset += 64;
-    if (paymanetID) {
-        os_memmove(data + offset, paymanetID, 8);
+    if (paymentID) {
+        os_memmove(data + offset, paymentID, 8);
         offset += 8;
     }
     monero_keccak_F(data, offset, G_monero_vstate.mlsagH);
     os_memmove(data + offset, G_monero_vstate.mlsagH, 4);
     offset += 4;
 
-    unsigned int full_block_count = (offset) / FULL_BLOCK_SIZE;
-    unsigned int last_block_size = (offset) % FULL_BLOCK_SIZE;
+    unsigned char full_block_count = offset / FULL_BLOCK_SIZE;
+    unsigned char last_block_size = offset % FULL_BLOCK_SIZE;
     for (size_t i = 0; i < full_block_count; ++i) {
         encode_block(data + i * FULL_BLOCK_SIZE, FULL_BLOCK_SIZE,
                      &str_b58[i * FULL_ENCODED_BLOCK_SIZE]);
     }
 
-    if (0 < last_block_size) {
+    if (last_block_size) {
         encode_block(data + full_block_count * FULL_BLOCK_SIZE, last_block_size,
                      &str_b58[full_block_count * FULL_ENCODED_BLOCK_SIZE]);
     }
 
-    return 0;
+    return full_block_count * FULL_ENCODED_BLOCK_SIZE + encoded_block_sizes[last_block_size];
 }

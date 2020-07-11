@@ -94,8 +94,10 @@ void ui_menu_pubaddr_display(unsigned int value);
 /* ----------------------------------------------------------------------- */
 #define OFFSETOF(type, field) ((unsigned int)&(((type *)NULL)->field))
 
-int monero_base58_public_key(char *str_b58, unsigned char *view, unsigned char *spend,
-                             unsigned char is_subbadress, unsigned char *paymanetID);
+// Obtains the monero-base58-encoded wallet address from the view and spend keys, subaddress flag,
+// and payment id (for integrated address).  Returns the number of chars written to str_b58.
+unsigned char loki_wallet_address(char *str_b58, unsigned char *view, unsigned char *spend,
+                                  unsigned char is_subbadress, unsigned char *paymentID);
 
 /** unsigned varint amount to uint64 */
 uint64_t monero_vamount2uint64(unsigned char *binary);
