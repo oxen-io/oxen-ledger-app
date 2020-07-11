@@ -192,8 +192,10 @@ struct monero_v_state_s {
 
     union {
         struct {
-            char ux_info1[14];
-            char ux_info2[14];
+            char ux_info1[16];
+            char ux_info2[16];
+        };
+        struct {
             /* menu */
             char ux_menu[16];
             // address to display: 95/106-chars for mainnet, 97/108 for testnet + null
@@ -217,9 +219,7 @@ struct monero_v_state_s {
             // 0, but won't be if the value is greater than 9 digits).
             char ux_amount[22];
         };
-        struct {
-            unsigned char tmp[160]; // Used in loki_proof for temporary calcs
-        };
+        unsigned char tmp[160]; // Used in loki_proof for temporary calcs
     };
 };
 typedef struct monero_v_state_s monero_v_state_t;
