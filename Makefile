@@ -30,6 +30,8 @@ else ifneq ("","$(wildcard /usr/lib/arm-none-eabi)")
 endif
 $(info SYSROOT=$(SYSROOT))
 
+SCRIPT_LD := $(shell pwd)/script.ld
+
 include $(BOLOS_SDK)/Makefile.defines
 
 APPNAME = Loki
@@ -60,7 +62,7 @@ all: default
 # Platform #
 ############
 
-DEFINES += OS_IO_SEPROXYHAL IO_SEPROXYHAL_BUFFER_SIZE_B=300
+DEFINES += OS_IO_SEPROXYHAL IO_SEPROXYHAL_BUFFER_SIZE_B=200
 DEFINES += HAVE_BAGL HAVE_SPRINTF
 DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=4 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
 DEFINES += HAVE_LEGACY_PID
@@ -115,6 +117,12 @@ include $(BOLOS_SDK)/Makefile.rules
 
 #add dependency on custom makefile filename
 dep/%.d: %.c Makefile
+
+# Rewrite the bolos sdk script to increase the stack size slightly
+script.ld: $(BOLOS_SDK)/script.ld Makefile
+	sed -e 's/^STACK_SIZE\s*=\s*[0-9]\+;/STACK_SIZE = 640;/' $< >$@
+
+bin/app.elf: script.ld
 
 listvariants:
 	@echo VARIANTS COIN loki
