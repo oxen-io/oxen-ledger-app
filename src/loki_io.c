@@ -302,7 +302,7 @@ int monero_io_fetch_decrypt_key(unsigned char* buffer) {
                                       TYPE_SCALAR);
             G_monero_vstate.io_offset += 32;
         }
-        os_memmove(buffer, G_monero_vstate.a, 32);
+        os_memmove(buffer, G_monero_vstate.view_priv, 32);
         return 32;
     }
     // spend?
@@ -322,7 +322,7 @@ int monero_io_fetch_decrypt_key(unsigned char* buffer) {
                                       G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
                                       TYPE_SCALAR);
         }
-        os_memmove(buffer, G_monero_vstate.b, 32);
+        os_memmove(buffer, G_monero_vstate.spend_priv, 32);
         return 32;
     }
     // else

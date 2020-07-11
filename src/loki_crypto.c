@@ -551,11 +551,11 @@ void monero_derive_subaddress_public_key(unsigned char *x, unsigned char *pub,
 /* ----------------------------------------------------------------------- */
 void monero_get_subaddress_spend_public_key(unsigned char *x, unsigned char *index) {
     // m = Hs(a || index_major || index_minor)
-    monero_get_subaddress_secret_key(x, G_monero_vstate.a, index);
+    monero_get_subaddress_secret_key(x, G_monero_vstate.view_priv, index);
     // M = m*G
     monero_secret_key_to_public_key(x, x);
     // D = B + M
-    monero_ecadd(x, x, G_monero_vstate.B);
+    monero_ecadd(x, x, G_monero_vstate.spend_pub);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -565,7 +565,7 @@ void monero_get_subaddress(unsigned char *C, unsigned char *D, unsigned char *in
     // retrieve D
     monero_get_subaddress_spend_public_key(D, index);
     // C = a*D
-    monero_ecmul_k(C, D, G_monero_vstate.a);
+    monero_ecmul_k(C, D, G_monero_vstate.view_priv);
 }
 
 /* ----------------------------------------------------------------------- */

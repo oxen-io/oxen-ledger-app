@@ -64,10 +64,7 @@ void monero_init() {
 /* --- init private keys                                               --- */
 /* ----------------------------------------------------------------------- */
 void monero_wipe_private_key() {
-    os_memset(G_monero_vstate.a, 0, 32);
-    os_memset(G_monero_vstate.b, 0, 32);
-    os_memset(G_monero_vstate.A, 0, 32);
-    os_memset(G_monero_vstate.B, 0, 32);
+    os_memset(G_monero_vstate.keys, 0, sizeof(G_monero_vstate.keys));
     os_memset(&G_monero_vstate.spk, 0, sizeof(G_monero_vstate.spk));
     G_monero_vstate.key_set = 0;
 }
@@ -91,26 +88,26 @@ void monero_init_private_key() {
     switch (N_monero_pstate->key_mode) {
         case KEY_MODE_SEED:
 
-            monero_keccak_F(seed, 32, G_monero_vstate.b);
-            monero_reduce(G_monero_vstate.b, G_monero_vstate.b);
-            monero_keccak_F(G_monero_vstate.b, 32, G_monero_vstate.a);
-            monero_reduce(G_monero_vstate.a, G_monero_vstate.a);
+            monero_keccak_F(seed, 32, G_monero_vstate.spend_priv);
+            monero_reduce(G_monero_vstate.spend_priv, G_monero_vstate.spend_priv);
+            monero_keccak_F(G_monero_vstate.spend_priv, 32, G_monero_vstate.view_priv);
+            monero_reduce(G_monero_vstate.view_priv, G_monero_vstate.view_priv);
             break;
 
         case KEY_MODE_EXTERNAL:
-            os_memmove(G_monero_vstate.a, (void*)N_monero_pstate->a, 32);
-            os_memmove(G_monero_vstate.b, (void*)N_monero_pstate->b, 32);
+            os_memmove(G_monero_vstate.view_priv, (void*)N_monero_pstate->view_priv, 32);
+            os_memmove(G_monero_vstate.spend_priv, (void*)N_monero_pstate->spend_priv, 32);
             break;
 
         default:
             THROW(SW_SECURITY_LOAD_KEY);
             return;
     }
-    monero_ecmul_G(G_monero_vstate.A, G_monero_vstate.a);
-    monero_ecmul_G(G_monero_vstate.B, G_monero_vstate.b);
+    monero_ecmul_G(G_monero_vstate.view_pub, G_monero_vstate.view_priv);
+    monero_ecmul_G(G_monero_vstate.spend_pub, G_monero_vstate.spend_priv);
 
     // generate key protection
-    monero_aes_derive(&G_monero_vstate.spk, chain, G_monero_vstate.a, G_monero_vstate.b);
+    monero_aes_derive(&G_monero_vstate.spk, chain, G_monero_vstate.view_priv, G_monero_vstate.spend_priv);
 
     G_monero_vstate.key_set = 1;
 }
@@ -119,11 +116,8 @@ void monero_init_private_key() {
 /* ---  Set up ui/ux                                                   --- */
 /* ----------------------------------------------------------------------- */
 void monero_init_ux() {
-    monero_base58_public_key(G_monero_vstate.ux_address, G_monero_vstate.A, G_monero_vstate.B, 0,
-                             NULL);
-    os_memset(G_monero_vstate.ux_wallet_public_short_address, '.',
-              sizeof(G_monero_vstate.ux_wallet_public_short_address));
-
+    loki_wallet_address(
+            G_monero_vstate.ux_address, G_monero_vstate.view_pub, G_monero_vstate.spend_pub, 0, NULL);
     snprintf(G_monero_vstate.ux_wallet_account_name, sizeof(G_monero_vstate.ux_wallet_account_name),
              "LOKI / %d", N_monero_pstate->account_id);
     os_memmove(G_monero_vstate.ux_wallet_public_short_address, G_monero_vstate.ux_address, 5);

@@ -80,9 +80,9 @@ struct monero_nv_state_s {
     unsigned int account_id;
 
     /* spend key */
-    unsigned char b[32];
+    unsigned char spend_priv[32];
     /* view key */
-    unsigned char a[32];
+    unsigned char view_priv[32];
 
 /*words*/
 #define WORDS_MAX_LENGTH 20
@@ -152,10 +152,15 @@ struct monero_v_state_s {
     /* ------------------------------------------ */
     /* ---               Crypo                --- */
     /* ------------------------------------------ */
-    unsigned char b[32];
-    unsigned char a[32];
-    unsigned char A[32];
-    unsigned char B[32];
+    union {
+        struct {
+            unsigned char view_priv[32];
+            unsigned char view_pub[32];
+            unsigned char spend_priv[32];
+            unsigned char spend_pub[32];
+        };
+        unsigned char keys[128];
+    };
 
     /* SPK */
     cx_aes_key_t spk;

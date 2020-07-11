@@ -306,7 +306,7 @@ unsigned int ui_menu_export_viewkey_action(unsigned int value) {
     sw = SW_OK;
 
     if (value == ACCEPT) {
-        monero_io_insert(G_monero_vstate.a, 32);
+        monero_io_insert(G_monero_vstate.view_priv, 32);
         G_monero_vstate.export_view_key = 1;
     } else {
         monero_io_insert(x, 32);
@@ -581,7 +581,7 @@ void ui_menu_pubaddr_display(unsigned int value) {
     G_monero_vstate.disp_addr_mode = 0;
     G_monero_vstate.disp_addr_M = 0;
     G_monero_vstate.disp_addr_M = 0;
-    ui_menu_any_pubaddr_display(value, G_monero_vstate.A, G_monero_vstate.B, 0, NULL);
+    ui_menu_any_pubaddr_display(value, G_monero_vstate.view_pub, G_monero_vstate.spend_pub, 0, NULL);
 }
 
 /* --------------------------------- MAIN UX --------------------------------- */
