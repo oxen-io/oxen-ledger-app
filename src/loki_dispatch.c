@@ -22,19 +22,19 @@
 #include "loki_api.h"
 #include "loki_vars.h"
 
-void update_protocol() {
+void update_protocol(void) {
     G_monero_vstate.tx_state_ins = G_monero_vstate.io_ins;
     G_monero_vstate.tx_state_p1 = G_monero_vstate.io_p1;
     G_monero_vstate.tx_state_p2 = G_monero_vstate.io_p2;
 }
 
-void clear_protocol() {
+void clear_protocol(void) {
     G_monero_vstate.tx_state_ins = 0;
     G_monero_vstate.tx_state_p1 = 0;
     G_monero_vstate.tx_state_p2 = 0;
 }
 
-int check_potocol() {
+int check_potocol(void) {
     /* if locked and pin is veririfed, unlock */
     if ((G_monero_vstate.protocol_barrier == PROTOCOL_LOCKED_UNLOCKABLE) &&
         (os_global_pin_is_validated() == PIN_VERIFIED)) {
@@ -65,7 +65,7 @@ int check_potocol() {
     return SW_OK;
 }
 
-int check_ins_access() {
+int check_ins_access(void) {
     if (G_monero_vstate.key_set != 1) {
         return SW_KEY_NOT_SET;
     }
@@ -124,7 +124,7 @@ int check_ins_access() {
     return SW_INS_NOT_SUPPORTED;
 }
 
-int monero_dispatch() {
+int monero_dispatch(void) {
     int sw;
 
     if (((sw = check_potocol()) != SW_OK) || ((sw = check_ins_access() != SW_OK))) {

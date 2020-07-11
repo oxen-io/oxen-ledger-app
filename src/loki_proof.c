@@ -35,7 +35,7 @@
  * sig.c = Hs(Msg || D || X || Y)
  * sig.r = k - sig.c*r
  */
-int monero_apdu_get_tx_proof() {
+int monero_apdu_get_tx_proof(void) {
     unsigned char *msg;
     unsigned char *R;
     unsigned char *A;

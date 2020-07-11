@@ -37,15 +37,15 @@ const unsigned char C_FAKE_SEC_SPEND_KEY[32] = {
 /* ----------------------------------------------------------------------- */
 /* --- Boot                                                            --- */
 /* ----------------------------------------------------------------------- */
-void monero_init() {
+void monero_init(void) {
     os_memset(&G_monero_vstate, 0, sizeof(monero_v_state_t));
 
     // first init ?
     if (os_memcmp((void*)N_monero_pstate->magic, (void*)C_MAGIC, sizeof(C_MAGIC)) != 0) {
 #if defined(LOKI_ALPHA) || defined(LOKI_BETA)
-        monero_install(TESTNET);
+        loki_install(TESTNET);
 #else
-        monero_install(MAINNET);
+        loki_install(MAINNET);
 #endif
     }
 
@@ -63,13 +63,13 @@ void monero_init() {
 /* ----------------------------------------------------------------------- */
 /* --- init private keys                                               --- */
 /* ----------------------------------------------------------------------- */
-void monero_wipe_private_key() {
+void monero_wipe_private_key(void) {
     os_memset(G_monero_vstate.keys, 0, sizeof(G_monero_vstate.keys));
     os_memset(&G_monero_vstate.spk, 0, sizeof(G_monero_vstate.spk));
     G_monero_vstate.key_set = 0;
 }
 
-void monero_init_private_key() {
+void monero_init_private_key(void) {
     unsigned int path[5];
     unsigned char seed[32];
     unsigned char chain[32];
@@ -115,7 +115,7 @@ void monero_init_private_key() {
 /* ----------------------------------------------------------------------- */
 /* ---  Set up ui/ux                                                   --- */
 /* ----------------------------------------------------------------------- */
-void monero_init_ux() {
+void monero_init_ux(void) {
     unsigned char wallet_len = loki_wallet_address(
             G_monero_vstate.ux_address, G_monero_vstate.view_pub, G_monero_vstate.spend_pub, 0, NULL);
     snprintf(G_monero_vstate.ux_wallet_account_name, sizeof(G_monero_vstate.ux_wallet_account_name),
@@ -129,9 +129,9 @@ void monero_init_ux() {
 }
 
 /* ----------------------------------------------------------------------- */
-/* ---  Install/ReInstall Monero app                                   --- */
+/* ---  Install/ReInstall Loki app                                   --- */
 /* ----------------------------------------------------------------------- */
-void monero_install(unsigned char netId) {
+void loki_install(unsigned char netId) {
     unsigned char c;
 
     // full reset data
@@ -156,7 +156,7 @@ const char* const monero_supported_client[MONERO_SUPPORTED_CLIENT_SIZE] = {
     "7.",
 };
 
-int monero_apdu_reset() {
+int monero_apdu_reset(void) {
     unsigned int client_version_len;
     char client_version[16];
     client_version_len = G_monero_vstate.io_length - G_monero_vstate.io_offset;
@@ -192,7 +192,7 @@ int monero_apdu_reset() {
 /* ----------------------------------------------------------------------- */
 /* --- LOCK                                                           --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_lock() {
+int monero_apdu_lock(void) {
     monero_io_discard(0);
     monero_lock_and_throw(SW_SECURITY_LOCKED);
     return SW_SECURITY_LOCKED;
@@ -202,6 +202,6 @@ void monero_lock_and_throw(int sw) {
     G_monero_vstate.protocol_barrier = PROTOCOL_LOCKED;
     snprintf(G_monero_vstate.ux_info1, sizeof(G_monero_vstate.ux_info1), "Security Err");
     snprintf(G_monero_vstate.ux_info2, sizeof(G_monero_vstate.ux_info2), "%x", sw);
-    ui_menu_info_display(0);
+    ui_menu_info_display();
     THROW(sw);
 }

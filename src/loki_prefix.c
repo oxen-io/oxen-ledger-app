@@ -29,7 +29,7 @@
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_prefix_hash_init() {
+int monero_apdu_prefix_hash_init(void) {
     int timelock;
 
     monero_keccak_update_H(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
@@ -45,7 +45,7 @@ int monero_apdu_prefix_hash_init() {
         monero_io_discard(1);
         if (timelock != 0) {
             monero_uint642str(timelock, G_monero_vstate.ux_amount);
-            ui_menu_timelock_validation_display(0);
+            ui_menu_timelock_validation_display();
             return 0;
         } else {
             return SW_OK;
@@ -59,7 +59,7 @@ int monero_apdu_prefix_hash_init() {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_prefix_hash_update() {
+int monero_apdu_prefix_hash_update(void) {
     monero_keccak_update_H(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
                            G_monero_vstate.io_length - G_monero_vstate.io_offset);
     monero_io_discard(0);

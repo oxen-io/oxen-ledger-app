@@ -19,11 +19,13 @@
 #ifndef MONERO_API_H
 #define MONERO_API_H
 
+#include <stdint.h>
+
 int monero_apdu_reset(void);
 int monero_apdu_lock(void);
 void monero_lock_and_throw(int sw);
 
-void monero_install(unsigned char netId);
+void loki_install(unsigned char netId);
 void monero_init(void);
 void monero_init_private_key(void);
 void monero_wipe_private_key(void);
@@ -78,16 +80,14 @@ int monero_apdu_mlsag_hash(void);
 int monero_apdu_mlsag_sign(void);
 int monero_apdu_close_tx(void);
 
-void ui_init(void);
 void ui_menu_lock_display(void);
-void ui_menu_main_display(unsigned int value);
-void ui_menu_info_display(unsigned int value);
-void ui_menu_info_display2(unsigned int value, char *line1, char *line2);
-void ui_export_viewkey_display(unsigned int value);
-void ui_menu_any_pubaddr_display(unsigned int value, unsigned char *pub_view,
-                                 unsigned char *pub_spend, unsigned char is_subbadress,
-                                 unsigned char *paymanetID);
-void ui_menu_pubaddr_display(unsigned int value);
+void ui_menu_main_display(void);
+void ui_menu_info_display(void);
+void ui_menu_info_display2(char *line1, char *line2);
+void ui_export_viewkey_display(void);
+void ui_menu_any_pubaddr_display(unsigned char *pub_view, unsigned char *pub_spend,
+                                 unsigned char is_subbadress, unsigned char *paymentID);
+void ui_menu_pubaddr_display(void);
 
 /* ----------------------------------------------------------------------- */
 /* ---                               MISC                             ---- */
@@ -116,12 +116,12 @@ void monero_uint642str(uint64_t val, char *str);
 int monero_abort_tx();
 int monero_unblind(unsigned char *v, unsigned char *k, unsigned char *AKout,
                    unsigned int short_amount);
-void ui_menu_validation_display(unsigned int value);
-void ui_menu_fee_validation_display(unsigned int value);
-void ui_menu_change_validation_display(unsigned int value);
-void ui_menu_timelock_validation_display(unsigned int value);
+void ui_menu_validation_display(void);
+void ui_menu_fee_validation_display(void);
+void ui_menu_change_validation_display(void);
+void ui_menu_timelock_validation_display(void);
 
-void ui_menu_opentx_display(unsigned int value);
+void ui_menu_opentx_display(void);
 /* ----------------------------------------------------------------------- */
 /* ---                          KEYS & ADDRESS                        ---- */
 /* ----------------------------------------------------------------------- */
@@ -230,12 +230,14 @@ void monero_check_scalar_range_1N(unsigned char *s);
 void monero_check_scalar_not_null(unsigned char *s);
 
 /**
- * LE-7-bits encoding. High bit set says one more byte to decode.
+ * LE-7-bits encoding. High bit set says more bytes to decode.  The maximum varint string length is
+ * 10 (for a uint64_t with the MSB set).
  */
 unsigned int monero_encode_varint(unsigned char *varint, unsigned int max_len, uint64_t v);
 
 /**
- * LE-7-bits decoding. High bit set says one more byte to decode.
+ * LE-7-bits decoding. High bit set says more bytes to decode.  The maximum varint string length is
+ * 10 (for a uint64_t with the MSB set).
  */
 unsigned int monero_decode_varint(unsigned char *varint, unsigned int max_len, uint64_t *v);
 

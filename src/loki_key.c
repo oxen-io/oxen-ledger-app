@@ -73,7 +73,7 @@ static unsigned long monero_crc32(unsigned long inCrc32, const void *buf, size_t
     return (crc32 ^ 0xFFFFFFFF);
 }
 
-void monero_clear_words() {
+void monero_clear_words(void) {
     monero_nvm_write((void *)N_monero_pstate->words_list, NULL,
                      sizeof(N_monero_pstate->words_list));
 }
@@ -109,7 +109,7 @@ static void monero_set_word(unsigned int n, unsigned int idx, unsigned int w_sta
 #define word_list_length 1626
 #define seed             G_monero_vstate.spend_priv
 
-int monero_apdu_manage_seedwords() {
+int monero_apdu_manage_seedwords(void) {
     unsigned int w_start, w_end;
     unsigned short wc[4];
 
@@ -190,7 +190,7 @@ static void monero_payment_id_to_str(const unsigned char *payment_id, char *str)
     }
 }
 
-int monero_apdu_display_address() {
+int monero_apdu_display_address(void) {
     unsigned int major;
     unsigned int minor;
     unsigned char index[8];
@@ -231,7 +231,7 @@ int monero_apdu_display_address() {
         }
     }
 
-    ui_menu_any_pubaddr_display(0, C, D, (minor | major) ? 1 : 0,
+    ui_menu_any_pubaddr_display(C, D, (minor | major) ? 1 : 0,
                                 (G_monero_vstate.io_p1 == 1) ? payment_id : NULL);
     return 0;
 }
@@ -246,7 +246,7 @@ int is_fake_spend_key(unsigned char *s) { return os_memcmp(s, C_FAKE_SEC_SPEND_K
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_put_key() {
+int monero_apdu_put_key(void) {
     unsigned char raw[32];
     unsigned char pub[32];
     unsigned char sec[32];
@@ -288,7 +288,7 @@ int monero_apdu_put_key() {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_get_key() {
+int monero_apdu_get_key(void) {
     monero_io_discard(1);
     switch (G_monero_vstate.io_p1) {
         // get pub
@@ -308,7 +308,7 @@ int monero_apdu_get_key() {
             if (G_monero_vstate.export_view_key) {
                 monero_io_insert(G_monero_vstate.view_priv, 32);
             } else {
-                ui_export_viewkey_display(0);
+                ui_export_viewkey_display();
                 return 0;
             }
             break;
@@ -351,7 +351,7 @@ int monero_apdu_get_key() {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_verify_key() {
+int monero_apdu_verify_key(void) {
     unsigned char pub[32];
     unsigned char priv[32];
     unsigned char computed_pub[32];

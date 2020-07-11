@@ -50,7 +50,7 @@ void monero_io_set_offset(unsigned int offset) {
     }
 }
 
-void monero_io_mark() { G_monero_vstate.io_mark = G_monero_vstate.io_offset; }
+void monero_io_mark(void) { G_monero_vstate.io_mark = G_monero_vstate.io_offset; }
 
 void monero_io_inserted(unsigned int len) {
     G_monero_vstate.io_offset += len;
@@ -66,7 +66,7 @@ void monero_io_discard(int clear) {
     }
 }
 
-void monero_io_clear() { os_memset(G_monero_vstate.io_buffer, 0, MONERO_IO_BUFFER_LENGTH); }
+void monero_io_clear(void) { os_memset(G_monero_vstate.io_buffer, 0, MONERO_IO_BUFFER_LENGTH); }
 
 /* ----------------------------------------------------------------------- */
 /* INSERT data to be sent                                                  */
@@ -196,7 +196,7 @@ void monero_io_insert_tlv(unsigned int T, unsigned int L, unsigned char const* V
 /* ----------------------------------------------------------------------- */
 /* FECTH data from received buffer                                         */
 /* ----------------------------------------------------------------------- */
-int monero_io_fetch_available() { return G_monero_vstate.io_length - G_monero_vstate.io_offset; }
+int monero_io_fetch_available(void) { return G_monero_vstate.io_length - G_monero_vstate.io_offset; }
 void monero_io_assert_available(int sz) {
     if ((G_monero_vstate.io_length - G_monero_vstate.io_offset) < sz) {
         THROW(SW_WRONG_LENGTH + (sz & 0xFF));
@@ -331,15 +331,15 @@ int monero_io_fetch_decrypt_key(unsigned char* buffer) {
     }
 }
 
-uint64_t monero_io_fetch_varint() {
+uint64_t monero_io_fetch_varint(void) {
     uint64_t v64;
     G_monero_vstate.io_offset +=
         monero_decode_varint(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
-                             MIN(8, G_monero_vstate.io_length - G_monero_vstate.io_offset), &v64);
+                             MIN(10, G_monero_vstate.io_length - G_monero_vstate.io_offset), &v64);
     return v64;
 }
 
-unsigned int monero_io_fetch_u32() {
+unsigned int monero_io_fetch_u32(void) {
     unsigned int v32;
     monero_io_assert_available(4);
     v32 = ((G_monero_vstate.io_buffer[G_monero_vstate.io_offset + 0] << 24) |
@@ -350,7 +350,7 @@ unsigned int monero_io_fetch_u32() {
     return v32;
 }
 
-unsigned int monero_io_fetch_u24() {
+unsigned int monero_io_fetch_u24(void) {
     unsigned int v24;
     monero_io_assert_available(3);
     v24 = ((G_monero_vstate.io_buffer[G_monero_vstate.io_offset + 0] << 16) |
@@ -360,7 +360,7 @@ unsigned int monero_io_fetch_u24() {
     return v24;
 }
 
-unsigned int monero_io_fetch_u16() {
+unsigned int monero_io_fetch_u16(void) {
     unsigned int v16;
     monero_io_assert_available(2);
     v16 = ((G_monero_vstate.io_buffer[G_monero_vstate.io_offset + 0] << 8) |
@@ -369,7 +369,7 @@ unsigned int monero_io_fetch_u16() {
     return v16;
 }
 
-unsigned int monero_io_fetch_u8() {
+unsigned int monero_io_fetch_u8(void) {
     unsigned int v8;
     monero_io_assert_available(1);
     v8 = G_monero_vstate.io_buffer[G_monero_vstate.io_offset];

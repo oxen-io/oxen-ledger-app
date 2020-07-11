@@ -29,7 +29,7 @@
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_mlsag_prehash_init() {
+int monero_apdu_mlsag_prehash_init(void) {
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         if (G_monero_vstate.io_p2 == 1) {
             monero_sha256_outkeys_final(G_monero_vstate.OUTK);
@@ -48,7 +48,7 @@ int monero_apdu_mlsag_prehash_init() {
                                  G_monero_vstate.ux_amount);
         // ask user
         monero_io_discard(1);
-        ui_menu_fee_validation_display(0);
+        ui_menu_fee_validation_display();
         return 0;
     } else {
         monero_io_discard(1);
@@ -59,7 +59,7 @@ int monero_apdu_mlsag_prehash_init() {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_mlsag_prehash_update() {
+int monero_apdu_mlsag_prehash_update(void) {
     unsigned char is_subaddress;
     unsigned char *Aout;
     unsigned char *Bout;
@@ -145,9 +145,9 @@ int monero_apdu_mlsag_prehash_update() {
         if (amount) {
             loki_currency_str(amount, G_monero_vstate.ux_amount);
             if (!is_change) {
-                ui_menu_validation_display(0);
+                ui_menu_validation_display();
             } else {
-                ui_menu_change_validation_display(0);
+                ui_menu_change_validation_display();
             }
             return 0;
         }
@@ -160,7 +160,7 @@ int monero_apdu_mlsag_prehash_update() {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_mlsag_prehash_finalize() {
+int monero_apdu_mlsag_prehash_finalize(void) {
     unsigned char message[32];
     unsigned char proof[32];
     unsigned char H[32];

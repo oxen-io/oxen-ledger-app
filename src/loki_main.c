@@ -195,7 +195,7 @@ __attribute__((section(".boot"))) int main(void) {
                 monero_init();
 
                 // set up initial screen
-                ui_init();
+                ui_menu_main_display();
 
                 // start the application
                 // the first exchange will:

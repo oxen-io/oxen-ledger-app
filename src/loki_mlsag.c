@@ -25,7 +25,7 @@
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_mlsag_prepare() {
+int monero_apdu_mlsag_prepare(void) {
     int options;
     unsigned char Hi[32];
     unsigned char xin[32];
@@ -74,7 +74,7 @@ int monero_apdu_mlsag_prepare() {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_mlsag_hash() {
+int monero_apdu_mlsag_hash(void) {
     unsigned char msg[32];
     unsigned char c[32];
     if (G_monero_vstate.io_p2 == 1) {
@@ -98,7 +98,7 @@ int monero_apdu_mlsag_hash() {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_mlsag_sign() {
+int monero_apdu_mlsag_sign(void) {
     unsigned char xin[32];
     unsigned char alpha[32];
     unsigned char ss[32];

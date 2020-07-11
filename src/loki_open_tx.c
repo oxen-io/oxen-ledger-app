@@ -46,7 +46,7 @@ void monero_reset_tx(int reset_tx_cnt) {
 /*
  * HD wallet not yet supported : account is assumed to be zero
  */
-int monero_apdu_open_tx() {
+int monero_apdu_open_tx(void) {
     unsigned int account;
 
     account = monero_io_fetch_u32();
@@ -55,14 +55,14 @@ int monero_apdu_open_tx() {
 
     monero_reset_tx(0);
     G_monero_vstate.tx_cnt++;
-    ui_menu_opentx_display(0);
+    ui_menu_opentx_display();
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         // return 0;
     }
     return monero_apdu_open_tx_cont();
 }
 
-int monero_apdu_open_tx_cont() {
+int monero_apdu_open_tx_cont(void) {
     G_monero_vstate.tx_in_progress = 1;
 
 #ifdef DEBUG_HWDEVICE
@@ -86,26 +86,26 @@ int monero_apdu_open_tx_cont() {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_close_tx() {
+int monero_apdu_close_tx(void) {
     monero_io_discard(1);
     monero_reset_tx(G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL);
-    ui_menu_main_display(0);
+    ui_menu_main_display();
     return SW_OK;
 }
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_abort_tx() {
+int monero_abort_tx(void) {
     monero_reset_tx(1);
-    ui_menu_info_display2(0, "TX", "Aborted");
+    ui_menu_info_display2("TX", "Aborted");
     return 0;
 }
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_set_signature_mode() {
+int monero_apdu_set_signature_mode(void) {
     unsigned int sig_mode;
 
     G_monero_vstate.tx_sig_mode = TRANSACTION_CREATE_FAKE;
