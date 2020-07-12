@@ -118,8 +118,12 @@ void monero_init_private_key(void) {
 void monero_init_ux(void) {
     unsigned char wallet_len = loki_wallet_address(
             G_monero_vstate.ux_address, G_monero_vstate.view_pub, G_monero_vstate.spend_pub, 0, NULL);
-    snprintf(G_monero_vstate.ux_wallet_account_name, sizeof(G_monero_vstate.ux_wallet_account_name),
-             "LOKI / %d", N_monero_pstate->account_id);
+    if (N_monero_pstate->account_id == 0)
+        os_memmove(G_monero_vstate.ux_wallet_account_name, "LOKI wallet", 12);
+    else
+        snprintf(G_monero_vstate.ux_wallet_account_name, sizeof(G_monero_vstate.ux_wallet_account_name),
+                "LOKI / %d", N_monero_pstate->account_id);
+
     os_memmove(G_monero_vstate.ux_wallet_public_short_address, G_monero_vstate.ux_address, 7);
     G_monero_vstate.ux_wallet_public_short_address[7] = '.';
     G_monero_vstate.ux_wallet_public_short_address[8] = '.';
