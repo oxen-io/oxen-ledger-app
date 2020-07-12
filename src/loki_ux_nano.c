@@ -274,16 +274,17 @@ void ui_menu_validation_action(unsigned int value) {
 /* -------------------------------- EXPORT VIEW KEY UX --------------------------------- */
 unsigned int ui_menu_export_viewkey_action(unsigned int value);
 
-UX_STEP_NOCB(ux_menu_export_viewkey_1_step, nn, {"Export", "View Key"});
+UX_STEP_CB(ux_menu_export_viewkey_1_step, pb, ui_menu_export_viewkey_action(ACCEPT),
+           {&C_icon_validate_14, "Export view key?"});
 
-UX_STEP_CB(ux_menu_export_viewkey_2_step, pb, ui_menu_export_viewkey_action(ACCEPT),
-           {&C_icon_validate_14, "Accept"});
-
-UX_STEP_CB(ux_menu_export_viewkey_3_step, pb, ui_menu_export_viewkey_action(REJECT),
+UX_STEP_CB(ux_menu_export_viewkey_2_step, pb, ui_menu_export_viewkey_action(REJECT),
            {&C_icon_crossmark, "Reject"});
 
-UX_FLOW(ux_flow_export_viewkey, &ux_menu_export_viewkey_1_step, &ux_menu_export_viewkey_2_step,
-        &ux_menu_export_viewkey_3_step);
+UX_FLOW(ux_flow_export_viewkey,
+        &ux_menu_export_viewkey_1_step,
+        &ux_menu_export_viewkey_2_step,
+        FLOW_LOOP
+        );
 
 void ui_export_viewkey_display(void) {
     ux_flow_init(0, ux_flow_export_viewkey, NULL);
