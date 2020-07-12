@@ -254,6 +254,8 @@ typedef struct monero_v_state_s monero_v_state_t;
 #define INS_RESET        0x02
 #define INS_LOCK_DISPLAY 0x04
 
+#define INS_GET_NETWORK        0x10
+
 #define INS_GET_KEY            0x20
 #define INS_DISPLAY_ADDRESS    0x21
 #define INS_PUT_KEY            0x22

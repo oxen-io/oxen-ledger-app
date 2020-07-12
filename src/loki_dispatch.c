@@ -48,8 +48,7 @@ int check_potocol(void) {
 
     /* the first command enforce the protocol version until application quits */
     switch (G_monero_vstate.io_protocol_version) {
-        case 0x00: /* the first one: PCSC epoch */
-        case 0x03: /* protocol V3 */
+        case 0x04: /* protocol V4 */
             if (G_monero_vstate.protocol == 0xff) {
                 G_monero_vstate.protocol = G_monero_vstate.io_protocol_version;
             }
@@ -73,6 +72,7 @@ int check_ins_access(void) {
     switch (G_monero_vstate.io_ins) {
         case INS_LOCK_DISPLAY:
         case INS_RESET:
+        case INS_GET_NETWORK:
         case INS_PUT_KEY:
         case INS_GET_KEY:
         case INS_DISPLAY_ADDRESS:
@@ -134,19 +134,18 @@ int monero_dispatch(void) {
 
     G_monero_vstate.options = monero_io_fetch_u8();
 
-    if (G_monero_vstate.io_ins == INS_RESET) {
-        sw = monero_apdu_reset();
-        return sw;
-    }
-
-    if (G_monero_vstate.io_ins == INS_LOCK_DISPLAY) {
-        sw = monero_apdu_lock();
-        return sw;
-    }
-
     sw = 0x6F01;
 
     switch (G_monero_vstate.io_ins) {
+        case INS_RESET:
+            sw = monero_apdu_reset();
+            break;
+        case INS_LOCK_DISPLAY:
+            sw = monero_apdu_lock();
+            break;
+        case INS_GET_NETWORK:
+            sw = monero_apdu_get_network();
+            break;
         /* --- KEYS --- */
         case INS_PUT_KEY:
             sw = monero_apdu_put_key();

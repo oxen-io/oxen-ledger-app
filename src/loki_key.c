@@ -285,6 +285,22 @@ int monero_apdu_put_key(void) {
     return SW_OK;
 }
 
+int monero_apdu_get_network(void) {
+    // We sent back "LOKI" followed by the network type byte
+    monero_io_discard(1);
+    uint8_t nettype;
+    switch (N_monero_pstate->network_id) {
+        case MAINNET: nettype = 0; break;
+        case TESTNET: nettype = 1; break;
+        case STAGENET: nettype = 2; break;
+        case FAKECHAIN: nettype = 3; break;
+        default: nettype = 255;
+    }
+    monero_io_insert("LOKI", 4);
+    monero_io_insert(&nettype, 1);
+    return SW_OK;
+}
+
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
