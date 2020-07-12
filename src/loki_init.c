@@ -25,7 +25,7 @@
 /* ----------------------*/
 /* -- A Kind of Magic -- */
 /* ----------------------*/
-const unsigned char C_MAGIC[8] = {'M', 'O', 'N', 'E', 'R', 'O', 'H', 'W'};
+const unsigned char C_MAGIC[8] = {'L', 'O', 'K', 'I', '0', '0', '0', '0'};
 
 const unsigned char C_FAKE_SEC_VIEW_KEY[32] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -158,6 +158,7 @@ void loki_install(unsigned char netId) {
 #define MONERO_SUPPORTED_CLIENT_SIZE 1
 const char* const monero_supported_client[MONERO_SUPPORTED_CLIENT_SIZE] = {
     "7.",
+    "8.",
 };
 
 int monero_apdu_reset(void) {
