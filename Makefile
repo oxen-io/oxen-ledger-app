@@ -30,7 +30,7 @@ else ifneq ("","$(wildcard /usr/lib/arm-none-eabi)")
 endif
 $(info SYSROOT=$(SYSROOT))
 
-SCRIPT_LD := $(shell pwd)/script.ld
+SCRIPT_LD := script.ld
 
 include $(BOLOS_SDK)/Makefile.defines
 
@@ -121,8 +121,6 @@ dep/%.d: %.c Makefile
 # Rewrite the bolos sdk script to increase the stack size slightly
 script.ld: $(BOLOS_SDK)/script.ld Makefile
 	sed -e 's/^STACK_SIZE\s*=\s*[0-9]\+;/STACK_SIZE = 712;/' $< >$@
-
-bin/app.elf: script.ld
 
 listvariants:
 	@echo VARIANTS COIN loki
