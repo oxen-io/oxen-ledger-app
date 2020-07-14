@@ -5,6 +5,7 @@ bin/
 debug/
 dep/
 obj/
+script.ld
 
 
 # Editors
