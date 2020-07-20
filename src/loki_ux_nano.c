@@ -375,9 +375,9 @@ void ui_menu_viewkey_export_display() {
 /* -------------------------------- ACCOUNT UX --------------------------------- */
 
 const char* const account_submenu_getter_values[] = {"0", "1", "2", "3", "4",    "5",
-                                                     "6", "7", "8", "9", "Abort"};
+                                                     "6", "7", "8", "9", "Cancel"};
 const char* const account_submenu_getter_values_selected[] = {
-    "0 *", "1 *", "2 *", "3 *", "4 *", "5 *", "6 *", "7 *", "8 *", "9 *", "Abort"};
+    "0 *", "1 *", "2 *", "3 *", "4 *", "5 *", "6 *", "7 *", "8 *", "9 *", "Cancel"};
 
 const char* account_submenu_getter(unsigned int idx) {
     if (idx >= ARRAYLEN(account_submenu_getter_values)) {
@@ -410,14 +410,14 @@ const char* const network_submenu_getter_values[] = {
 #else
     "Main Network",
 #endif
-    "Test Network", "Abort"};
+    "Test Network", "Cancel"};
 const char* const network_submenu_getter_values_selected[] = {
 #ifdef LOKI_ALPHA
     "Unvailable",
 #else
     "Main Network *",
 #endif
-    "Test Network *", "Abort"};
+    "Test Network *", "Cancel"};
 
 const char* network_submenu_getter(unsigned int idx) {
     if (idx >= ARRAYLEN(network_submenu_getter_values)) {
