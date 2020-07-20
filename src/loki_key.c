@@ -296,7 +296,7 @@ int monero_apdu_get_network(void) {
         case FAKECHAIN: nettype = 3; break;
         default: nettype = 255;
     }
-    monero_io_insert("LOKI", 4);
+    monero_io_insert((const unsigned char*) "LOKI", 4);
     monero_io_insert(&nettype, 1);
     return SW_OK;
 }

@@ -298,41 +298,35 @@ int monero_dispatch(void) {
 
         /* --- PREFIX HASH  --- */
         case INS_PREFIX_HASH:
-            // 1. state machine check
-            if ((G_monero_vstate.tx_state_ins != INS_GEN_TXOUT_KEYS) &&
-                (G_monero_vstate.tx_state_ins != INS_PREFIX_HASH)) {
-                THROW(SW_COMMAND_NOT_ALLOWED);
-            }
-            // init prefixhash state machine
+            // init prefixhash state machine if this is the first step:
             if (G_monero_vstate.tx_state_ins == INS_GEN_TXOUT_KEYS) {
                 G_monero_vstate.tx_state_ins = INS_PREFIX_HASH;
                 G_monero_vstate.tx_state_p1 = 0;
                 G_monero_vstate.tx_state_p2 = 0;
-            }
-            // check new state is allowed
-            if (G_monero_vstate.tx_state_p1 == 0) {
-                if (1 != G_monero_vstate.io_p1) {
-                    THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                }
-            } else if (G_monero_vstate.tx_state_p1 == 1) {
-                if ((G_monero_vstate.io_p1 != 2) || (G_monero_vstate.io_p2 != 1)) {
-                    THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                }
-            } else if (G_monero_vstate.tx_state_p1 == 2) {
-                if ((G_monero_vstate.io_p1 != 2) ||
-                    (G_monero_vstate.io_p2 - 1 != G_monero_vstate.tx_state_p2)) {
-                    THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                }
-            } else {
+            } else if (G_monero_vstate.tx_state_ins != INS_PREFIX_HASH) {
+                // Otherwise we must be coming from a previous INS_PREFIX_HASH step
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
-            // 2. command process
-            if (G_monero_vstate.io_p1 == 1) {
+
+            if (G_monero_vstate.tx_state_p1 == 0 && G_monero_vstate.io_p1 == 1) {
+                // We're going from initialization to our first subcommand, where we get basic tx
+                // parameters (version, type, locktime).
                 sw = monero_apdu_prefix_hash_init();
-            } else if (G_monero_vstate.io_p1 == 2) {
+            } else if (G_monero_vstate.tx_state_p1 == 1 && G_monero_vstate.io_p1 == 2 && (
+                        G_monero_vstate.io_p2 == 0 || G_monero_vstate.io_p2 == 0xff)) {
+                // We've moving from first subcommand to phase 2 where we start receiving the full
+                // prefix; either [2,0] for the first piece of a multi-piece prefix, or [2,ff] for a
+                // single-piece prefix.
+                sw = monero_apdu_prefix_hash_update();
+            } else if (G_monero_vstate.tx_state_p1 == 2 && G_monero_vstate.tx_state_p2 < 0xff &&
+                    G_monero_vstate.io_p1 == 2 && (G_monero_vstate.io_p2 == G_monero_vstate.tx_state_p2 + 1
+                                                || G_monero_vstate.io_p2 == 0xff)) {
+                // We're coming from a non-final [2,N] (that is, where N < ff) into the next piece
+                // which is either [2,N+1] if there are more pieces, or [2,ff] for the last piece.
                 sw = monero_apdu_prefix_hash_update();
             } else {
-                THROW(SW_WRONG_P1P2);
+                // Some invalid subcommand or state transition
+                THROW(SW_SUBCOMMAND_NOT_ALLOWED);
             }
             update_protocol();
             break;

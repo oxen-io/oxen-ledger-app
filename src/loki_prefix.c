@@ -30,19 +30,28 @@
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_init(void) {
-    int timelock;
-
     monero_keccak_update_H(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
                            G_monero_vstate.io_length - G_monero_vstate.io_offset);
-
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-        monero_io_fetch_varint();
-        timelock = monero_io_fetch_varint();
-        if (monero_io_fetch_available() != 0) {
+        if (monero_io_fetch_varint16() != 4) // version; we only support v4 txes here
+            THROW(SW_WRONG_DATA_RANGE);
+
+        uint64_t timelock = monero_io_fetch_varint();
+        uint16_t txtype = monero_io_fetch_varint16();
+
+        if (!(txtype == TXTYPE_STANDARD || txtype == TXTYPE_UNLOCK || txtype == TXTYPE_STAKE || txtype == TXTYPE_LNS))
+            THROW(SW_WRONG_DATA_RANGE);
+
+        if (timelock != 0 && txtype != TXTYPE_STANDARD)
+            THROW(SW_WRONG_DATA_RANGE);
+
+        if (monero_io_fetch_available())
             THROW(SW_WRONG_DATA);
-        }
-        // ask user
+
         monero_io_discard(1);
+
+        // At this stage we only want to check for a timelock and prompt if necessary (to prevent
+        // accidental timelocked transactions).
         if (timelock != 0) {
             monero_uint642str(timelock, G_monero_vstate.ux_amount);
             ui_menu_timelock_validation_display();

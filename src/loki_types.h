@@ -96,12 +96,15 @@ struct monero_nv_state_s {
 
 typedef struct monero_nv_state_s monero_nv_state_t;
 
-#define MONERO_IO_BUFFER_LENGTH 288
 enum device_mode { NONE, TRANSACTION_CREATE_REAL, TRANSACTION_CREATE_FAKE, TRANSACTION_PARSE };
+
+enum txtype { TXTYPE_STANDARD, TXTYPE_STATE_CHANGE, TXTYPE_UNLOCK, TXTYPE_STAKE, TXTYPE_LNS };
 
 #define DISP_MAIN       0x51
 #define DISP_SUB        0x52
 #define DISP_INTEGRATED 0x53
+
+#define MONERO_IO_BUFFER_LENGTH 288
 
 struct monero_v_state_s {
     unsigned char state;
