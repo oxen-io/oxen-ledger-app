@@ -339,6 +339,18 @@ uint64_t monero_io_fetch_varint(void) {
     return v64;
 }
 
+uint32_t monero_io_fetch_varint32(void) {
+    uint64_t v64 = monero_io_fetch_varint();
+    if (v64 > 0xffffffffULL) THROW(SW_WRONG_DATA_RANGE);
+    return (uint32_t) v64;
+}
+
+uint16_t monero_io_fetch_varint16(void) {
+    uint64_t v64 = monero_io_fetch_varint();
+    if (v64 > 0xffffULL) THROW(SW_WRONG_DATA_RANGE);
+    return (uint16_t) v64;
+}
+
 unsigned int monero_io_fetch_u32(void) {
     unsigned int v32;
     monero_io_assert_available(4);

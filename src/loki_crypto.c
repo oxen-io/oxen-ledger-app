@@ -84,7 +84,7 @@ void monero_aes_generate(cx_aes_key_t *sk) {
 /* ----------------------------------------------------------------------- */
 /* --- assert: max_len>0                                               --- */
 /* ----------------------------------------------------------------------- */
-unsigned int monero_encode_varint(unsigned char *varint, unsigned int max_len, uint64_t value) {
+unsigned int monero_encode_varint(unsigned char *varint, const unsigned int max_len, uint64_t value) {
     unsigned int len;
     len = 0;
     while (value >= 0x80) {
@@ -102,11 +102,12 @@ unsigned int monero_encode_varint(unsigned char *varint, unsigned int max_len, u
 /* ----------------------------------------------------------------------- */
 /* --- assert: max_len>0                                               --- */
 /* ----------------------------------------------------------------------- */
-unsigned int monero_decode_varint(unsigned char *varint, unsigned int max_len, uint64_t *value) {
-    const unsigned int bits = max_len < 8 ? max_len*8 : 64;
+unsigned int monero_decode_varint(const unsigned char *varint, const unsigned int max_len, uint64_t *value) {
+    const unsigned int bits = max_len < 10 ? max_len*7 : 64;
 
     bool more = true;
     unsigned int read = 0;
+    *value = 0;
     for (unsigned int shift = 0; more && read < max_len; shift += 7, ++read, ++varint) {
 
         // if all 0 bits *and* shifting we have something invalid: we have a final, most-significant
@@ -116,7 +117,7 @@ unsigned int monero_decode_varint(unsigned char *varint, unsigned int max_len, u
             THROW(SW_WRONG_DATA);
 
         // If we have <= 7 bits of space remaining then the value must fit and must not have a continuation bit
-        unsigned int bits_avail = bits - shift;
+        const unsigned int bits_avail = bits - shift;
         if (bits_avail <= 7 && *varint >= 1 << bits_avail)
             break; // more is still set, so will throw below
 

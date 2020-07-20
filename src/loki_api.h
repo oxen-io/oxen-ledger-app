@@ -234,13 +234,13 @@ void monero_check_scalar_not_null(unsigned char *s);
  * LE-7-bits encoding. High bit set says more bytes to decode.  The maximum varint string length is
  * 10 (for a uint64_t with the MSB set).
  */
-unsigned int monero_encode_varint(unsigned char *varint, unsigned int max_len, uint64_t v);
+unsigned int monero_encode_varint(unsigned char *varint, const unsigned int max_len, const uint64_t v);
 
 /**
  * LE-7-bits decoding. High bit set says more bytes to decode.  The maximum varint string length is
  * 10 (for a uint64_t with the MSB set).
  */
-unsigned int monero_decode_varint(unsigned char *varint, unsigned int max_len, uint64_t *v);
+unsigned int monero_decode_varint(const unsigned char *varint, const unsigned int max_len, uint64_t *v);
 
 /** */
 void monero_reverse32(unsigned char *rscal, unsigned char *scal);
@@ -336,6 +336,8 @@ void monero_io_insert_tlv(unsigned int T, unsigned int L, unsigned char const *V
 int monero_io_fetch_available();
 void monero_io_fetch_buffer(unsigned char *buffer, unsigned int len);
 uint64_t monero_io_fetch_varint(void);
+uint32_t monero_io_fetch_varint32(void);
+uint16_t monero_io_fetch_varint16(void);
 unsigned int monero_io_fetch_u32(void);
 unsigned int monero_io_fetch_u24(void);
 unsigned int monero_io_fetch_u16(void);
