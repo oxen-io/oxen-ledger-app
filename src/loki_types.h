@@ -78,6 +78,12 @@ struct monero_nv_state_s {
 #define KEY_MODE_SEED     0x42
     unsigned char key_mode;
 
+#define VIEWKEY_EXPORT_ALWAYS_PROMPT 0
+#define VIEWKEY_EXPORT_ALWAYS_ALLOW 1
+#define VIEWKEY_EXPORT_ALWAYS_DENY 2
+    /* view key export mode */
+    unsigned char viewkey_export_mode;
+
     /* acount id for bip derivation */
     unsigned int account_id;
 

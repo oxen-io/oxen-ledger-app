@@ -277,17 +277,35 @@ unsigned int ui_menu_export_viewkey_action(unsigned int value);
 UX_STEP_CB(ux_menu_export_viewkey_1_step, pb, ui_menu_export_viewkey_action(ACCEPT),
            {&C_icon_validate_14, "Export view key?"});
 
-UX_STEP_CB(ux_menu_export_viewkey_2_step, pb, ui_menu_export_viewkey_action(REJECT),
+UX_STEP_CB(ux_menu_export_viewkey_2_step, pb, ui_menu_export_viewkey_action(ACCEPT | 0x10000),
+           {&C_icon_validate_14, "Always export"});
+
+UX_STEP_CB(ux_menu_export_viewkey_3_step, pb, ui_menu_export_viewkey_action(REJECT),
            {&C_icon_crossmark, "Reject"});
+
+UX_STEP_CB(ux_menu_export_viewkey_4_step, pb, ui_menu_export_viewkey_action(REJECT | 0x10000),
+           {&C_icon_crossmark, "Always reject"});
 
 UX_FLOW(ux_flow_export_viewkey,
         &ux_menu_export_viewkey_1_step,
         &ux_menu_export_viewkey_2_step,
+        &ux_menu_export_viewkey_3_step,
+        &ux_menu_export_viewkey_4_step,
         FLOW_LOOP
         );
 
 void ui_export_viewkey_display(void) {
-    ux_flow_init(0, ux_flow_export_viewkey, NULL);
+    switch (N_monero_pstate->viewkey_export_mode) {
+        case VIEWKEY_EXPORT_ALWAYS_ALLOW:
+            ui_menu_export_viewkey_action(ACCEPT);
+            break;
+        case VIEWKEY_EXPORT_ALWAYS_DENY:
+            ui_menu_export_viewkey_action(REJECT);
+            break;
+        default:
+            ux_flow_init(0, ux_flow_export_viewkey, NULL);
+            break;
+    }
 }
 
 unsigned int ui_menu_export_viewkey_action(unsigned int value) {
@@ -297,6 +315,11 @@ unsigned int ui_menu_export_viewkey_action(unsigned int value) {
     monero_io_discard(0);
     os_memset(x, 0, 32);
     sw = SW_OK;
+    if (value & 0x10000) { // remember
+        value &= ~0x10000;
+        unsigned char val = value == ACCEPT ? VIEWKEY_EXPORT_ALWAYS_ALLOW : VIEWKEY_EXPORT_ALWAYS_DENY;
+        monero_nvm_write((void*)&N_monero_pstate->viewkey_export_mode, &val, sizeof(unsigned char));
+    }
 
     if (value == ACCEPT) {
         monero_io_insert(G_monero_vstate.view_priv, 32);
@@ -309,6 +332,44 @@ unsigned int ui_menu_export_viewkey_action(unsigned int value) {
     monero_io_do(IO_RETURN_AFTER_TX);
     ui_menu_main_display();
     return 0;
+}
+
+
+const char* const viewkey_export_submenu_values[] = {
+    "Always prompt",
+    "Always allow",
+    "Always deny",
+    "Cancel"};
+const char* const viewkey_export_submenu_values_selected[] = {
+    "Always prompt *",
+    "Always allow *",
+    "Always deny *",
+    "Cancel"};
+
+const char* viewkey_export_submenu_getter(unsigned int idx) {
+    if (idx >= ARRAYLEN(viewkey_export_submenu_values)) {
+        return NULL;
+    } else if (N_monero_pstate->viewkey_export_mode == idx) {
+        return viewkey_export_submenu_values_selected[idx];
+    } else {
+        return viewkey_export_submenu_values[idx];
+    }
+}
+
+void viewkey_export_submenu_selector(unsigned int idx) {
+    if (idx < ARRAYLEN(viewkey_export_submenu_values) - 1) {
+        unsigned char val =
+            idx == 1 ? VIEWKEY_EXPORT_ALWAYS_ALLOW :
+            idx == 2 ? VIEWKEY_EXPORT_ALWAYS_DENY :
+            VIEWKEY_EXPORT_ALWAYS_PROMPT;
+        monero_nvm_write((void*)&N_monero_pstate->viewkey_export_mode, &val, sizeof(unsigned char));
+        monero_init();
+    }
+    ui_menu_main_display();
+}
+
+void ui_menu_viewkey_export_display() {
+    ux_menulist_init(G_ux.stack_count - 1, viewkey_export_submenu_getter, viewkey_export_submenu_selector);
 }
 
 /* -------------------------------- ACCOUNT UX --------------------------------- */
@@ -447,7 +508,7 @@ void ui_menu_reset_action(unsigned int value) {
 /* ------------------------------- SETTINGS UX ------------------------------- */
 
 const char* const settings_submenu_getter_values[] = {
-    "Select Account", "Select Network", "Show 25 words", "Reset", "Back",
+    "Select Account", "Select Network", "View key export", "Show 25 words", "Reset", "Back",
 };
 
 const char* settings_submenu_getter(unsigned int idx) {
@@ -459,20 +520,12 @@ const char* settings_submenu_getter(unsigned int idx) {
 
 void settings_submenu_selector(unsigned int idx) {
     switch (idx) {
-        case 0:
-            ui_menu_account_display();
-            break;
-        case 1:
-            ui_menu_network_display();
-            break;
-        case 2:
-            ui_menu_words_display();
-            break;
-        case 3:
-            ui_menu_reset_display();
-            break;
-        default:
-            ui_menu_main_display();
+        case 0: ui_menu_account_display(); break;
+        case 1: ui_menu_network_display(); break;
+        case 2: ui_menu_viewkey_export_display(); break;
+        case 3: ui_menu_words_display(); break;
+        case 4: ui_menu_reset_display(); break;
+        default: ui_menu_main_display();
     }
 }
 
