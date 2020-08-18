@@ -108,6 +108,6 @@ To remove the app from your Ledger:
 
 ## Useful links
 
-* Loki client CLI - [https://github.com/loki-project/loki-core/releases](https://web.getmonero.org/downloads/)
+* Loki client CLI - [https://github.com/loki-project/loki-core/releases](https://github.com/loki-project/loki-core/releases)
 
 * Ledger's developer documentation - [https://ledger.readthedocs.io](https://ledger.readthedocs.io)
