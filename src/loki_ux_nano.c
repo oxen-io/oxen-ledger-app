@@ -581,8 +581,10 @@ void ui_menu_any_pubaddr_display(unsigned char* pub_view, unsigned char* pub_spe
             os_memmove(G_monero_vstate.ux_addr_type, "Regular address", 15);
             if (N_monero_pstate->network_id == MAINNET)
                 os_memmove(G_monero_vstate.ux_addr_info, "(mainnet)", 9);
-            if (N_monero_pstate->network_id == TESTNET)
+            else if (N_monero_pstate->network_id == TESTNET)
                 os_memmove(G_monero_vstate.ux_addr_info, "(testnet)", 9);
+            else if (N_monero_pstate->network_id == DEVNET)
+                os_memmove(G_monero_vstate.ux_addr_info, "(devnet)", 8);
             break;
 
         case DISP_SUB:

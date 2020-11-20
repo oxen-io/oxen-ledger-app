@@ -23,7 +23,7 @@
 
 #if CX_APILEVEL == 8
 #define PIN_VERIFIED (!0)
-#elif CX_APILEVEL == 9 || CX_APILEVEL == 10
+#elif CX_APILEVEL >= 9
 
 #define PIN_VERIFIED BOLOS_UX_OK
 #else
@@ -299,6 +299,7 @@ typedef struct monero_v_state_s monero_v_state_t;
 #define INS_PREFIX_HASH         0x7D
 #define INS_VALIDATE            0x7C
 #define INS_MLSAG               0x7E
+#define INS_CLSAG               0x7F
 #define INS_CLOSE_TX            0x80
 
 #define INS_GET_TX_PROOF       0xA0

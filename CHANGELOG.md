@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.7.5 - 2020-11-16
+
+- Support of firmware 1.2.4-5
+
+## 1.7.4 - 2020-10-13
+
+- Support of Monero client version `0.17.1.*`
+
+## 1.7.3 - 2020-10-06
+
+- Fix garbage when displaying destination address on Nano
+
+## 1.7.2 - 2020-10-02
+
+- Fix behavior without `DEBUG_HWDEVICE` flag
+
+
+## 1.7.1 - 2020-09-24
+
+- Fix `clsag_hash()` behavior which is different than MLSAG
+
+## 1.7.0 - 2020-09-13
+
+- Update to protocol v4 to support both MLSAG and CLSAG
+- Add CLSAG signature algorithm with `INS_CLSAG`
+- Update InProofv1 to InProofv2
 
 ## 1.6.0 - 2020-06-04
 
