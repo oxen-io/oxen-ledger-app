@@ -106,9 +106,13 @@ static void encode_block(const unsigned char* block, unsigned int size, char* re
     }
 }
 
+#define ADDR_NETTYPE_MAX_SIZE 2
+#define ADDR_PUBKEY_SIZE 32
+#define ADDR_PAYMENTID_SIZE 8
+#define ADDR_CHECKSUM_SIZE 4
 unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned char* spend,
                                   unsigned char is_subbadress, unsigned char* paymentID) {
-    unsigned char data[2/*nettype*/ + 32/*spend pubkey*/ + 32/*view pubkey*/ + 8/*paymentid*/ + 4/*checksum*/];
+    unsigned char data[ADDR_NETTYPE_MAX_SIZE + 2*ADDR_PUBKEY_SIZE + ADDR_PAYMENTID_SIZE + ADDR_CHECKSUM_SIZE];
     unsigned char offset;
     unsigned char prefix;
 
@@ -144,18 +148,18 @@ unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned c
             break;
 #endif
     }
-    offset = monero_encode_varint(data, 8, prefix);
+    offset = monero_encode_varint(data, ADDR_NETTYPE_MAX_SIZE, prefix);
 
-    os_memmove(data + offset, spend, 32);
-    os_memmove(data + offset + 32, view, 32);
-    offset += 64;
+    os_memmove(data + offset, spend, ADDR_PUBKEY_SIZE);
+    os_memmove(data + offset + ADDR_PUBKEY_SIZE, view, ADDR_PUBKEY_SIZE);
+    offset += 2*ADDR_PUBKEY_SIZE;
     if (paymentID) {
         os_memmove(data + offset, paymentID, 8);
-        offset += 8;
+        offset += ADDR_PAYMENTID_SIZE;
     }
     monero_keccak_F(data, offset, G_monero_vstate.mlsagH);
-    os_memmove(data + offset, G_monero_vstate.mlsagH, 4);
-    offset += 4;
+    os_memmove(data + offset, G_monero_vstate.mlsagH, ADDR_CHECKSUM_SIZE);
+    offset += ADDR_CHECKSUM_SIZE;
 
     unsigned char full_block_count = offset / FULL_BLOCK_SIZE;
     unsigned char last_block_size = offset % FULL_BLOCK_SIZE;
