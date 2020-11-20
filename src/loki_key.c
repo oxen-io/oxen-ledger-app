@@ -293,7 +293,7 @@ int monero_apdu_get_network(void) {
     switch (N_monero_pstate->network_id) {
         case MAINNET: nettype = 0; break;
         case TESTNET: nettype = 1; break;
-        case STAGENET: nettype = 2; break;
+        case DEVNET: nettype = 2; break;
         case FAKECHAIN: nettype = 3; break;
         default: nettype = 255;
     }

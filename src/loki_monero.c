@@ -27,8 +27,8 @@ const unsigned char C_MAINNET_NETWORK_ID[] = {0x46 ,0x61, 0x72, 0x62 ,0x61, 0x75
 #endif
 const unsigned char C_TESTNET_NETWORK_ID[] = {0x5f, 0x3a, 0x78, 0x65, 0xe1, 0x6f, 0xca, 0xb8,
                                               0x02, 0xa1, 0xdc, 0x17, 0x61, 0x64, 0x15, 0xbe};
-const unsigned char C_STAGENET_NETWORK_ID[] = {0xbb ,0x37, 0x9B, 0x22 , 0x0A, 0x66 , 0x69, 0x1E,
-                                               0x09, 0xB2, 0x97, 0x8A, 0xCC, 0xA1, 0xDF, 0x9C};
+const unsigned char C_DEVNET_NETWORK_ID[] = {0xa9, 0xf7, 0x5c, 0x7d, 0x55, 0x17, 0xcb, 0x6b,
+                                             0x5a, 0xf4, 0x63, 0x79, 0x7a, 0x57, 0xab, 0xd3};
 
 // Copyright (c) 2014-2017, The Monero Project
 //
@@ -114,7 +114,7 @@ unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned c
                                   unsigned char is_subbadress, unsigned char* paymentID) {
     unsigned char data[ADDR_NETTYPE_MAX_SIZE + 2*ADDR_PUBKEY_SIZE + ADDR_PAYMENTID_SIZE + ADDR_CHECKSUM_SIZE];
     unsigned char offset;
-    unsigned char prefix;
+    unsigned short prefix;
 
     // data[0] = N_monero_pstate->network_id;
     switch (N_monero_pstate->network_id) {
@@ -127,13 +127,13 @@ unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned c
                 prefix = TESTNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
             }
             break;
-        case STAGENET:
+        case DEVNET:
             if (paymentID) {
-                prefix = STAGENET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
+                prefix = DEVNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
             } else if (is_subbadress) {
-                prefix = STAGENET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
+                prefix = DEVNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
             } else {
-                prefix = STAGENET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
+                prefix = DEVNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
             }
             break;
 #ifndef LOKI_ALPHA
