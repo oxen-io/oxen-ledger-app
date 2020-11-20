@@ -122,7 +122,7 @@ unsigned int monero_decode_varint(const unsigned char *varint, const unsigned in
             break; // more is still set, so will throw below
 
         more = *varint & 0x80;
-        *value |= (*varint & 0x7f) << shift; // 7-bit value
+        *value |= (uint64_t)(*varint & 0x7f) << shift; // 7-bit value
     }
     if (more)
         THROW(SW_WRONG_DATA_RANGE);
