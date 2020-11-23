@@ -17,7 +17,7 @@
  *****************************************************************************/
 
 /*
- * Client: rctSigs.cpp.c -> get_pre_mlsag_hash
+ * Client: rctSigs.cpp.c -> get_pre_clsag_hash
  */
 
 #include "os.h"
@@ -29,7 +29,7 @@
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_mlsag_prehash_init(void) {
+int monero_apdu_clsag_prehash_init(void) {
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         if (G_monero_vstate.io_p2 == 1) {
             monero_sha256_outkeys_final(G_monero_vstate.OUTK);
@@ -59,17 +59,16 @@ int monero_apdu_mlsag_prehash_init(void) {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_mlsag_prehash_update(void) {
+int monero_apdu_clsag_prehash_update(void) {
     unsigned char is_subaddress;
     unsigned char *Aout;
     unsigned char *Bout;
     unsigned char is_change;
-    unsigned char AKout[32];
+    unsigned char aH[32];
     unsigned char C[32];
     unsigned char v[32];
     unsigned char k[32];
 
-#define aH AKout
     unsigned char kG[32];
 
     // fetch destination
@@ -83,14 +82,14 @@ int monero_apdu_mlsag_prehash_update(void) {
     monero_io_fetch(NULL, 32);
     Bout = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
     monero_io_fetch(NULL, 32);
-    monero_io_fetch_decrypt(AKout, 32, TYPE_AMOUNT_KEY);
+    monero_io_fetch_decrypt(aH, 32, TYPE_AMOUNT_KEY);
     monero_io_fetch(C, 32);
     monero_io_fetch(k, 32);
     monero_io_fetch(v, 32);
 
     monero_io_discard(0);
 
-    // update MLSAG prehash
+    // update CLSAG prehash
     if ((G_monero_vstate.options & 0x03) == 0x02) {
         monero_keccak_update_H(v, 8);
     } else {
@@ -108,11 +107,11 @@ int monero_apdu_mlsag_prehash_update(void) {
             monero_sha256_outkeys_update(Aout, 32);
             monero_sha256_outkeys_update(Bout, 32);
             monero_sha256_outkeys_update(&is_change, 1);
-            monero_sha256_outkeys_update(AKout, 32);
+            monero_sha256_outkeys_update(aH, 32);
         }
 
         // check C = aH+kG
-        monero_unblind(v, k, AKout, G_monero_vstate.options & 0x03);
+        monero_unblind(v, k, aH, G_monero_vstate.options & 0x03);
         monero_ecmul_G(kG, k);
         if (!cx_math_is_zero(v, 32)) {
             monero_ecmul_H(aH, v);
@@ -153,14 +152,12 @@ int monero_apdu_mlsag_prehash_update(void) {
         }
     }
     return SW_OK;
-
-#undef aH
 }
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_apdu_mlsag_prehash_finalize(void) {
+int monero_apdu_clsag_prehash_finalize(void) {
     unsigned char message[32];
     unsigned char proof[32];
     unsigned char H[32];
@@ -194,9 +191,9 @@ int monero_apdu_mlsag_prehash_finalize(void) {
         monero_keccak_update_H(message, 32);
         monero_keccak_update_H(H, 32);
         monero_keccak_update_H(proof, 32);
-        monero_keccak_final_H(G_monero_vstate.mlsagH);
+        monero_keccak_final_H(G_monero_vstate.clsag_prehash);
 
-        monero_io_insert(G_monero_vstate.mlsagH, 32);
+        monero_io_insert(G_monero_vstate.clsag_prehash, 32);
     }
 
     return SW_OK;

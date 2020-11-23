@@ -110,7 +110,6 @@ int check_ins_access(void) {
         case INS_PREFIX_HASH:
         case INS_BLIND:
         case INS_VALIDATE:
-        case INS_MLSAG:
         case INS_CLSAG:
         case INS_GEN_COMMITMENT_MASK:
             if (os_global_pin_is_validated() != PIN_VERIFIED) {
@@ -406,55 +405,11 @@ int monero_dispatch(void) {
             }
             // 2. command process
             if (G_monero_vstate.io_p1 == 1) {
-                sw = monero_apdu_mlsag_prehash_init();
+                sw = monero_apdu_clsag_prehash_init();
             } else if (G_monero_vstate.io_p1 == 2) {
-                sw = monero_apdu_mlsag_prehash_update();
+                sw = monero_apdu_clsag_prehash_update();
             } else if (G_monero_vstate.io_p1 == 3) {
-                sw = monero_apdu_mlsag_prehash_finalize();
-            } else {
-                THROW(SW_WRONG_P1P2);
-            }
-            update_protocol();
-            break;
-
-        /* --- MLSAG --- */
-        case INS_MLSAG:
-            // 1. state machine check
-            if ((G_monero_vstate.tx_state_ins != INS_VALIDATE) &&  //
-                (G_monero_vstate.tx_state_ins != INS_MLSAG) &&     //
-                ((G_monero_vstate.protocol != 3) || (G_monero_vstate.protocol != 4))) {
-                THROW(SW_COMMAND_NOT_ALLOWED);
-            }
-            if (G_monero_vstate.tx_state_ins == INS_VALIDATE) {
-                if ((G_monero_vstate.tx_state_p1 != 3) || (G_monero_vstate.io_p1 != 1) ||
-                    (G_monero_vstate.io_p2 != 0)) {
-                    THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                }
-            } else {
-                if (G_monero_vstate.tx_state_p1 == 1) {
-                    if (2 != G_monero_vstate.io_p1) {
-                        THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                    }
-                } else if (G_monero_vstate.tx_state_p1 == 2) {
-                    if ((2 != G_monero_vstate.io_p1) && (3 != G_monero_vstate.io_p1)) {
-                        THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                    }
-                } else if (G_monero_vstate.tx_state_p1 == 3) {
-                    if (1 != G_monero_vstate.io_p1) {
-                        THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                    }
-                } else {
-                    THROW(SW_COMMAND_NOT_ALLOWED);
-                }
-            }
-
-            // 2. command process
-            if (G_monero_vstate.io_p1 == 1) {
-                sw = monero_apdu_mlsag_prepare();
-            } else if (G_monero_vstate.io_p1 == 2) {
-                sw = monero_apdu_mlsag_hash();
-            } else if (G_monero_vstate.io_p1 == 3) {
-                sw = monero_apdu_mlsag_sign();
+                sw = monero_apdu_clsag_prehash_finalize();
             } else {
                 THROW(SW_WRONG_P1P2);
             }

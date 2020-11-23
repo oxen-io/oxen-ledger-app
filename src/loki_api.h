@@ -67,9 +67,9 @@ int monero_apdu_blind(void);
 int monero_apdu_unblind(void);
 int monero_apdu_gen_commitment_mask(void);
 
-int monero_apdu_mlsag_prehash_init(void);
-int monero_apdu_mlsag_prehash_update(void);
-int monero_apdu_mlsag_prehash_finalize(void);
+int monero_apdu_clsag_prehash_init(void);
+int monero_apdu_clsag_prehash_update(void);
+int monero_apdu_clsag_prehash_finalize(void);
 
 int monero_apdu_clsag_prepare(void);
 int monero_apdu_clsag_hash(void);
@@ -80,9 +80,6 @@ int monero_apu_generate_txout_keys(void);
 int monero_apdu_prefix_hash_init();
 int monero_apdu_prefix_hash_update();
 
-int monero_apdu_mlsag_prepare(void);
-int monero_apdu_mlsag_hash(void);
-int monero_apdu_mlsag_sign(void);
 int monero_apdu_close_tx(void);
 
 void ui_menu_lock_display(void);

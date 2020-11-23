@@ -181,11 +181,11 @@ struct monero_v_state_s {
     unsigned char R[32];
     unsigned char r[32];
 
-    /* prefix/mlsag hash */
+    /* prefix hash */
     cx_sha3_t keccakF;
     cx_sha3_t keccakH;
     unsigned char prefixH[32];
-    unsigned char mlsagH[32];
+    unsigned char clsag_prehash[32];
     unsigned char c[32];
 
     /* -- track tx-in/out and commitment -- */
@@ -298,7 +298,6 @@ typedef struct monero_v_state_s monero_v_state_t;
 #define INS_GEN_TXOUT_KEYS      0x7B
 #define INS_PREFIX_HASH         0x7D
 #define INS_VALIDATE            0x7C
-#define INS_MLSAG               0x7E
 #define INS_CLSAG               0x7F
 #define INS_CLOSE_TX            0x80
 
