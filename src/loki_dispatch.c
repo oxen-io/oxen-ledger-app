@@ -34,8 +34,8 @@ void clear_protocol(void) {
     G_monero_vstate.tx_state_p2 = 0;
 }
 
-int check_potocol(void) {
-    /* if locked and pin is veririfed, unlock */
+int check_protocol(void) {
+    /* if locked and pin is verified, unlock */
     if ((G_monero_vstate.protocol_barrier == PROTOCOL_LOCKED_UNLOCKABLE) &&
         (os_global_pin_is_validated() == PIN_VERIFIED)) {
         G_monero_vstate.protocol_barrier = PROTOCOL_UNLOCKED;
@@ -127,7 +127,7 @@ int check_ins_access(void) {
 int monero_dispatch(void) {
     int sw;
 
-    if (((sw = check_potocol()) != SW_OK) || ((sw = check_ins_access() != SW_OK))) {
+    if (((sw = check_protocol()) != SW_OK) || ((sw = check_ins_access() != SW_OK))) {
         monero_io_discard(0);
         return sw;
     }
