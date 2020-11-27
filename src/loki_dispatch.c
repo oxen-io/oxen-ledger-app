@@ -262,9 +262,8 @@ int monero_dispatch(void) {
                     (G_monero_vstate.tx_state_ins != INS_STEALTH)) {
                     THROW(SW_COMMAND_NOT_ALLOWED);
                 }
-                if ((G_monero_vstate.io_p1 != 0) || (G_monero_vstate.io_p2 != 0)) {
+                if (!LOKI_IO_P_EQUALS(0, 0))
                     THROW(SW_WRONG_P1P2);
-                }
             }
             // 2. command process
             sw = monero_apdu_stealth();
@@ -288,9 +287,9 @@ int monero_dispatch(void) {
                     THROW(SW_COMMAND_NOT_ALLOWED);
                 }
             }
-            if ((G_monero_vstate.io_p1 != 0) || (G_monero_vstate.io_p2 != 0)) {
+            if (!LOKI_IO_P_EQUALS(0, 0))
                 THROW(SW_WRONG_P1P2);
-            }
+
             // 2. command process
             sw = monero_apu_generate_txout_keys();
             update_protocol();
@@ -341,9 +340,9 @@ int monero_dispatch(void) {
                 }
             }
 
-            if ((G_monero_vstate.io_p1 != 0) || (G_monero_vstate.io_p2 != 0)) {
+            if (!LOKI_IO_P_EQUALS(0, 0))
                 THROW(SW_WRONG_P1P2);
-            }
+
             // 2. command process
             sw = monero_apdu_gen_commitment_mask();
             update_protocol();

@@ -27,6 +27,12 @@
 
 extern monero_v_state_t G_monero_vstate;
 
+#define LOKI_IO_P_EQUALS(p1, p2) (G_monero_vstate.io_p1 == (p1) && G_monero_vstate.io_p2 == (p2))
+#define LOKI_TX_STATE_P_EQUALS(p1, p2) (G_monero_vstate.tx_state_p1 == (p1) && G_monero_vstate.tx_state_p2 == (p2))
+
+#define LOKI_IO_INS_P_EQUALS(ins, p1, p2) (G_monero_vstate.io_ins == (ins) && LOKI_IO_P_EQUALS(p1, p2))
+#define LOKI_TX_STATE_INS_P_EQUALS(ins, p1, p2) (G_monero_vstate.tx_state_ins == (ins) && LOKI_TX_STATE_P_EQUALS(p1, p2))
+
 extern monero_nv_state_t N_state_pic;
 #define N_monero_pstate ((WIDE monero_nv_state_t *)PIC(&N_state_pic))
 
