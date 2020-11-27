@@ -89,9 +89,6 @@ int monero_apdu_clsag_prepare() {
 int monero_apdu_clsag_hash() {
     unsigned char c[32];
 
-    if (G_monero_vstate.io_p1 != 2)
-        THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-
     // We init hash if we just came off [1], or we just finished a [2,0].  In either case we require
     // the current command be [2,1] or [2,0] (i.e. first of multipart, or single-part):
     if (G_monero_vstate.tx_state_p1 == 1 || LOKI_TX_STATE_P_EQUALS(2, 0)) {
@@ -115,6 +112,15 @@ int monero_apdu_clsag_hash() {
         monero_io_insert(c, 32);
         os_memmove(G_monero_vstate.c, c, 32);
     }
+    return SW_OK;
+}
+
+// Sets the clsag_hash directly (i.e. from an externally or previously calculated value).
+int monero_apdu_clsag_hash_set() {
+    monero_io_fetch(G_monero_vstate.c, 32);
+    monero_check_scalar_not_null(G_monero_vstate.c);
+    monero_reduce(G_monero_vstate.c, G_monero_vstate.c);
+    monero_io_discard(1);
     return SW_OK;
 }
 
