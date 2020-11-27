@@ -87,18 +87,29 @@ int monero_apdu_clsag_prepare() {
     }
 */
 int monero_apdu_clsag_hash() {
-    unsigned char msg[32];
     unsigned char c[32];
 
-    if (G_monero_vstate.io_p2 == 1) {
+    if (G_monero_vstate.io_p1 != 2)
+        THROW(SW_SUBCOMMAND_NOT_ALLOWED);
+
+    // We init hash if we just came off [1], or we just finished a [2,0].  In either case we require
+    // the current command be [2,1] or [2,0] (i.e. first of multipart, or single-part):
+    if (G_monero_vstate.tx_state_p1 == 1 || LOKI_TX_STATE_P_EQUALS(2, 0)) {
+        if (G_monero_vstate.io_p2 > 1)
+            THROW(SW_SUBCOMMAND_NOT_ALLOWED);
         monero_keccak_init_H();
+    } else if (!(
+                G_monero_vstate.io_p2 == 0 || // this chunk is last, *or*:
+                G_monero_vstate.io_p2 == (G_monero_vstate.tx_state_p2 == 255 ? 1 : G_monero_vstate.tx_state_p2 + 1) // this chunk properly follows the previous
+            )) {
+        THROW(SW_SUBCOMMAND_NOT_ALLOWED);
     }
 
-    monero_io_fetch(msg, 32);
+    monero_keccak_update_H(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
+                           G_monero_vstate.io_length - G_monero_vstate.io_offset);
     monero_io_discard(1);
 
-    monero_keccak_update_H(msg, 32);
-    if ((G_monero_vstate.options & 0x80) == 0) {
+    if (G_monero_vstate.io_p2 == 0) {
         monero_keccak_final_H(c);
         monero_reduce(c, c);
         monero_io_insert(c, 32);

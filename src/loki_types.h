@@ -230,7 +230,7 @@ struct monero_v_state_s {
             // 0, but won't be if the value is greater than 9 digits).
             char ux_amount[22];
         };
-        unsigned char tmp[160]; // Used in loki_proof for temporary calcs
+        unsigned char tmp[160]; // Used as extra temp storage in loki_proof, loki_clsag
     };
 };
 typedef struct monero_v_state_s monero_v_state_t;

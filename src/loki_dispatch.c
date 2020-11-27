@@ -311,17 +311,21 @@ int monero_dispatch(void) {
                 // We're going from initialization to our first subcommand, where we get basic tx
                 // parameters (version, type, locktime).
                 sw = monero_apdu_prefix_hash_init();
-            } else if (G_monero_vstate.tx_state_p1 == 1 && G_monero_vstate.io_p1 == 2 && (
-                        G_monero_vstate.io_p2 == 0 || G_monero_vstate.io_p2 == 0xff)) {
-                // We've moving from first subcommand to phase 2 where we start receiving the full
-                // prefix; either [2,0] for the first piece of a multi-piece prefix, or [2,ff] for a
-                // single-piece prefix.
-                sw = monero_apdu_prefix_hash_update();
-            } else if (G_monero_vstate.tx_state_p1 == 2 && G_monero_vstate.tx_state_p2 < 0xff &&
-                    G_monero_vstate.io_p1 == 2 && (G_monero_vstate.io_p2 == G_monero_vstate.tx_state_p2 + 1
-                                                || G_monero_vstate.io_p2 == 0xff)) {
-                // We're coming from a non-final [2,N] (that is, where N < ff) into the next piece
-                // which is either [2,N+1] if there are more pieces, or [2,ff] for the last piece.
+            } else if (G_monero_vstate.io_p1 == 2 && (
+                    // We've moving from first subcommand to phase 2 where we start receiving the
+                    // full prefix; either [2,1] for the first piece of a multi-piece prefix, or
+                    // [2,0] for a single-piece prefix:
+                    (G_monero_vstate.tx_state_p1 == 1 && G_monero_vstate.io_p2 <= 1)
+                ||
+                    // We're already in phase 2, and moving on to the next piece.  We require that
+                    // the next piece index (p2) equals 0 (meaning this is the last piece), or the
+                    // old one plus 1.  If we hit 255 then we wrap around to 1, not 0 (unless the
+                    // next one just happens to be the last piece).
+                    (G_monero_vstate.tx_state_p1 == 2 && G_monero_vstate.io_p1 == 2 && (
+                        G_monero_vstate.io_p2 == 0 ||
+                        G_monero_vstate.io_p2 == (G_monero_vstate.tx_state_p2 < 255 ? G_monero_vstate.tx_state_p2 + 1 : 1))
+                    )
+            )) {
                 sw = monero_apdu_prefix_hash_update();
             } else {
                 // Some invalid subcommand or state transition
@@ -418,44 +422,27 @@ int monero_dispatch(void) {
         /* --- CLSAG --- */
         case INS_CLSAG:
             // 1. state machine check
-            if ((G_monero_vstate.tx_state_ins != INS_VALIDATE) &&  //
-                (G_monero_vstate.tx_state_ins != INS_CLSAG) &&     //
-                (G_monero_vstate.protocol != 4)) {
+            if (G_monero_vstate.protocol != 4)
+                THROW(SW_COMMAND_NOT_ALLOWED);
+
+            // If we are going to [CLSAG, 1, 0] then we must be coming from either [VALIDATE, 3] or [CLSAG, 3, 0]
+            if (LOKI_IO_P_EQUALS(1, 0)) {
+                if ((G_monero_vstate.tx_state_ins == INS_VALIDATE && G_monero_vstate.tx_state_p1 == 3) || LOKI_TX_STATE_INS_P_EQUALS(INS_CLSAG, 3, 0))
+                    sw = monero_apdu_clsag_prepare();
+                else
+                    THROW(SW_SUBCOMMAND_NOT_ALLOWED);
+            } else if (G_monero_vstate.tx_state_ins == INS_CLSAG) {
+                // Transitioning between CLSAG states:
+                if ((G_monero_vstate.tx_state_p1 == 1 || G_monero_vstate.tx_state_p1 == 2) && G_monero_vstate.io_p1 == 2) // [1] -> [2,x] or [2,x]->[2,y] (loki_clsag.c does x/y validation)
+                    sw = monero_apdu_clsag_hash();
+                else if (LOKI_TX_STATE_P_EQUALS(2, 0) && LOKI_IO_P_EQUALS(3, 0)) // [2,0] -> [3,0]
+                    sw = monero_apdu_clsag_sign();
+                else
+                    THROW(SW_SUBCOMMAND_NOT_ALLOWED);
+            } else {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
-            if (G_monero_vstate.tx_state_ins == INS_VALIDATE) {
-                if ((G_monero_vstate.tx_state_p1 != 3) || (G_monero_vstate.io_p1 != 1) ||
-                    (G_monero_vstate.io_p2 != 0)) {
-                    THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                }
-            } else {
-                if (G_monero_vstate.tx_state_p1 == 1) {
-                    if (2 != G_monero_vstate.io_p1) {
-                        THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                    }
-                } else if (G_monero_vstate.tx_state_p1 == 2) {
-                    if ((2 != G_monero_vstate.io_p1) && (3 != G_monero_vstate.io_p1)) {
-                        THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                    }
-                } else if (G_monero_vstate.tx_state_p1 == 3) {
-                    if (1 != G_monero_vstate.io_p1) {
-                        THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-                    }
-                } else {
-                    THROW(SW_COMMAND_NOT_ALLOWED);
-                }
-            }
 
-            // 2. command process
-            if (G_monero_vstate.io_p1 == 1) {
-                sw = monero_apdu_clsag_prepare();
-            } else if (G_monero_vstate.io_p1 == 2) {
-                sw = monero_apdu_clsag_hash();
-            } else if (G_monero_vstate.io_p1 == 3) {
-                sw = monero_apdu_clsag_sign();
-            } else {
-                THROW(SW_WRONG_P1P2);
-            }
             update_protocol();
             break;
 

@@ -30,10 +30,9 @@
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_init(void) {
-    monero_keccak_update_H(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
-                           G_monero_vstate.io_length - G_monero_vstate.io_offset);
+    monero_keccak_init_H();
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-        if (monero_io_fetch_varint16() != 4) // version; we only support v4 txes here
+        if (monero_io_fetch_varint16() != 4) // tx version; we only support v4 txes
             THROW(SW_WRONG_DATA_RANGE);
 
         uint64_t timelock = monero_io_fetch_varint();
@@ -72,7 +71,7 @@ int monero_apdu_prefix_hash_update(void) {
     monero_keccak_update_H(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
                            G_monero_vstate.io_length - G_monero_vstate.io_offset);
     monero_io_discard(0);
-    if ((G_monero_vstate.options & 0x80) == 0x00) {
+    if (G_monero_vstate.io_p2 == 0) {
         monero_keccak_final_H(G_monero_vstate.prefixH);
         monero_io_insert(G_monero_vstate.prefixH, 32);
     }
