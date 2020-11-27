@@ -48,7 +48,7 @@ int check_protocol(void) {
 
     /* the first command enforce the protocol version until application quits */
     switch (G_monero_vstate.io_protocol_version) {
-        case 0x04: /* protocol V4 */
+        case 0x01: /* protocol V1 */
             if (G_monero_vstate.protocol == 0xff) {
                 G_monero_vstate.protocol = G_monero_vstate.io_protocol_version;
             }
@@ -280,13 +280,6 @@ int monero_dispatch(void) {
                 (G_monero_vstate.tx_state_ins != INS_STEALTH)) {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
-            if (G_monero_vstate.protocol == 3) {
-                if ((G_monero_vstate.tx_state_ins != INS_OPEN_TX) &&
-                    (G_monero_vstate.tx_state_ins != INS_GEN_TXOUT_KEYS) &&
-                    (G_monero_vstate.tx_state_ins != INS_STEALTH)) {
-                    THROW(SW_COMMAND_NOT_ALLOWED);
-                }
-            }
             if (!LOKI_IO_P_EQUALS(0, 0))
                 THROW(SW_WRONG_P1P2);
 
@@ -336,14 +329,6 @@ int monero_dispatch(void) {
 
             /*--- COMMITMENT MASK --- */
         case INS_GEN_COMMITMENT_MASK:
-            // 1. state machine check
-            if (G_monero_vstate.protocol == 3) {
-                if ((G_monero_vstate.tx_state_ins != INS_PREFIX_HASH) &&
-                    (G_monero_vstate.tx_state_ins != INS_GEN_COMMITMENT_MASK)) {
-                    THROW(SW_COMMAND_NOT_ALLOWED);
-                }
-            }
-
             if (!LOKI_IO_P_EQUALS(0, 0))
                 THROW(SW_WRONG_P1P2);
 
@@ -356,12 +341,6 @@ int monero_dispatch(void) {
         case INS_BLIND:
             // 1. state machine check
             if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_FAKE) {
-                if (G_monero_vstate.protocol == 3) {
-                    if ((G_monero_vstate.tx_state_ins != INS_PREFIX_HASH) &&
-                        (G_monero_vstate.tx_state_ins != INS_BLIND)) {
-                        THROW(SW_COMMAND_NOT_ALLOWED);
-                    }
-                }
             } else if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
                 if ((G_monero_vstate.tx_state_ins != INS_GEN_COMMITMENT_MASK) &&
                     (G_monero_vstate.tx_state_ins != INS_BLIND)) {
@@ -421,10 +400,6 @@ int monero_dispatch(void) {
 
         /* --- CLSAG --- */
         case INS_CLSAG:
-            // 1. state machine check
-            if (G_monero_vstate.protocol != 4)
-                THROW(SW_COMMAND_NOT_ALLOWED);
-
             // If we are going to [CLSAG, 1, 0] then we must be coming from either [VALIDATE, 3] or [CLSAG, 3, 0]
             if (LOKI_IO_P_EQUALS(1, 0)) {
                 if ((G_monero_vstate.tx_state_ins == INS_VALIDATE && G_monero_vstate.tx_state_p1 == 3) || LOKI_TX_STATE_INS_P_EQUALS(INS_CLSAG, 3, 0))

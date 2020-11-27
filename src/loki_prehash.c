@@ -73,11 +73,7 @@ int monero_apdu_clsag_prehash_update(void) {
 
     // fetch destination
     is_subaddress = monero_io_fetch_u8();
-    if (G_monero_vstate.io_protocol_version >= 2) {
-        is_change = monero_io_fetch_u8();
-    } else {
-        is_change = 0;
-    }
+    is_change = monero_io_fetch_u8();
     Aout = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
     monero_io_fetch(NULL, 32);
     Bout = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
@@ -104,12 +100,10 @@ int monero_apdu_clsag_prehash_update(void) {
             G_monero_vstate.ux_address[pos] = 0; // null terminate
         }
         // update destination hash control
-        if (G_monero_vstate.io_protocol_version >= 2) {
-            monero_sha256_outkeys_update(Aout, 32);
-            monero_sha256_outkeys_update(Bout, 32);
-            monero_sha256_outkeys_update(&is_change, 1);
-            monero_sha256_outkeys_update(aH, 32);
-        }
+        monero_sha256_outkeys_update(Aout, 32);
+        monero_sha256_outkeys_update(Bout, 32);
+        monero_sha256_outkeys_update(&is_change, 1);
+        monero_sha256_outkeys_update(aH, 32);
 
         // check C = aH+kG
         monero_unblind(v, k, aH, G_monero_vstate.options & 0x03);
@@ -127,12 +121,10 @@ int monero_apdu_clsag_prehash_update(void) {
         monero_sha256_commitment_update(C, 32);
 
         if ((G_monero_vstate.options & IN_OPTION_MORE_COMMAND) == 0) {
-            if (G_monero_vstate.io_protocol_version >= 2) {
-                // finalize and check destination hash_control
-                monero_sha256_outkeys_final(k);
-                if (os_memcmp(k, G_monero_vstate.OUTK, 32)) {
-                    monero_lock_and_throw(SW_SECURITY_OUTKEYS_CHAIN_CONTROL);
-                }
+            // finalize and check destination hash_control
+            monero_sha256_outkeys_final(k);
+            if (os_memcmp(k, G_monero_vstate.OUTK, 32)) {
+                monero_lock_and_throw(SW_SECURITY_OUTKEYS_CHAIN_CONTROL);
             }
             // finalize commitment hash control
             monero_sha256_commitment_final(NULL);
@@ -184,10 +176,8 @@ int monero_apdu_clsag_prehash_finalize(void) {
         monero_io_fetch(proof, 32);
         monero_io_discard(1);
         monero_keccak_init_H();
-        if (G_monero_vstate.io_protocol_version >= 3) {
-            if (os_memcmp(message, G_monero_vstate.prefixH, 32) != 0) {
-                monero_lock_and_throw(SW_SECURITY_PREFIX_HASH);
-            }
+        if (os_memcmp(message, G_monero_vstate.prefixH, 32) != 0) {
+            monero_lock_and_throw(SW_SECURITY_PREFIX_HASH);
         }
         monero_keccak_update_H(message, 32);
         monero_keccak_update_H(H, 32);
