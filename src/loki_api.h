@@ -98,6 +98,7 @@ void ui_menu_pubaddr_display(void);
 
 // Obtains the monero-base58-encoded wallet address from the view and spend keys, subaddress flag,
 // and payment id (for integrated address).  Returns the number of chars written to str_b58.
+// Note: does *not* null-terminate the string.
 unsigned char loki_wallet_address(char *str_b58, unsigned char *view, unsigned char *spend,
                                   unsigned char is_subbadress, unsigned char *paymentID);
 

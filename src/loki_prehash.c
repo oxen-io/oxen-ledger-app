@@ -100,7 +100,8 @@ int monero_apdu_clsag_prehash_update(void) {
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         if (is_change == 0) {
             // encode dest adress
-            loki_wallet_address(&G_monero_vstate.ux_address[0], Aout, Bout, is_subaddress, NULL);
+            unsigned char pos = loki_wallet_address(G_monero_vstate.ux_address, Aout, Bout, is_subaddress, NULL);
+            G_monero_vstate.ux_address[pos] = 0; // null terminate
         }
         // update destination hash control
         if (G_monero_vstate.io_protocol_version >= 2) {
