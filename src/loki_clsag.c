@@ -140,11 +140,11 @@ bool device_default::clsag_sign(const rct::key &c,
 */
 int monero_apdu_clsag_sign() {
     unsigned char s[32];
-    unsigned char a[32];
-    unsigned char p[32];
-    unsigned char z[32];
-    unsigned char mu_P[32];
-    unsigned char mu_C[32];
+    unsigned char *a = &G_monero_vstate.tmp[0];
+    unsigned char *p = &G_monero_vstate.tmp[32];
+    unsigned char *z = &G_monero_vstate.tmp[64];
+    unsigned char *mu_P = &G_monero_vstate.tmp[96];
+    unsigned char *mu_C = &G_monero_vstate.tmp[128];
 
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_FAKE) {
         monero_io_fetch(a, 32);
