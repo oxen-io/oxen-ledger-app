@@ -136,7 +136,7 @@ unsigned int ui_menu_opentx_action(unsigned int value) {
         sw = monero_apdu_open_tx_cont();
         ui_menu_info_display2("Processing TX", "...");
     } else {
-        monero_abort_tx(0);
+        monero_abort_tx();
         sw = SW_DENY;
         ui_menu_info_display2("Tansaction", "aborted");
     }
@@ -219,7 +219,7 @@ void ui_menu_amount_validation_action(unsigned int value) {
     if (value == ACCEPT) {
         sw = SW_OK;
     } else {
-        monero_abort_tx(0);
+        monero_abort_tx();
         sw = SW_DENY;
     }
     monero_io_insert_u16(sw);
@@ -263,7 +263,7 @@ void ui_menu_validation_action(unsigned int value) {
     if (value == ACCEPT) {
         sw = SW_OK;
     } else {
-        monero_abort_tx(0);
+        monero_abort_tx();
         sw = SW_DENY;
     }
     monero_io_insert_u16(sw);
