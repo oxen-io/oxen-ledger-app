@@ -149,18 +149,15 @@ int monero_apdu_clsag_sign() {
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_FAKE) {
         monero_io_fetch(a, 32);
         monero_io_fetch(p, 32);
-        monero_io_fetch(z, 32);
-        monero_io_fetch(mu_P, 32);
-        monero_io_fetch(mu_C, 32);
     } else if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         monero_io_fetch_decrypt(a, 32, TYPE_ALPHA);
         monero_io_fetch_decrypt(p, 32, TYPE_SCALAR);
-        monero_io_fetch(z, 32);
-        monero_io_fetch(mu_P, 32);
-        monero_io_fetch(mu_C, 32);
     } else {
         monero_lock_and_throw(SW_SECURITY_INTERNAL);
     }
+    monero_io_fetch(z, 32);
+    monero_io_fetch(mu_P, 32);
+    monero_io_fetch(mu_C, 32);
 
     monero_io_discard(1);
 
