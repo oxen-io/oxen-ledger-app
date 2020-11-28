@@ -738,8 +738,6 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
     need_additional_txkeys = monero_io_fetch_u8();
     if (need_additional_txkeys) {
         monero_io_fetch_decrypt_key(additional_txkey_sec);
-    } else {
-        monero_io_fetch(NULL, 32);
     }
 
     // update outkeys hash control
