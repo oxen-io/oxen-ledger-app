@@ -73,6 +73,7 @@ int monero_apdu_clsag_prehash_finalize(void);
 
 int monero_apdu_clsag_prepare(void);
 int monero_apdu_clsag_hash(void);
+int monero_apdu_clsag_hash_set(void);
 int monero_apdu_clsag_sign(void);
 
 int monero_apu_generate_txout_keys(void);
@@ -209,7 +210,7 @@ int monero_hash(unsigned int algo, cx_hash_t *hasher, unsigned char *buf, unsign
     monero_hash(CX_KECCAK, (cx_hash_t *)&G_monero_vstate.keccakH, (buf), (len), (out))
 
 #define monero_sha256_commitment_init() \
-    monero_hash_init_sha256((cx_hash_t *)&G_monero_vstate.sha256_commitment)
+    monero_hash_init_sha256(&G_monero_vstate.sha256_commitment)
 #define monero_sha256_commitment_update(buf, len) \
     monero_hash_update((cx_hash_t *)&G_monero_vstate.sha256_commitment, (buf), (len))
 #define monero_sha256_commitment_final(out)                            \
@@ -217,7 +218,7 @@ int monero_hash(unsigned int algo, cx_hash_t *hasher, unsigned char *buf, unsign
                       (out) ? (out) : G_monero_vstate.C)
 
 #define monero_sha256_outkeys_init() \
-    monero_hash_init_sha256((cx_hash_t *)&G_monero_vstate.sha256_out_keys)
+    monero_hash_init_sha256(&G_monero_vstate.sha256_out_keys)
 #define monero_sha256_outkeys_update(buf, len) \
     monero_hash_update((cx_hash_t *)&G_monero_vstate.sha256_out_keys, (buf), (len))
 #define monero_sha256_outkeys_final(out) \
