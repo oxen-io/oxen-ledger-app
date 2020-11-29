@@ -25,7 +25,6 @@
 
 #include "loki_ux_msg.h"
 #include "os_io_seproxyhal.h"
-#include "string.h"
 #include "glyphs.h"
 
 /* ----------------------------------------------------------------------- */
@@ -540,9 +539,9 @@ void ui_menu_pubaddr_action(void) {
  */
 void ui_menu_any_pubaddr_display(unsigned char* pub_view, unsigned char* pub_spend,
                                  unsigned char is_subbadress, unsigned char* paymentID) {
-    memset(G_monero_vstate.ux_address, 0, sizeof(G_monero_vstate.ux_address));
-    memset(G_monero_vstate.ux_addr_type, 0, sizeof(G_monero_vstate.ux_addr_type));
-    memset(G_monero_vstate.ux_addr_info, 0, sizeof(G_monero_vstate.ux_addr_info));
+    os_memset(G_monero_vstate.ux_address, 0, sizeof(G_monero_vstate.ux_address));
+    os_memset(G_monero_vstate.ux_addr_type, 0, sizeof(G_monero_vstate.ux_addr_type));
+    os_memset(G_monero_vstate.ux_addr_info, 0, sizeof(G_monero_vstate.ux_addr_info));
 
     switch (G_monero_vstate.disp_addr_mode) {
         case 0:
