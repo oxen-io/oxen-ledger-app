@@ -134,14 +134,15 @@ struct monero_v_state_s {
     /* ------------------------------------------ */
     /* ---            State Machine           --- */
     /* ------------------------------------------ */
-    unsigned char export_view_key : 1;
-    unsigned char key_set : 1;
 
 /* protocol guard */
 #define PROTOCOL_LOCKED            0x42
 #define PROTOCOL_LOCKED_UNLOCKABLE 0x84
 #define PROTOCOL_UNLOCKED          0x24
     unsigned char protocol_barrier;
+
+    unsigned char export_view_key : 1;
+    unsigned char key_set : 1;
 
     /* Tx state machine */
     unsigned char tx_in_progress : 1;
