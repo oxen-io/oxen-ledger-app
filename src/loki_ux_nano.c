@@ -176,13 +176,13 @@ void ui_menu_amount_validation_action(unsigned int value);
 
 UX_STEP_NOCB(ux_menu_validation_fee_1_step, bn,
              {
-                 "Fee",
+                 "Confirm Fee",
                  G_monero_vstate.ux_amount,
              });
 
 UX_STEP_NOCB(ux_menu_validation_change_1_step, bn,
              {
-                 "Change",
+                 "Amount (change)",
                  G_monero_vstate.ux_amount,
              });
 
@@ -238,10 +238,10 @@ void ui_menu_timelock_validation_display(void) {
 /* ----------------------------- USER DEST/AMOUNT VALIDATION ----------------------------- */
 void ui_menu_validation_action(unsigned int value);
 
-UX_STEP_NOCB(ux_menu_validation_1_step, bn, {"Amount", G_monero_vstate.ux_amount});
+UX_STEP_NOCB(ux_menu_validation_1_step, bn, {"Confirm Amount", G_monero_vstate.ux_amount});
 
 UX_STEP_NOCB(ux_menu_validation_2_step, paging,
-             {"Destination", G_monero_vstate.ux_address});
+             {"Recipient", G_monero_vstate.ux_address});
 
 UX_STEP_CB(ux_menu_validation_3_step, pb, ui_menu_validation_action(ACCEPT),
            {&C_icon_validate_14, "Accept"});

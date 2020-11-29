@@ -882,7 +882,9 @@ void loki_currency_str(uint64_t atomic_loki, char *str) {
     // Special case short circuit for 0 LOKI
     if (atomic_loki == 0) {
         str[0] = '0';
-        str[1] = 0;
+        str[1] = '.';
+        str[2] = '0';
+        str[3] = 0;
         return;
     }
 
@@ -915,14 +917,12 @@ void loki_currency_str(uint64_t atomic_loki, char *str) {
         str[j] = tmp;
     }
 
-    // Drop insignificant 0's (and the '.' if everything after is insignificant), so that we get the
-    // final display amount:
+    // Drop insignificant 0's beyond the first decimal place, so that we get the final display
+    // amount:
     //     "0.012345678"
     //     "1.23456789"
-    //     "12345"
-    while (str[len - 1] == '0')
-        str[--len] = 0;
-    if (str[len - 1] == '.') // If the loop ended at the '.' then remove it, too.
+    //     "12345.0"
+    while (str[len - 2] != '.' && str[len - 1] == '0')
         str[--len] = 0;
     str[len] = 0;
 }
