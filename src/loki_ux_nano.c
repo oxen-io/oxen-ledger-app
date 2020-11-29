@@ -379,14 +379,18 @@ const char* const network_submenu_getter_values[] = {
 #else
     "Main Network",
 #endif
-    "Test Network", "Cancel"};
+    "Test Network",
+    "Dev Network",
+    "Cancel"};
 const char* const network_submenu_getter_values_selected[] = {
 #ifdef LOKI_ALPHA
     "Unvailable",
 #else
     "Main Network *",
 #endif
-    "Test Network *", "Cancel"};
+    "Test Network *",
+    "Dev Network *",
+    "Cancel"};
 
 const char* network_submenu_getter(unsigned int idx) {
     if (idx >= ARRAYLEN(network_submenu_getter_values)) {
@@ -403,6 +407,9 @@ const char* network_submenu_getter(unsigned int idx) {
             break;
         case 1:
             net = TESTNET;
+            break;
+        case 2:
+            net = DEVNET;
             break;
         default:
             net = -1;
@@ -429,6 +436,9 @@ void network_submenu_selector(unsigned int idx) {
             break;
         case 1:
             network_set_net(TESTNET);
+            break;
+        case 2:
+            network_set_net(DEVNET);
             break;
         default:
             break;
