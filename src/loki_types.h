@@ -84,9 +84,6 @@ struct monero_nv_state_s {
     /* view key export mode */
     unsigned char viewkey_export_mode;
 
-    /* acount id for bip derivation */
-    unsigned int account_id;
-
     /* spend key */
     unsigned char spend_priv[32];
     /* view key */
@@ -199,7 +196,6 @@ struct monero_v_state_s {
     /* ---               UI/UX                --- */
     /* ------------------------------------------ */
     char ux_wallet_public_short_address[7 + 2 + 3 + 1]; // first 7, two dots, last 3, null
-    char ux_wallet_account_name[14];
 
     union {
         struct {
@@ -207,8 +203,6 @@ struct monero_v_state_s {
             char ux_info2[16];
         };
         struct {
-            /* menu */
-            char ux_menu[16];
             // address to display: 95/106-chars for mainnet, 97/108 for testnet + null
             char ux_address[109];
             // Address type string; max 15 chars + null

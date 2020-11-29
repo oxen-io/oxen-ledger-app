@@ -80,7 +80,7 @@ void monero_init_private_key(void) {
     // m / 44'      / 240'       / 0'       / 0      / 0
     path[0] = 0x8000002C;
     path[1] = 0x800000F0;
-    path[2] = 0x80000000 | N_monero_pstate->account_id;
+    path[2] = 0x80000000;
     path[3] = 0x00000000;
     path[4] = 0x00000000;
     os_perso_derive_node_bip32(CX_CURVE_SECP256K1, path, 5, seed, chain);
@@ -118,11 +118,6 @@ void monero_init_private_key(void) {
 void monero_init_ux(void) {
     unsigned char wallet_len = loki_wallet_address(
             G_monero_vstate.ux_address, G_monero_vstate.view_pub, G_monero_vstate.spend_pub, 0, NULL);
-    if (N_monero_pstate->account_id == 0)
-        os_memmove(G_monero_vstate.ux_wallet_account_name, "LOKI wallet", 12);
-    else
-        snprintf(G_monero_vstate.ux_wallet_account_name, sizeof(G_monero_vstate.ux_wallet_account_name),
-                "LOKI / %d", N_monero_pstate->account_id);
 
     os_memmove(G_monero_vstate.ux_wallet_public_short_address, G_monero_vstate.ux_address, 7);
     G_monero_vstate.ux_wallet_public_short_address[7] = '.';

@@ -372,36 +372,6 @@ void ui_menu_viewkey_export_display() {
     ux_menulist_init(G_ux.stack_count - 1, viewkey_export_submenu_getter, viewkey_export_submenu_selector);
 }
 
-/* -------------------------------- ACCOUNT UX --------------------------------- */
-
-const char* const account_submenu_getter_values[] = {"0", "1", "2", "3", "4",    "5",
-                                                     "6", "7", "8", "9", "Cancel"};
-const char* const account_submenu_getter_values_selected[] = {
-    "0 *", "1 *", "2 *", "3 *", "4 *", "5 *", "6 *", "7 *", "8 *", "9 *", "Cancel"};
-
-const char* account_submenu_getter(unsigned int idx) {
-    if (idx >= ARRAYLEN(account_submenu_getter_values)) {
-        return NULL;
-    }
-    if (N_monero_pstate->account_id == idx) {
-        return account_submenu_getter_values_selected[idx];
-    } else {
-        return account_submenu_getter_values[idx];
-    }
-}
-
-void account_submenu_selector(unsigned int idx) {
-    if (idx <= 9) {
-        monero_nvm_write((void*)&N_monero_pstate->account_id, &idx, sizeof(unsigned int));
-        monero_init();
-    }
-    ui_menu_main_display();
-}
-
-void ui_menu_account_display() {
-    ux_menulist_init(G_ux.stack_count - 1, account_submenu_getter, account_submenu_selector);
-}
-
 /* -------------------------------- NETWORK UX --------------------------------- */
 
 const char* const network_submenu_getter_values[] = {
@@ -508,7 +478,7 @@ void ui_menu_reset_action(unsigned int value) {
 /* ------------------------------- SETTINGS UX ------------------------------- */
 
 const char* const settings_submenu_getter_values[] = {
-    "Select Account", "Select Network", "View key export", "Show 25 words", "Reset", "Back",
+    "Select Network", "View key export", "Show 25 words", "Reset", "Back",
 };
 
 const char* settings_submenu_getter(unsigned int idx) {
@@ -520,11 +490,10 @@ const char* settings_submenu_getter(unsigned int idx) {
 
 void settings_submenu_selector(unsigned int idx) {
     switch (idx) {
-        case 0: ui_menu_account_display(); break;
-        case 1: ui_menu_network_display(); break;
-        case 2: ui_menu_viewkey_export_display(); break;
-        case 3: ui_menu_words_display(); break;
-        case 4: ui_menu_reset_display(); break;
+        case 0: ui_menu_network_display(); break;
+        case 1: ui_menu_viewkey_export_display(); break;
+        case 2: ui_menu_words_display(); break;
+        case 3: ui_menu_reset_display(); break;
         default: ui_menu_main_display();
     }
 }
@@ -623,7 +592,7 @@ UX_STEP_CB(
     ui_menu_pubaddr_display(),
     {
         &C_icon_loki,
-        G_monero_vstate.ux_wallet_account_name,
+        "LOKI wallet",
         G_monero_vstate.ux_wallet_public_short_address
     });
 
