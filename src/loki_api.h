@@ -110,10 +110,6 @@ uint64_t monero_bamount2uint64(unsigned char *binary);
  * 22 chars long. */
 void loki_currency_str(uint64_t atomic_loki, char *str);
 
-/** unsigned varint-encoded atomic currency value to human-readable currency string. `str` must
- * be at least 22 chars long. */
-void loki_varint_currency_str(unsigned char *binary, char *str);
-
 /** uint64 amount to str */
 void monero_uint642str(uint64_t val, char *str);
 

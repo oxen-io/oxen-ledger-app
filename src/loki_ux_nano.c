@@ -58,6 +58,22 @@ void ui_menu_pinlock_display(void) {
     ui_menu_main_display();
 }
 
+// Ordered list of Settings items, so that we can return to the same item on the settings page from
+// a settings subpage.
+#define UI_SETTINGS_BACK_TO_MAIN    0
+#define UI_SETTINGS_VIEW_KEY_EXPORT 1
+#define UI_SETTINGS_FEE_CONFIRM     2
+#define UI_SETTINGS_ADDRESS_CONFIRM 3
+#define UI_SETTINGS_CHANGE_CONFIRM  4
+#define UI_SETTINGS_SELECT_NETWORK  5
+#define UI_SETTINGS_SEED_WORDS      6
+#define UI_SETTINGS_RESET           7
+#define UI_SETTINGS_BACK            8
+
+void ui_menu_settings_display(void);
+void ui_menu_settings_display_select(unsigned int idx);
+
+
 /* -------------------------------------- 25 WORDS --------------------------------------- */
 void ui_menu_words_display(void);
 void ui_menu_words_clear(void);
@@ -334,41 +350,36 @@ unsigned int ui_menu_export_viewkey_action(unsigned int value) {
 }
 
 
+// NB: indices need to match up with the VIEWKEY_EXPORT_... constants:
 const char* const viewkey_export_submenu_values[] = {
     "Always prompt",
     "Always allow",
-    "Always deny",
-    "Cancel"};
+    "Always deny"};
 const char* const viewkey_export_submenu_values_selected[] = {
     "Always prompt *",
     "Always allow *",
-    "Always deny *",
-    "Cancel"};
+    "Always deny *"};
 
 const char* viewkey_export_submenu_getter(unsigned int idx) {
-    if (idx >= ARRAYLEN(viewkey_export_submenu_values)) {
+    if (idx >= ARRAYLEN(viewkey_export_submenu_values))
         return NULL;
-    } else if (N_monero_pstate->viewkey_export_mode == idx) {
+    if (N_monero_pstate->viewkey_export_mode == idx)
         return viewkey_export_submenu_values_selected[idx];
-    } else {
-        return viewkey_export_submenu_values[idx];
-    }
+    return viewkey_export_submenu_values[idx];
 }
 
 void viewkey_export_submenu_selector(unsigned int idx) {
-    if (idx < ARRAYLEN(viewkey_export_submenu_values) - 1) {
-        unsigned char val =
-            idx == 1 ? VIEWKEY_EXPORT_ALWAYS_ALLOW :
-            idx == 2 ? VIEWKEY_EXPORT_ALWAYS_DENY :
-            VIEWKEY_EXPORT_ALWAYS_PROMPT;
+    if (idx < ARRAYLEN(viewkey_export_submenu_values)) {
+        unsigned char val = idx;
         monero_nvm_write((void*)&N_monero_pstate->viewkey_export_mode, &val, sizeof(unsigned char));
         monero_init();
     }
-    ui_menu_main_display();
+    ui_menu_settings_display_select(UI_SETTINGS_VIEW_KEY_EXPORT);
 }
 
 void ui_menu_viewkey_export_display() {
-    ux_menulist_init(G_ux.stack_count - 1, viewkey_export_submenu_getter, viewkey_export_submenu_selector);
+    ux_menulist_init_select(G_ux.stack_count - 1, viewkey_export_submenu_getter, viewkey_export_submenu_selector,
+            N_monero_pstate->viewkey_export_mode);
 }
 
 /* -------------------------------- NETWORK UX --------------------------------- */
@@ -450,6 +461,102 @@ void ui_menu_network_display(void) {
     ux_menulist_init(G_ux.stack_count - 1, network_submenu_getter, network_submenu_selector);
 }
 
+/* -------------------------------- TRUNCATE ADDRS UX --------------------------------- */
+
+const char* const truncate_addrs_values[] = {
+    "Full address",
+    "Short address",
+    "Shorter addr"};
+const char* const truncate_addrs_values_selected[] = {
+    "Full address*",
+    "Short address*",
+    "Shorter addr*"};
+
+const char* truncate_addrs_submenu_getter(unsigned int idx) {
+    if (idx >= ARRAYLEN(truncate_addrs_values))
+        return NULL;
+    if (N_monero_pstate->truncate_addrs_mode == idx)
+        return truncate_addrs_values_selected[idx];
+    return truncate_addrs_values[idx];
+}
+
+void truncate_addrs_submenu_selector(unsigned int idx) {
+    if (idx < ARRAYLEN(truncate_addrs_values)) {
+        unsigned char val = idx;
+        monero_nvm_write((void*)&N_monero_pstate->truncate_addrs_mode, &val, sizeof(unsigned char));
+        monero_init();
+    }
+    ui_menu_settings_display_select(UI_SETTINGS_ADDRESS_CONFIRM);
+}
+
+void ui_menu_truncate_addrs_display() {
+    ux_menulist_init_select(G_ux.stack_count - 1, truncate_addrs_submenu_getter, truncate_addrs_submenu_selector,
+            N_monero_pstate->truncate_addrs_mode);
+}
+
+/* -------------------------------- CONFIRM FEE --------------------------------- */
+
+const char* const confirm_fee_values[] = {
+    "Always",
+    "Above 0.05 LOKI",
+    "Above 0.2 LOKI",
+    "Above 1.0 LOKI"};
+const char* const confirm_fee_values_selected[] = {
+    "Always*",
+    "Above 0.05 LOKI*",
+    "Above 0.2 LOKI*",
+    "Above 1.0 LOKI*"};
+
+const char* confirm_fee_submenu_getter(unsigned int idx) {
+    if (idx >= ARRAYLEN(confirm_fee_values))
+        return NULL;
+    if (N_monero_pstate->confirm_fee_mode == idx)
+        return confirm_fee_values_selected[idx];
+    return confirm_fee_values[idx];
+}
+
+void confirm_fee_submenu_selector(unsigned int idx) {
+    if (idx < ARRAYLEN(confirm_fee_values)) {
+        unsigned char val = idx;
+        monero_nvm_write((void*)&N_monero_pstate->confirm_fee_mode, &val, sizeof(unsigned char));
+        monero_init();
+    }
+    ui_menu_settings_display_select(UI_SETTINGS_FEE_CONFIRM);
+}
+
+void ui_menu_confirm_fee_display() {
+    ux_menulist_init_select(G_ux.stack_count - 1, confirm_fee_submenu_getter, confirm_fee_submenu_selector,
+            N_monero_pstate->confirm_fee_mode);
+}
+
+/* -------------------------------- CONFIRM CHANGE --------------------------------- */
+
+const char* const confirm_change_values[] = {"No", "Yes"};
+const char* const confirm_change_values_selected[] = {"No*", "Yes*"};
+
+const char* confirm_change_submenu_getter(unsigned int idx) {
+    if (idx >= ARRAYLEN(confirm_change_values))
+        return NULL;
+    if (N_monero_pstate->confirm_change_mode == idx)
+        return confirm_change_values_selected[idx];
+    return confirm_change_values[idx];
+}
+
+void confirm_change_submenu_selector(unsigned int idx) {
+    if (idx < ARRAYLEN(confirm_change_values)) {
+        unsigned char val = idx;
+        monero_nvm_write((void*)&N_monero_pstate->confirm_change_mode, &val, sizeof(unsigned char));
+        monero_init();
+    }
+    ui_menu_settings_display_select(UI_SETTINGS_CHANGE_CONFIRM);
+}
+
+void ui_menu_confirm_change_display() {
+    ux_menulist_init_select(G_ux.stack_count - 1, confirm_change_submenu_getter, confirm_change_submenu_selector,
+            N_monero_pstate->confirm_change_mode);
+}
+
+
 /* -------------------------------- RESET UX --------------------------------- */
 void ui_menu_reset_display(void);
 void ui_menu_reset_action(unsigned int value);
@@ -487,7 +594,7 @@ void ui_menu_reset_action(unsigned int value) {
 /* ------------------------------- SETTINGS UX ------------------------------- */
 
 const char* const settings_submenu_getter_values[] = {
-    "Select Network", "View key export", "Show 25 words", "Reset", "Back",
+    "<< Main menu", "View key export", "Fee confirm", "Address confirm", "Change confirm", "Select Network", "Show 25 words", "Reset", "Back",
 };
 
 const char* settings_submenu_getter(unsigned int idx) {
@@ -499,13 +606,24 @@ const char* settings_submenu_getter(unsigned int idx) {
 
 void settings_submenu_selector(unsigned int idx) {
     switch (idx) {
-        case 0: ui_menu_network_display(); break;
-        case 1: ui_menu_viewkey_export_display(); break;
-        case 2: ui_menu_words_display(); break;
-        case 3: ui_menu_reset_display(); break;
-        default: ui_menu_main_display();
+        case UI_SETTINGS_VIEW_KEY_EXPORT: ui_menu_viewkey_export_display(); break;
+        case UI_SETTINGS_FEE_CONFIRM: ui_menu_confirm_fee_display(); break;
+        case UI_SETTINGS_ADDRESS_CONFIRM: ui_menu_truncate_addrs_display(); break;
+        case UI_SETTINGS_CHANGE_CONFIRM: ui_menu_confirm_change_display(); break;
+        case UI_SETTINGS_SELECT_NETWORK: ui_menu_network_display(); break;
+        case UI_SETTINGS_SEED_WORDS: ui_menu_words_display(); break;
+        case UI_SETTINGS_RESET: ui_menu_reset_display(); break;
+        default: ui_menu_main_display(); // UI_SETTINGS_BACK_TO_MAIN, UI_SETTINGS_BACK
     }
 }
+
+void ui_menu_settings_display_select(unsigned int idx) {
+    ux_menulist_init_select(G_ux.stack_count - 1, settings_submenu_getter, settings_submenu_selector, idx);
+}
+void ui_menu_settings_display(void) {
+    ui_menu_settings_display_select(0);
+}
+
 
 /* ---------------------------- PUBLIC ADDRESS UX ---------------------------- */
 void ui_menu_pubaddr_action(void);
@@ -608,7 +726,7 @@ UX_STEP_CB(
 UX_STEP_CB(
     ux_menu_main_2_step,
     pb,
-    ux_menulist_init(G_ux.stack_count - 1, settings_submenu_getter, settings_submenu_selector),
+    ui_menu_settings_display(),
     {&C_icon_coggle, "Settings"}
 );
 

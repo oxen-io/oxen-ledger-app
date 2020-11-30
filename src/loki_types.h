@@ -84,6 +84,25 @@ struct monero_nv_state_s {
     /* view key export mode */
     unsigned char viewkey_export_mode;
 
+#define CONFIRM_ADDRESS_FULL 0   // Full addr (takes 6-7 pages)
+#define CONFIRM_ADDRESS_SHORT 1 // [first 23..last 23] (so fits on 3 pages)
+#define CONFIRM_ADDRESS_SHORTER 2  // [first 16..last 14] (so fits on 2 pages)
+    /* address confirm truncatation mode */
+    unsigned char truncate_addrs_mode;
+
+#define CONFIRM_FEE_ALWAYS 0
+#define CONFIRM_FEE_ABOVE_0_05 1
+#define CONFIRM_FEE_ABOVE_0_2 2
+#define CONFIRM_FEE_ABOVE_1 3
+#define CONFIRM_FEE_NEVER 4
+    /* fee confirmation mode */
+    unsigned char confirm_fee_mode;
+
+#define CONFIRM_CHANGE_DISABLED 0
+#define CONFIRM_CHANGE_ENABLED 1
+    /* confirm confirmation mode */
+    unsigned char confirm_change_mode;
+
     /* spend key */
     unsigned char spend_priv[32];
     /* view key */

@@ -40,16 +40,29 @@ int monero_apdu_clsag_prehash_init(void) {
     }
     monero_keccak_update_H(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
                            G_monero_vstate.io_length - G_monero_vstate.io_offset);
-    if ((G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) && (G_monero_vstate.io_p2 == 1)) {
+    if ((G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) && (G_monero_vstate.io_p2 == 1)
+            && N_monero_pstate->confirm_fee_mode != CONFIRM_FEE_NEVER) {
+
         // skip type
         monero_io_fetch_u8();
         // fee str
-        loki_varint_currency_str(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
-                                 G_monero_vstate.ux_amount);
-        // ask user
+        uint64_t amount;
+        monero_decode_varint(G_monero_vstate.io_buffer + G_monero_vstate.io_offset, 10, &amount);
         monero_io_discard(1);
-        ui_menu_fee_validation_display();
-        return 0;
+
+        switch (N_monero_pstate->confirm_fee_mode) {
+            case CONFIRM_FEE_ABOVE_0_05: if (amount <   50000000) amount = 0; break;
+            case CONFIRM_FEE_ABOVE_0_2:  if (amount <  200000000) amount = 0; break;
+            case CONFIRM_FEE_ABOVE_1:    if (amount < 1000000000) amount = 0; break;
+            default: break;
+        }
+        if (amount > 0) {
+            // ask user
+            loki_currency_str(amount, G_monero_vstate.ux_amount);
+            ui_menu_fee_validation_display();
+            return 0;
+        }
+        return SW_OK;
     } else {
         monero_io_discard(1);
         return SW_OK;
@@ -94,9 +107,22 @@ int monero_apdu_clsag_prehash_update(void) {
     }
 
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-        if (is_change == 0) {
+        if (!is_change) {
             // encode dest adress
             unsigned char pos = loki_wallet_address(G_monero_vstate.ux_address, Aout, Bout, is_subaddress, NULL);
+            if (N_monero_pstate->truncate_addrs_mode == CONFIRM_ADDRESS_SHORT) {
+                // First 23, "..", last 23 (so total is 48 = 3 pages on Nano S)
+                G_monero_vstate.ux_address[23] = '.';
+                G_monero_vstate.ux_address[24] = '.';
+                os_memmove(&G_monero_vstate.ux_address[25], &G_monero_vstate.ux_address[pos-23], 23);
+                pos = 48;
+            } else if (N_monero_pstate->truncate_addrs_mode == CONFIRM_ADDRESS_SHORTER) {
+                // 16..14 so that first page gets first [16], last page gets last [..14]
+                G_monero_vstate.ux_address[16] = '.';
+                G_monero_vstate.ux_address[17] = '.';
+                os_memmove(&G_monero_vstate.ux_address[18], &G_monero_vstate.ux_address[pos-14], 14);
+                pos = 32;
+            }
             G_monero_vstate.ux_address[pos] = 0; // null terminate
         }
         // update destination hash control
@@ -136,11 +162,12 @@ int monero_apdu_clsag_prehash_update(void) {
         amount = monero_bamount2uint64(v);
         if (amount) {
             loki_currency_str(amount, G_monero_vstate.ux_amount);
-            if (!is_change) {
+            if (!is_change)
                 ui_menu_validation_display();
-            } else {
+            else if (N_monero_pstate->confirm_change_mode == CONFIRM_CHANGE_DISABLED)
+                return SW_OK;
+            else
                 ui_menu_change_validation_display();
-            }
             return 0;
         }
     }

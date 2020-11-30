@@ -927,14 +927,6 @@ void loki_currency_str(uint64_t atomic_loki, char *str) {
     str[len] = 0;
 }
 
-/* Converts a varint-encoded binary currency value to a string.  The given output str location
- * must be at least 22 character long. */
-void loki_varint_currency_str(unsigned char *binary, char *str) {
-    uint64_t amount;
-    monero_decode_varint(binary, 10, &amount);
-    loki_currency_str(amount, str);
-}
-
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
