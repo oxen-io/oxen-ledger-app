@@ -29,6 +29,35 @@
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
+// str must be size >= 21
+static void monero_uint642str(uint64_t val, char *str) {
+    unsigned char len, i, j;
+    char tmp;
+
+    len = 0;
+
+    // Write it out in reverse, then swap it (because until we write it out we won't know the
+    // length)
+    do {
+        str[len++] = '0' + val % 10;
+        val /= 10;
+    } while (val);
+
+    // Reverse it
+    for (i = 0, j = len - 1; i < j; ++i, --j) {
+        tmp = str[i];
+        str[i] = str[j];
+        str[j] = tmp;
+    }
+
+    // Terminate it
+    str[len] = 0;
+}
+
+
+/* ----------------------------------------------------------------------- */
+/* ---                                                                 --- */
+/* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_init(void) {
     monero_keccak_init_H();
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {

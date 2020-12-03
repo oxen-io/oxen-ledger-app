@@ -110,9 +110,6 @@ uint64_t monero_bamount2uint64(unsigned char *binary);
  * 22 chars long. */
 void loki_currency_str(uint64_t atomic_loki, char *str);
 
-/** uint64 amount to str */
-void monero_uint642str(uint64_t val, char *str);
-
 int monero_abort_tx(void);
 int monero_unblind(unsigned char *v, unsigned char *k, unsigned char *AKout,
                    unsigned int short_amount);

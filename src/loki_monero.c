@@ -175,3 +175,60 @@ unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned c
 
     return full_block_count * FULL_ENCODED_BLOCK_SIZE + encoded_block_sizes[last_block_size];
 }
+
+/* ----------------------------------------------------------------------- */
+/* ---                                                                 --- */
+/* ----------------------------------------------------------------------- */
+// str must be length >= 22
+void loki_currency_str(uint64_t atomic_loki, char *str) {
+    // max uint64 is 18446744073709551616, aka 20 char, plus dot
+    unsigned char len, i, j;
+    char tmp;
+
+    // Special case short circuit for 0 LOKI
+    if (atomic_loki == 0) {
+        str[0] = '0';
+        str[1] = '.';
+        str[2] = '0';
+        str[3] = 0;
+        return;
+    }
+
+    // Write the value out in reverse; this is a bit easier since we don't know the length yet
+    for (len = 0; atomic_loki; ++len) {
+        if (len == COIN_DECIMAL)
+            str[len++] = '.';
+        str[len] = '0' + atomic_loki % 10;
+        atomic_loki /= 10;
+    }
+    if (len <= COIN_DECIMAL) {
+        // The value is less than 1 LOKI so add any needed significant 0's and add the '.0'
+        while (len < COIN_DECIMAL)
+            str[len++] = '0';
+        str[len++] = '.';
+        str[len++] = '0';
+    }
+
+    // We've now converted an atomic loki value such as:
+    //     12345678 to "876543210.0"
+    //     1234567890 to "098765432.1"
+    //     12345000000000 to "000000000.54321"
+    // Reverse it, so that we get:
+    //     "0.012345678"
+    //     "1.234567890"
+    //     "12345.000000000"
+    for (i = 0, j = len - 1; i < j; ++i, --j) {
+        tmp = str[i];
+        str[i] = str[j];
+        str[j] = tmp;
+    }
+
+    // Drop insignificant 0's beyond the first decimal place, so that we get the final display
+    // amount:
+    //     "0.012345678"
+    //     "1.23456789"
+    //     "12345.0"
+    while (str[len - 2] != '.' && str[len - 1] == '0')
+        str[--len] = 0;
+    str[len] = 0;
+}
