@@ -50,6 +50,7 @@ int monero_apdu_derivation_to_scalar(void);
 int monero_apdu_derive_public_key(void);
 int monero_apdu_derive_secret_key(void);
 int monero_apdu_generate_key_image(void);
+int loki_apdu_generate_key_image_signature(void);
 int monero_apdu_derive_subaddress_public_key(void);
 int monero_apdu_get_subaddress(void);
 int monero_apdu_get_subaddress_spend_public_key(void);
@@ -164,6 +165,7 @@ void monero_derive_public_key(unsigned char *x, unsigned char *drv_data, unsigne
                               unsigned char *ec_pub);
 void monero_secret_key_to_public_key(unsigned char *ec_pub, unsigned char *ec_priv);
 void monero_generate_key_image(unsigned char *img, unsigned char *P, unsigned char *x);
+void loki_generate_key_image_signature(unsigned char *sig, unsigned char *img, unsigned char *P, unsigned char *x);
 
 void monero_derive_subaddress_public_key(unsigned char *x, unsigned char *pub,
                                          unsigned char *drv_data, unsigned int index);

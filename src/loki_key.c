@@ -620,6 +620,30 @@ int monero_apdu_generate_key_image(
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
+int loki_apdu_generate_key_image_signature(
+    /*const crypto::key_image& image, const crypto::public_key& pub, const crypto::secret_key& sec, crypto::signature& sig*/) {
+    unsigned char signature[64];
+    unsigned char image[32];
+    unsigned char pub[32];
+    unsigned char sec[32];
+
+    // fetch
+    monero_io_fetch(image, 32);
+    monero_io_fetch(pub, 32);
+    monero_io_fetch_decrypt(sec, 32, TYPE_SCALAR);
+    monero_io_discard(0);
+
+    // sign
+    loki_generate_key_image_signature(signature, image, pub, sec);
+
+    // return
+    monero_io_insert(signature, 64);
+    return SW_OK;
+}
+
+/* ----------------------------------------------------------------------- */
+/* ---                                                                 --- */
+/* ----------------------------------------------------------------------- */
 int monero_apdu_derive_subaddress_public_key(/*const crypto::public_key &pub, const crypto::key_derivation &derivation, const std::size_t output_index, public_key &derived_pub*/) {
     unsigned char pub[32];
     unsigned char derivation[32];

@@ -531,6 +531,33 @@ void monero_generate_key_image(unsigned char *img, unsigned char *P, unsigned ch
     monero_ecmul_k(img, I, x);
 }
 
+/* ----------------------------------------------------------------------- */
+/* ---                                                                 --- */
+/* ----------------------------------------------------------------------- */
+void loki_generate_key_image_signature(unsigned char *sig, unsigned char *img, unsigned char *P, unsigned char *x) {
+    unsigned char k[32];
+    unsigned char tmp[32];
+
+    monero_keccak_init_H(); // Need to calculate H(I || L || R)
+    monero_keccak_update_H(img, 32); // H(I ||...
+
+    monero_rng_mod_order(k); // k = random ]0..L[
+    monero_ecmul_G(tmp, k); // L0 = kG
+    monero_keccak_update_H(tmp, 32); // H(...|| L ||...)
+
+    monero_hash_to_ec(tmp, P); // H(P)
+    monero_ecmul_k(tmp, tmp, k); // R = kH(P)
+    monero_keccak_update_H(tmp, 32); // H(...|| R)
+
+    // sig = [c,r]
+    // c = H(I || L || R) mod L
+    monero_keccak_final_H(sig);
+    monero_reduce(sig, sig);
+
+    monero_multm(tmp, x, sig); // xc
+    monero_subm(sig+32, k, tmp); // r = k - xc
+}
+
 /* ======================================================================= */
 /*                               SUB ADDRESS                               */
 /* ======================================================================= */
