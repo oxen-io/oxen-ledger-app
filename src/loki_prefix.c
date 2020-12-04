@@ -64,8 +64,8 @@ int monero_apdu_prefix_hash_init(void) {
         if (monero_io_fetch_varint16() != 4) // tx version; we only support v4 txes
             THROW(SW_WRONG_DATA_RANGE);
 
-        uint64_t timelock = monero_io_fetch_varint();
         uint16_t txtype = monero_io_fetch_varint16();
+        uint64_t timelock = monero_io_fetch_varint();
 
         if (!(txtype == TXTYPE_STANDARD || txtype == TXTYPE_UNLOCK || txtype == TXTYPE_STAKE || txtype == TXTYPE_LNS))
             THROW(SW_WRONG_DATA_RANGE);
