@@ -107,7 +107,7 @@ int monero_apdu_clsag_prehash_update(void) {
     }
 
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-        if (!is_change) {
+        if (!is_change && G_monero_vstate.tx_type != TXTYPE_STAKE) {
             // encode dest adress
             unsigned char pos = loki_wallet_address(G_monero_vstate.ux_address, Aout, Bout, is_subaddress, NULL);
             if (N_monero_pstate->truncate_addrs_mode == CONFIRM_ADDRESS_SHORT) {
@@ -162,8 +162,17 @@ int monero_apdu_clsag_prehash_update(void) {
         amount = monero_bamount2uint64(v);
         if (amount) {
             loki_currency_str(amount, G_monero_vstate.ux_amount);
-            if (!is_change)
-                ui_menu_validation_display();
+            if (!is_change) {
+                if (G_monero_vstate.tx_type == TXTYPE_STAKE) {
+                    // If this is a stake tx then the non-change recipient must be ourself.
+                    if (os_memcmp(Aout, G_monero_vstate.view_pub, 32) || os_memcmp(Bout, G_monero_vstate.spend_pub, 32))
+                        monero_lock_and_throw(SW_SECURITY_INTERNAL);
+
+                    ui_menu_stake_validation_display();
+                }
+                else
+                    ui_menu_validation_display();
+            }
             else if (N_monero_pstate->confirm_change_mode == CONFIRM_CHANGE_DISABLED)
                 return SW_OK;
             else

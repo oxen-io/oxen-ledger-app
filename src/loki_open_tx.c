@@ -47,10 +47,18 @@ int monero_apdu_open_tx(void) {
     unsigned int account;
 
     account = monero_io_fetch_u32();
+    uint8_t txversion = monero_io_fetch_u8();
+    uint8_t txtype = monero_io_fetch_u8();
+
+    if (txversion != 4)
+        THROW(SW_WRONG_DATA_RANGE);
+    if (!(txtype == TXTYPE_STANDARD || txtype == TXTYPE_UNLOCK || txtype == TXTYPE_STAKE || txtype == TXTYPE_LNS))
+        THROW(SW_WRONG_DATA_RANGE);
 
     monero_io_discard(1);
 
     monero_reset_tx(0);
+    G_monero_vstate.tx_type = txtype;
     G_monero_vstate.tx_cnt++;
     ui_menu_opentx_display();
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {

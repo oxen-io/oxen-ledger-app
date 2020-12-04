@@ -120,15 +120,25 @@ unsigned int ui_menu_info_action(void) {
     return 0;
 }
 
-void ui_menu_info_display2(char* line1, char* line2) {
-    snprintf(G_monero_vstate.ux_info1, sizeof(G_monero_vstate.ux_info1), "%s", line1);
-    snprintf(G_monero_vstate.ux_info2, sizeof(G_monero_vstate.ux_info2), "%s", line2);
+void ui_menu_info_display2(const char* line1, const char* line2) {
+    os_memmove(G_monero_vstate.ux_info1, line1, sizeof(G_monero_vstate.ux_info1)-1);
+    os_memmove(G_monero_vstate.ux_info2, line2, sizeof(G_monero_vstate.ux_info2)-1);
+    G_monero_vstate.ux_info1[sizeof(G_monero_vstate.ux_info1)-1] = 0;
+    G_monero_vstate.ux_info2[sizeof(G_monero_vstate.ux_info2)-1] = 0;
     ux_flow_init(0, ux_flow_info, NULL);
 }
 
 void ui_menu_info_display(void) { ux_flow_init(0, ux_flow_info, NULL); }
 
 /* -------------------------------- OPEN TX UX --------------------------------- */
+const char* processing_tx() {
+    return
+        G_monero_vstate.tx_type == TXTYPE_STAKE ? "Processing Stake" :
+        G_monero_vstate.tx_type == TXTYPE_LNS ? "Processing LNS" :
+        G_monero_vstate.tx_type == TXTYPE_UNLOCK ? "ProcessingUnlock" :
+        "Processing TX";
+}
+
 unsigned int ui_menu_opentx_action(unsigned int value);
 
 UX_STEP_NOCB(ux_menu_opentx_1_step, nn, {"Process", "new TX ?"});
@@ -149,7 +159,7 @@ unsigned int ui_menu_opentx_action(unsigned int value) {
 
     if (value == ACCEPT) {
         sw = monero_apdu_open_tx_cont();
-        ui_menu_info_display2("Processing TX", "...");
+        ui_menu_info_display2(processing_tx(), "...");
     } else {
         monero_abort_tx();
         sw = SW_DENY;
@@ -173,11 +183,9 @@ void ui_menu_opentx_display(void) {
 #else
 void ui_menu_opentx_display(void) {
     uint8_t i;
-    if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-        snprintf(G_monero_vstate.ux_info1, sizeof(G_monero_vstate.ux_info1), "Processing TX");
-    } else {
-        snprintf(G_monero_vstate.ux_info1, sizeof(G_monero_vstate.ux_info1), "Preparing TX");
-    }
+
+    os_memmove(G_monero_vstate.ux_info1, processing_tx(), sizeof(G_monero_vstate.ux_info1)-1);
+    G_monero_vstate.ux_info1[sizeof(G_monero_vstate.ux_info1)-1] = 0;
     for (i = 0; (i < G_monero_vstate.tx_cnt) && (i < 12); i++) {
         G_monero_vstate.ux_info2[i] = '.';
     }
@@ -239,7 +247,7 @@ void ui_menu_amount_validation_action(unsigned int value) {
     }
     monero_io_insert_u16(sw);
     monero_io_do(IO_RETURN_AFTER_TX);
-    ui_menu_info_display2("Processing TX", "...");
+    ui_menu_info_display2(processing_tx(), "...");
 }
 
 void ui_menu_fee_validation_display(void) { ux_flow_init(0, ux_flow_fee, NULL); }
@@ -283,8 +291,21 @@ void ui_menu_validation_action(unsigned int value) {
     }
     monero_io_insert_u16(sw);
     monero_io_do(IO_RETURN_AFTER_TX);
-    ui_menu_info_display2("Processing TX", "...");
+    ui_menu_info_display2(processing_tx(), "...");
 }
+
+// Same as above, but for stake txes: we don't need to show the recipient (because we have already
+// enforced that this wallet is the recipient).
+void ui_menu_stake_validation_action(unsigned int value);
+
+UX_STEP_NOCB(ux_menu_stake_validation_1_step, bn, {"Confirm Stake", G_monero_vstate.ux_amount});
+
+UX_FLOW(ux_flow_stake_validation,
+        &ux_menu_stake_validation_1_step,
+        &ux_menu_validation_2_step,
+        &ux_menu_validation_3_step);
+
+void ui_menu_stake_validation_display(void) { ux_flow_init(0, ux_flow_stake_validation, NULL); }
 
 /* -------------------------------- EXPORT VIEW KEY UX --------------------------------- */
 unsigned int ui_menu_export_viewkey_action(unsigned int value);

@@ -165,6 +165,7 @@ struct monero_v_state_s {
 
     /* Tx state machine */
     unsigned char tx_in_progress : 1;
+    unsigned char tx_type;
     unsigned char tx_cnt;
     unsigned char tx_sig_mode;
     unsigned char tx_state_ins;
@@ -219,8 +220,8 @@ struct monero_v_state_s {
 
     union {
         struct {
-            char ux_info1[16];
-            char ux_info2[16];
+            char ux_info1[17];
+            char ux_info2[17];
         };
         struct {
             // address to display: 95/106-chars for mainnet, 97/108 for testnet + null
@@ -306,6 +307,7 @@ typedef struct monero_v_state_s monero_v_state_t;
 #define INS_OPEN_TX             0x70
 #define INS_SET_SIGNATURE_MODE  0x72
 #define INS_GET_ADDITIONAL_KEY  0x74
+#define INS_GET_TX_SECRET_KEY   0x75
 #define INS_STEALTH             0x76
 #define INS_GEN_COMMITMENT_MASK 0x77
 #define INS_BLIND               0x78

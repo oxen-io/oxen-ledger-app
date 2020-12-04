@@ -67,7 +67,7 @@ int monero_apdu_prefix_hash_init(void) {
         uint16_t txtype = monero_io_fetch_varint16();
         uint64_t timelock = monero_io_fetch_varint();
 
-        if (!(txtype == TXTYPE_STANDARD || txtype == TXTYPE_UNLOCK || txtype == TXTYPE_STAKE || txtype == TXTYPE_LNS))
+        if (G_monero_vstate.tx_type != txtype)
             THROW(SW_WRONG_DATA_RANGE);
 
         if (timelock != 0 && txtype != TXTYPE_STANDARD)

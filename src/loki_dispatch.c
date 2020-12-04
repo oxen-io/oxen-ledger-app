@@ -97,6 +97,7 @@ int check_ins_access(void) {
         case INS_UNBLIND:
         case INS_STEALTH:
         case INS_GET_TX_PROOF:
+        case INS_GET_TX_SECRET_KEY:
         case INS_CLOSE_TX:
             return SW_OK;
 
@@ -225,6 +226,13 @@ int monero_dispatch(void) {
         case INS_GET_TX_PROOF:
             sw = monero_apdu_get_tx_proof();
             break;
+
+        /// This call will only work when we have an open transaction *and* it is recognized as a /
+        /// stake, but we don't explicitly enforce it to be called at any particular time.
+        case INS_GET_TX_SECRET_KEY:
+            sw = monero_apdu_get_tx_secret_key();
+            break;
+
 
             /* =======================================================================
              *  Following command are only allowed during transaction and their

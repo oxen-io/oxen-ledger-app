@@ -49,6 +49,7 @@ int monero_apdu_generate_key_derivation(void);
 int monero_apdu_derivation_to_scalar(void);
 int monero_apdu_derive_public_key(void);
 int monero_apdu_derive_secret_key(void);
+int monero_apdu_get_tx_secret_key(void);
 int monero_apdu_generate_key_image(void);
 int loki_apdu_generate_key_image_signature(void);
 int monero_apdu_derive_subaddress_public_key(void);
@@ -87,7 +88,7 @@ int monero_apdu_close_tx(void);
 void ui_menu_lock_display(void);
 void ui_menu_main_display(void);
 void ui_menu_info_display(void);
-void ui_menu_info_display2(char *line1, char *line2);
+void ui_menu_info_display2(const char *line1, const char *line2);
 void ui_export_viewkey_display(void);
 void ui_menu_any_pubaddr_display(unsigned char *pub_view, unsigned char *pub_spend,
                                  unsigned char is_subbadress, unsigned char *paymentID);
@@ -115,6 +116,7 @@ int monero_abort_tx(void);
 int monero_unblind(unsigned char *v, unsigned char *k, unsigned char *AKout,
                    unsigned int short_amount);
 void ui_menu_validation_display(void);
+void ui_menu_stake_validation_display(void);
 void ui_menu_fee_validation_display(void);
 void ui_menu_change_validation_display(void);
 void ui_menu_timelock_validation_display(void);
