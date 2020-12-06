@@ -157,8 +157,8 @@ unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned c
         os_memmove(data + offset, paymentID, 8);
         offset += ADDR_PAYMENTID_SIZE;
     }
-    monero_keccak_F(data, offset, G_monero_vstate.clsag_prehash);
-    os_memmove(data + offset, G_monero_vstate.clsag_prehash, ADDR_CHECKSUM_SIZE);
+    monero_keccak_F(data, offset, G_monero_vstate.addr_checksum_hash);
+    os_memmove(data + offset, G_monero_vstate.addr_checksum_hash, ADDR_CHECKSUM_SIZE);
     offset += ADDR_CHECKSUM_SIZE;
 
     unsigned char full_block_count = offset / FULL_BLOCK_SIZE;

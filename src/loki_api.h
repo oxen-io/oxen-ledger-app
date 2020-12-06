@@ -211,8 +211,7 @@ int monero_hash(unsigned int algo, cx_hash_t *hasher, unsigned char *buf, unsign
 #define monero_sha256_commitment_update(buf, len) \
     monero_hash_update((cx_hash_t *)&G_monero_vstate.sha256_commitment, (buf), (len))
 #define monero_sha256_commitment_final(out)                            \
-    monero_hash_final((cx_hash_t *)&G_monero_vstate.sha256_commitment, \
-                      (out) ? (out) : G_monero_vstate.C)
+    monero_hash_final((cx_hash_t *)&G_monero_vstate.sha256_commitment, (out))
 
 #define monero_sha256_outkeys_init() \
     monero_hash_init_sha256(&G_monero_vstate.sha256_out_keys)

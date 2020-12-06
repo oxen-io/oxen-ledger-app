@@ -179,7 +179,7 @@ struct monero_v_state_s {
     unsigned char last_get_subaddress_secret_key[32];
 
     /* ------------------------------------------ */
-    /* ---               Crypo                --- */
+    /* ---               Crypto               --- */
     /* ------------------------------------------ */
     union {
         struct {
@@ -203,15 +203,18 @@ struct monero_v_state_s {
     cx_sha3_t keccakF;
     cx_sha3_t keccakH;
     unsigned char prefixH[32];
-    unsigned char clsag_prehash[32];
-    unsigned char c[32];
+    union {
+        unsigned char clsag_c[32];
+        unsigned char commitment_hash[32];
+        unsigned char addr_checksum_hash[32];
+    };
 
     /* -- track tx-in/out and commitment -- */
     cx_sha256_t sha256_out_keys;
     unsigned char OUTK[32];
 
     cx_sha256_t sha256_commitment;
-    unsigned char C[32];
+    //commitment_hash
 
     /* ------------------------------------------ */
     /* ---               UI/UX                --- */

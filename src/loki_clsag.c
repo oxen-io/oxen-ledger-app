@@ -110,16 +110,16 @@ int monero_apdu_clsag_hash() {
         monero_keccak_final_H(c);
         monero_reduce(c, c);
         monero_io_insert(c, 32);
-        os_memmove(G_monero_vstate.c, c, 32);
+        os_memmove(G_monero_vstate.clsag_c, c, 32);
     }
     return SW_OK;
 }
 
 // Sets the clsag_hash directly (i.e. from an externally or previously calculated value).
 int monero_apdu_clsag_hash_set() {
-    monero_io_fetch(G_monero_vstate.c, 32);
-    monero_check_scalar_not_null(G_monero_vstate.c);
-    monero_reduce(G_monero_vstate.c, G_monero_vstate.c);
+    monero_io_fetch(G_monero_vstate.clsag_c, 32);
+    monero_check_scalar_not_null(G_monero_vstate.clsag_c);
+    monero_reduce(G_monero_vstate.clsag_c, G_monero_vstate.clsag_c);
     monero_io_discard(1);
     return SW_OK;
 }
@@ -176,7 +176,7 @@ int monero_apdu_clsag_sign() {
     monero_reduce(z, z);
     monero_reduce(mu_P, mu_P);
     monero_reduce(mu_C, mu_C);
-    monero_reduce(G_monero_vstate.c, G_monero_vstate.c);
+    monero_reduce(G_monero_vstate.clsag_c, G_monero_vstate.clsag_c);
 
     // s0_p_mu_P = mu_P*p
     // s0_add_z_mu_C = mu_C*z + s0_p_mu_P
@@ -191,7 +191,7 @@ int monero_apdu_clsag_sign() {
     // s = p*mu_P + mu_C*z
     monero_addm(s, s, mu_P);
     // mu_P = c * (p*mu_P + mu_C*z)
-    monero_multm(mu_P, G_monero_vstate.c, s);
+    monero_multm(mu_P, G_monero_vstate.clsag_c, s);
     // s = a - c*(p*mu_P + mu_C*z)
     monero_subm(s, a, mu_P);
 
