@@ -165,6 +165,7 @@ struct monero_v_state_s {
 
     /* Tx state machine */
     unsigned char tx_in_progress : 1;
+    unsigned char tx_special_confirmed : 1;
     unsigned char tx_type;
     unsigned char tx_cnt;
     unsigned char tx_sig_mode;
@@ -321,9 +322,8 @@ typedef struct monero_v_state_s monero_v_state_t;
 #define INS_CLSAG               0x7F
 #define INS_CLOSE_TX            0x80
 
-#define INS_GET_TX_PROOF       0xA0
-#define INS_GEN_SIGNATURE      0xA2
-#define INS_GEN_RING_SIGNATURE 0xA4
+#define INS_GET_TX_PROOF             0xA0
+#define INS_GEN_UNLOCK_SIGNATURE     0xA2
 
 #define INS_GET_RESPONSE 0xc0
 

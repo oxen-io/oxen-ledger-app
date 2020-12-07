@@ -656,6 +656,40 @@ int loki_apdu_generate_key_image_signature(
     return SW_OK;
 }
 
+static const unsigned char STAKE_UNLOCK_HASH[32] = {
+    'U','N','L','K','U','N','L','K','U','N','L','K','U','N','L','K',
+    'U','N','L','K','U','N','L','K','U','N','L','K','U','N','L','K'};
+
+// Generate an unlock signature.  There are two steps here: the first (p1=0) asks for confirmation,
+// and if given, we store that and then allow the second (p1=1) to produce the signature.  We
+// require that that a transaction be open, and be an UNLOCK type.
+int loki_apdu_generate_unlock_signature(void) {
+    unsigned char signature[64];
+    unsigned char sec[32];
+    unsigned char *pub;
+
+    if (G_monero_vstate.io_p1 == 0) {
+        // Confirm the unlock with the user
+        monero_io_discard(1);
+        ui_menu_unlock_validation_display();
+        return 0;
+    } else if (G_monero_vstate.io_p1 != 1 || !G_monero_vstate.tx_special_confirmed) {
+        monero_lock_and_throw(SW_WRONG_DATA);
+    }
+
+    // fetch
+    pub = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
+    monero_io_fetch(NULL, 32);
+    monero_io_fetch_decrypt(sec, 32, TYPE_SCALAR);
+    monero_io_discard(0);
+
+    // sign
+    loki_generate_signature(signature, (unsigned char*) STAKE_UNLOCK_HASH, pub, sec);
+
+    // return
+    monero_io_insert(signature, 64);
+    return SW_OK;
+}
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */

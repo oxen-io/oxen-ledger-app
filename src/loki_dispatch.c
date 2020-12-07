@@ -84,6 +84,7 @@ int check_ins_access(void) {
         case INS_DERIVE_SECRET_KEY:
         case INS_GEN_KEY_IMAGE:
         case INS_GEN_KEY_IMAGE_SIGNATURE:
+        case INS_GEN_UNLOCK_SIGNATURE:
         case INS_SECRET_KEY_TO_PUBLIC_KEY:
         case INS_SECRET_KEY_ADD:
         case INS_GENERATE_KEYPAIR:
@@ -442,7 +443,22 @@ int monero_dispatch(void) {
             update_protocol();
             break;
 
-            /* --- KEYS --- */
+        /* --- Unlock --- */
+        case INS_GEN_UNLOCK_SIGNATURE:
+            if (G_monero_vstate.tx_in_progress)
+                THROW(SW_COMMAND_NOT_ALLOWED);
+            // Initialization: must not be in the middle of something else
+            if (LOKI_IO_P_EQUALS(0, 0) && G_monero_vstate.tx_state_ins == 0)
+                sw = loki_apdu_generate_unlock_signature();
+            else if (LOKI_IO_P_EQUALS(1, 0) && LOKI_TX_STATE_INS_P_EQUALS(INS_GEN_UNLOCK_SIGNATURE, 0, 0))
+                // [UNLOCK,1,0] is the post-confirmation step and must follow immediately the
+                // [UNLOCK,0,0] (which is where we ask for confirmation).
+                sw = loki_apdu_generate_unlock_signature();
+            else
+                THROW(SW_COMMAND_NOT_ALLOWED);
+
+            update_protocol();
+            break;
 
         default:
             THROW(SW_INS_NOT_SUPPORTED);

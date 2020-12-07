@@ -267,17 +267,17 @@ UX_STEP_NOCB(ux_menu_validation_1_step, bn, {"Confirm Amount", G_monero_vstate.u
 UX_STEP_NOCB(ux_menu_validation_2_step, paging,
              {"Recipient", G_monero_vstate.ux_address});
 
-UX_STEP_CB(ux_menu_validation_3_step, pb, ui_menu_validation_action(ACCEPT),
+UX_STEP_CB(ux_menu_validation_accept_step, pb, ui_menu_validation_action(ACCEPT),
            {&C_icon_validate_14, "Accept"});
 
-UX_STEP_CB(ux_menu_validation_4_step, pb, ui_menu_validation_action(REJECT),
+UX_STEP_CB(ux_menu_validation_reject_step, pb, ui_menu_validation_action(REJECT),
            {&C_icon_crossmark, "Reject"});
 
 UX_FLOW(ux_flow_validation,
         &ux_menu_validation_1_step,
         &ux_menu_validation_2_step,
-        &ux_menu_validation_3_step,
-        &ux_menu_validation_4_step);
+        &ux_menu_validation_accept_step,
+        &ux_menu_validation_reject_step);
 
 void ui_menu_validation_display(void) { ux_flow_init(0, ux_flow_validation, NULL); }
 
@@ -296,16 +296,32 @@ void ui_menu_validation_action(unsigned int value) {
 
 // Same as above, but for stake txes: we don't need to show the recipient (because we have already
 // enforced that this wallet is the recipient).
-void ui_menu_stake_validation_action(unsigned int value);
-
 UX_STEP_NOCB(ux_menu_stake_validation_1_step, bn, {"Confirm Stake", G_monero_vstate.ux_amount});
 
 UX_FLOW(ux_flow_stake_validation,
         &ux_menu_stake_validation_1_step,
-        &ux_menu_validation_2_step,
-        &ux_menu_validation_3_step);
+        &ux_menu_validation_accept_step,
+        &ux_menu_validation_reject_step);
 
 void ui_menu_stake_validation_display(void) { ux_flow_init(0, ux_flow_stake_validation, NULL); }
+
+/** Common menu items for special transaction (i.e. unlocks) */
+void ui_menu_special_validation_action(unsigned int value) {
+    if (value == ACCEPT) G_monero_vstate.tx_special_confirmed = 1;
+    ui_menu_validation_action(value);
+}
+UX_STEP_CB(ux_menu_special_validation_accept_step, pb,
+        ui_menu_special_validation_action(ACCEPT), {&C_icon_validate_14, "Accept"});
+UX_STEP_CB(ux_menu_special_validation_reject_step, pb,
+        ui_menu_special_validation_action(REJECT), {&C_icon_crossmark, "Reject"});
+
+/* Sign unlock output */
+UX_STEP_NOCB(ux_menu_unlock_validation_1_step, bb, {"Confirm Service", "Node Unlock"});
+UX_FLOW(ux_flow_unlock_validation,
+        &ux_menu_unlock_validation_1_step,
+        &ux_menu_special_validation_accept_step,
+        &ux_menu_special_validation_reject_step);
+void ui_menu_unlock_validation_display(void) { ux_flow_init(0, ux_flow_unlock_validation, NULL); }
 
 /* -------------------------------- EXPORT VIEW KEY UX --------------------------------- */
 unsigned int ui_menu_export_viewkey_action(unsigned int value);
