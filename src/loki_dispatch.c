@@ -230,7 +230,7 @@ int monero_dispatch(void) {
         /// This call will only work when we have an open transaction *and* it is recognized as a /
         /// stake, but we don't explicitly enforce it to be called at any particular time.
         case INS_GET_TX_SECRET_KEY:
-            sw = monero_apdu_get_tx_secret_key();
+            sw = loki_apdu_get_tx_secret_key();
             break;
 
 

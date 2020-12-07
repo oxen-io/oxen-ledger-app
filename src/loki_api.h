@@ -49,7 +49,7 @@ int monero_apdu_generate_key_derivation(void);
 int monero_apdu_derivation_to_scalar(void);
 int monero_apdu_derive_public_key(void);
 int monero_apdu_derive_secret_key(void);
-int monero_apdu_get_tx_secret_key(void);
+int loki_apdu_get_tx_secret_key(void);
 int monero_apdu_generate_key_image(void);
 int loki_apdu_generate_key_image_signature(void);
 int monero_apdu_derive_subaddress_public_key(void);

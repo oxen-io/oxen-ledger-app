@@ -595,11 +595,13 @@ int monero_apdu_derive_secret_key(/*const crypto::key_derivation &derivation, co
     return SW_OK;
 }
 
-/// Accesses the tx secret key.  Normally you don't want to do this (because having it unmasks the
-/// transaction details), but that is explicitly required for stake transactions so we allow this
-/// *only if* we have an open transaction and it is a stake transaction (which also changes how the
-/// is displayed so the user will confirm it as a stake rather than a regular TX).
-int monero_apdu_get_tx_secret_key(void) {
+// Accesses the (decrypted) tx secret key.  Normally you don't want to do this (because having it
+// unmasks the transaction details), but that is explicitly required for stake transactions so we
+// allow this *only if* we have an open transaction and it is a stake transaction (which also
+// changes how the is displayed so the user will confirm it as a stake rather than a regular TX),
+// and only while constructing the transaction from our local r (so that you can't misuse this to
+// decrypt an arbitrary value), which is only ever set randomly.
+int loki_apdu_get_tx_secret_key(void) {
     monero_io_discard(0);
     if (G_monero_vstate.tx_in_progress && G_monero_vstate.tx_type == TXTYPE_STAKE) {
         monero_io_insert(G_monero_vstate.r, 32);
