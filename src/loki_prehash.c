@@ -38,10 +38,15 @@ int monero_apdu_clsag_prehash_init(void) {
             monero_keccak_init_H();
         }
     }
+    // We always confirm fees for LNS because often this is the *only* confirmation for an LNS tx
+    unsigned char confirm_fee_mode = G_monero_vstate.tx_type == TXTYPE_LNS
+        ? CONFIRM_FEE_ALWAYS
+        : N_monero_pstate->confirm_fee_mode;
+
     monero_keccak_update_H(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
                            G_monero_vstate.io_length - G_monero_vstate.io_offset);
     if ((G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) && (G_monero_vstate.io_p2 == 1)
-            && N_monero_pstate->confirm_fee_mode != CONFIRM_FEE_NEVER) {
+            && confirm_fee_mode != CONFIRM_FEE_NEVER) {
 
         // skip type
         monero_io_fetch_u8();
@@ -50,7 +55,7 @@ int monero_apdu_clsag_prehash_init(void) {
         monero_decode_varint(G_monero_vstate.io_buffer + G_monero_vstate.io_offset, 10, &amount);
         monero_io_discard(1);
 
-        switch (N_monero_pstate->confirm_fee_mode) {
+        switch (confirm_fee_mode) {
             case CONFIRM_FEE_ABOVE_0_05: if (amount <   50000000) amount = 0; break;
             case CONFIRM_FEE_ABOVE_0_2:  if (amount <  200000000) amount = 0; break;
             case CONFIRM_FEE_ABOVE_1:    if (amount < 1000000000) amount = 0; break;
@@ -107,7 +112,7 @@ int monero_apdu_clsag_prehash_update(void) {
     }
 
     if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-        if (!is_change && G_monero_vstate.tx_type != TXTYPE_STAKE) {
+        if (!is_change && G_monero_vstate.tx_type != TXTYPE_STAKE && G_monero_vstate.tx_type != TXTYPE_LNS) {
             // encode dest adress
             unsigned char pos = loki_wallet_address(G_monero_vstate.ux_address, Aout, Bout, is_subaddress, NULL);
             if (N_monero_pstate->truncate_addrs_mode == CONFIRM_ADDRESS_SHORT) {
@@ -163,8 +168,8 @@ int monero_apdu_clsag_prehash_update(void) {
         if (amount) {
             loki_currency_str(amount, G_monero_vstate.ux_amount);
             if (!is_change) {
-                if (G_monero_vstate.tx_type == TXTYPE_STAKE) {
-                    // If this is a stake tx then the non-change recipient must be ourself.
+                if (G_monero_vstate.tx_type == TXTYPE_STAKE || G_monero_vstate.tx_type == TXTYPE_LNS) {
+                    // If this is a stake or LNS tx then the non-change recipient must be ourself.
                     if (os_memcmp(Aout, G_monero_vstate.view_pub, 32) || os_memcmp(Bout, G_monero_vstate.spend_pub, 32))
                         monero_lock_and_throw(SW_SECURITY_INTERNAL);
 

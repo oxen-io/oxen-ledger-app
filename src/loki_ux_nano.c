@@ -200,6 +200,7 @@ void ui_menu_amount_validation_action(unsigned int value);
     UX_STEP_NOCB(name, bn, {title, G_monero_vstate.ux_amount})
 
 LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_fee_step, "Confirm Fee");
+LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_lns_fee_step, "Confirm LNS Fee");
 LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_change_step, "Amount (change)");
 LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_timelock_step, "Timelock");
 
@@ -210,6 +211,9 @@ LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_timelock_step, "Timelock");
 LOKI_UX_ACCEPT_REJECT(ux_menu_validation_cf, ui_menu_amount_validation_action);
 
 UX_FLOW(ux_flow_fee, &ux_menu_validation_fee_step, &ux_menu_validation_cf_accept_step,
+        &ux_menu_validation_cf_reject_step);
+
+UX_FLOW(ux_flow_lns_fee, &ux_menu_validation_lns_fee_step, &ux_menu_validation_cf_accept_step,
         &ux_menu_validation_cf_reject_step);
 
 UX_FLOW(ux_flow_change, &ux_menu_validation_change_step, &ux_menu_validation_cf_accept_step,
@@ -232,14 +236,10 @@ void ui_menu_amount_validation_action(unsigned int value) {
 }
 
 void ui_menu_fee_validation_display(void) { ux_flow_init(0, ux_flow_fee, NULL); }
+void ui_menu_lns_fee_validation_display(void) { ux_flow_init(0, ux_flow_lns_fee, NULL); }
+void ui_menu_change_validation_display(void) { ux_flow_init(0, ux_flow_change, NULL); }
+void ui_menu_timelock_validation_display(void) { ux_flow_init(0, ux_flow_timelock, NULL); }
 
-void ui_menu_change_validation_display(void) {
-    ux_flow_init(0, ux_flow_change, NULL);
-}
-
-void ui_menu_timelock_validation_display(void) {
-    ux_flow_init(0, ux_flow_timelock, NULL);
-}
 /* ----------------------------- USER DEST/AMOUNT VALIDATION ----------------------------- */
 void ui_menu_validation_action(unsigned int value);
 

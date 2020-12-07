@@ -123,6 +123,7 @@ void ui_menu_stake_validation_display(void);
 void ui_menu_unlock_validation_display(void);
 void ui_menu_lns_validation_display(void);
 void ui_menu_fee_validation_display(void);
+void ui_menu_lns_fee_validation_display(void);
 void ui_menu_change_validation_display(void);
 void ui_menu_timelock_validation_display(void);
 
