@@ -78,19 +78,19 @@ void ui_menu_settings_display_select(unsigned int idx);
 void ui_menu_words_display(void);
 void ui_menu_words_clear(void);
 
-UX_STEP_NOCB(ux_menu_words_1_step,
+UX_STEP_NOCB(ux_menu_words_seed_step,
              paging,
              {
                  .title = "Electrum Seed",
                  .text = "NOTSET",
              });
 
-UX_STEP_CB(ux_menu_words_2_step, bn, ui_menu_words_clear(),
+UX_STEP_CB(ux_menu_words_clear_step, bn, ui_menu_words_clear(),
            {"CLEAR WORDS", "(Does not wipe wallet)"});
 
-UX_STEP_CB(ux_menu_words_3_step, pb, ui_menu_main_display(), {&C_icon_back, "back"});
+UX_STEP_CB(ux_menu_words_back_step, pb, ui_menu_main_display(), {&C_icon_back, "Back"});
 
-UX_FLOW(ux_flow_words, &ux_menu_words_1_step, &ux_menu_words_2_step, &ux_menu_words_3_step);
+UX_FLOW(ux_flow_words, &ux_menu_words_seed_step, &ux_menu_words_clear_step, &ux_menu_words_back_step);
 
 void ui_menu_words_clear(void) {
     monero_clear_words();
@@ -103,13 +103,13 @@ void settings_show_25_words(void) { ui_menu_words_display(); }
 /* -------------------------------- INFO UX --------------------------------- */
 unsigned int ui_menu_info_action(void);
 
-UX_STEP_CB(ux_menu_info_1_step, nn, ui_menu_info_action(),
+UX_STEP_CB(ux_menu_info_show_step, nn, ui_menu_info_action(),
            {
                G_monero_vstate.ux_info1,
                G_monero_vstate.ux_info2,
            });
 
-UX_FLOW(ux_flow_info, &ux_menu_info_1_step);
+UX_FLOW(ux_flow_info, &ux_menu_info_show_step);
 
 unsigned int ui_menu_info_action(void) {
     if (G_monero_vstate.protocol_barrier == PROTOCOL_LOCKED) {
@@ -139,15 +139,14 @@ const char* processing_tx() {
         "Processing TX";
 }
 
+#if 0
 unsigned int ui_menu_opentx_action(unsigned int value);
 
-UX_STEP_NOCB(ux_menu_opentx_1_step, nn, {"Process", "new TX ?"});
+UX_STEP_NOCB(ux_menu_opentx_process_step, nn, {"Process", "new TX?"});
 
-UX_STEP_CB(ux_menu_opentx_2_step, pb, ui_menu_opentx_action(ACCEPT), {&C_icon_validate_14, "Yes"});
+LOKI_UX_ACCEPT_REJECT(ux_menu_opentx, ui_menu_opentx_action)
 
-UX_STEP_CB(ux_menu_opentx_3_step, pb, ui_menu_opentx_action(REJECT), {&C_icon_crossmark, "No!"});
-
-UX_FLOW(ux_flow_opentx, &ux_menu_opentx_1_step, &ux_menu_opentx_2_step, &ux_menu_opentx_3_step);
+UX_FLOW(ux_flow_opentx, &ux_menu_opentx_process_step, &ux_menu_opentx_accept_step, &ux_menu_opentx_reject_step);
 
 unsigned int ui_menu_opentx_action(unsigned int value) {
     unsigned int sw;
@@ -170,7 +169,6 @@ unsigned int ui_menu_opentx_action(unsigned int value) {
     return 0;
 }
 
-#if 0
 void ui_menu_opentx_display(void) {
   if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
     ux_flow_init(0, ux_flow_opentx,NULL);
@@ -198,44 +196,27 @@ void ui_menu_opentx_display(void) {
 
 void ui_menu_amount_validation_action(unsigned int value);
 
-UX_STEP_NOCB(ux_menu_validation_fee_1_step, bn,
-             {
-                 "Confirm Fee",
-                 G_monero_vstate.ux_amount,
-             });
+#define LOKI_UX_CONFIRM_AMOUNT_STEP(name, title) \
+    UX_STEP_NOCB(name, bn, {title, G_monero_vstate.ux_amount})
 
-UX_STEP_NOCB(ux_menu_validation_change_1_step, bn,
-             {
-                 "Amount (change)",
-                 G_monero_vstate.ux_amount,
-             });
+LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_fee_step, "Confirm Fee");
+LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_change_step, "Amount (change)");
+LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_timelock_step, "Timelock");
 
-UX_STEP_NOCB(ux_menu_validation_timelock_1_step, bn,
-             {
-                 "Timelock",
-                 G_monero_vstate.ux_amount,
-             });
+#define LOKI_UX_ACCEPT_REJECT(basename, callback) \
+    UX_STEP_CB(basename##_accept_step, pb, callback(ACCEPT), {&C_icon_validate_14, "Accept"}); \
+    UX_STEP_CB(basename##_reject_step, pb, callback(REJECT), {&C_icon_crossmark, "Reject"})
 
-UX_STEP_CB(ux_menu_validation_cf_2_step, pb, ui_menu_amount_validation_action(ACCEPT),
-           {
-               &C_icon_validate_14,
-               "Accept",
-           });
+LOKI_UX_ACCEPT_REJECT(ux_menu_validation_cf, ui_menu_amount_validation_action);
 
-UX_STEP_CB(ux_menu_validation_cf_3_step, pb, ui_menu_amount_validation_action(REJECT),
-           {
-               &C_icon_crossmark,
-               "Reject",
-           });
+UX_FLOW(ux_flow_fee, &ux_menu_validation_fee_step, &ux_menu_validation_cf_accept_step,
+        &ux_menu_validation_cf_reject_step);
 
-UX_FLOW(ux_flow_fee, &ux_menu_validation_fee_1_step, &ux_menu_validation_cf_2_step,
-        &ux_menu_validation_cf_3_step);
+UX_FLOW(ux_flow_change, &ux_menu_validation_change_step, &ux_menu_validation_cf_accept_step,
+        &ux_menu_validation_cf_reject_step);
 
-UX_FLOW(ux_flow_change, &ux_menu_validation_change_1_step, &ux_menu_validation_cf_2_step,
-        &ux_menu_validation_cf_3_step);
-
-UX_FLOW(ux_flow_timelock, &ux_menu_validation_timelock_1_step, &ux_menu_validation_cf_2_step,
-        &ux_menu_validation_cf_3_step);
+UX_FLOW(ux_flow_timelock, &ux_menu_validation_timelock_step, &ux_menu_validation_cf_accept_step,
+        &ux_menu_validation_cf_reject_step);
 
 void ui_menu_amount_validation_action(unsigned int value) {
     unsigned short sw;
@@ -262,20 +243,16 @@ void ui_menu_timelock_validation_display(void) {
 /* ----------------------------- USER DEST/AMOUNT VALIDATION ----------------------------- */
 void ui_menu_validation_action(unsigned int value);
 
-UX_STEP_NOCB(ux_menu_validation_1_step, bn, {"Confirm Amount", G_monero_vstate.ux_amount});
+UX_STEP_NOCB(ux_menu_validation_amount_step, bn, {"Confirm Amount", G_monero_vstate.ux_amount});
 
-UX_STEP_NOCB(ux_menu_validation_2_step, paging,
+UX_STEP_NOCB(ux_menu_validation_recipient_step, paging,
              {"Recipient", G_monero_vstate.ux_address});
 
-UX_STEP_CB(ux_menu_validation_accept_step, pb, ui_menu_validation_action(ACCEPT),
-           {&C_icon_validate_14, "Accept"});
-
-UX_STEP_CB(ux_menu_validation_reject_step, pb, ui_menu_validation_action(REJECT),
-           {&C_icon_crossmark, "Reject"});
+LOKI_UX_ACCEPT_REJECT(ux_menu_validation, ui_menu_validation_action);
 
 UX_FLOW(ux_flow_validation,
-        &ux_menu_validation_1_step,
-        &ux_menu_validation_2_step,
+        &ux_menu_validation_amount_step,
+        &ux_menu_validation_recipient_step,
         &ux_menu_validation_accept_step,
         &ux_menu_validation_reject_step);
 
@@ -296,10 +273,10 @@ void ui_menu_validation_action(unsigned int value) {
 
 // Same as above, but for stake txes: we don't need to show the recipient (because we have already
 // enforced that this wallet is the recipient).
-UX_STEP_NOCB(ux_menu_stake_validation_1_step, bn, {"Confirm Stake", G_monero_vstate.ux_amount});
+UX_STEP_NOCB(ux_menu_stake_validation_step, bn, {"Confirm Stake", G_monero_vstate.ux_amount});
 
 UX_FLOW(ux_flow_stake_validation,
-        &ux_menu_stake_validation_1_step,
+        &ux_menu_stake_validation_step,
         &ux_menu_validation_accept_step,
         &ux_menu_validation_reject_step);
 
@@ -310,23 +287,20 @@ void ui_menu_special_validation_action(unsigned int value) {
     if (value == ACCEPT) G_monero_vstate.tx_special_confirmed = 1;
     ui_menu_validation_action(value);
 }
-UX_STEP_CB(ux_menu_special_validation_accept_step, pb,
-        ui_menu_special_validation_action(ACCEPT), {&C_icon_validate_14, "Accept"});
-UX_STEP_CB(ux_menu_special_validation_reject_step, pb,
-        ui_menu_special_validation_action(REJECT), {&C_icon_crossmark, "Reject"});
+LOKI_UX_ACCEPT_REJECT(ux_menu_special_validation, ui_menu_special_validation_action);
 
 /* Sign unlock output */
-UX_STEP_NOCB(ux_menu_unlock_validation_1_step, bb, {"Confirm Service", "Node Unlock"});
+UX_STEP_NOCB(ux_menu_unlock_validation_step, bb, {"Confirm Service", "Node Unlock"});
 UX_FLOW(ux_flow_unlock_validation,
-        &ux_menu_unlock_validation_1_step,
+        &ux_menu_unlock_validation_step,
         &ux_menu_special_validation_accept_step,
         &ux_menu_special_validation_reject_step);
 void ui_menu_unlock_validation_display(void) { ux_flow_init(0, ux_flow_unlock_validation, NULL); }
 
 /* LNS */
-UX_STEP_NOCB(ux_menu_lns_validation_1_step, bb, {"Confirm Loki", "Name Service TX"});
+UX_STEP_NOCB(ux_menu_lns_validation_step, bb, {"Confirm Loki", "Name Service TX"});
 UX_FLOW(ux_flow_lns_validation,
-        &ux_menu_lns_validation_1_step,
+        &ux_menu_lns_validation_step,
         &ux_menu_special_validation_accept_step,
         &ux_menu_special_validation_reject_step);
 
@@ -335,23 +309,23 @@ void ui_menu_lns_validation_display(void) { ux_flow_init(0, ux_flow_lns_validati
 /* -------------------------------- EXPORT VIEW KEY UX --------------------------------- */
 unsigned int ui_menu_export_viewkey_action(unsigned int value);
 
-UX_STEP_CB(ux_menu_export_viewkey_1_step, pb, ui_menu_export_viewkey_action(ACCEPT),
+UX_STEP_CB(ux_menu_export_viewkey_export_step, pb, ui_menu_export_viewkey_action(ACCEPT),
            {&C_icon_validate_14, "Export view key?"});
 
-UX_STEP_CB(ux_menu_export_viewkey_2_step, pb, ui_menu_export_viewkey_action(ACCEPT | 0x10000),
+UX_STEP_CB(ux_menu_export_viewkey_export_always_step, pb, ui_menu_export_viewkey_action(ACCEPT | 0x10000),
            {&C_icon_validate_14, "Always export"});
 
-UX_STEP_CB(ux_menu_export_viewkey_3_step, pb, ui_menu_export_viewkey_action(REJECT),
+UX_STEP_CB(ux_menu_export_viewkey_reject_step, pb, ui_menu_export_viewkey_action(REJECT),
            {&C_icon_crossmark, "Reject"});
 
-UX_STEP_CB(ux_menu_export_viewkey_4_step, pb, ui_menu_export_viewkey_action(REJECT | 0x10000),
+UX_STEP_CB(ux_menu_export_viewkey_reject_always_step, pb, ui_menu_export_viewkey_action(REJECT | 0x10000),
            {&C_icon_crossmark, "Always reject"});
 
 UX_FLOW(ux_flow_export_viewkey,
-        &ux_menu_export_viewkey_1_step,
-        &ux_menu_export_viewkey_2_step,
-        &ux_menu_export_viewkey_3_step,
-        &ux_menu_export_viewkey_4_step,
+        &ux_menu_export_viewkey_export_step,
+        &ux_menu_export_viewkey_export_always_step,
+        &ux_menu_export_viewkey_reject_step,
+        &ux_menu_export_viewkey_reject_always_step,
         FLOW_LOOP
         );
 
@@ -607,25 +581,11 @@ void ui_menu_confirm_change_display() {
 void ui_menu_reset_display(void);
 void ui_menu_reset_action(unsigned int value);
 
-UX_STEP_NOCB(ux_menu_reset_1_step, nn,
-             {
-                 "",
-                 "Really Reset?",
-             });
+UX_STEP_NOCB(ux_menu_reset_really_step, nn, {"", "Really Reset?"});
+UX_STEP_CB(ux_menu_reset_no_step, pb, ui_menu_reset_action(REJECT), {&C_icon_crossmark, "No"});
+UX_STEP_CB(ux_menu_reset_yes_step, pb, ui_menu_reset_action(ACCEPT), {&C_icon_validate_14, "Yes"});
 
-UX_STEP_CB(ux_menu_reset_2_step, pb, ui_menu_reset_action(REJECT),
-           {
-               &C_icon_crossmark,
-               "No",
-           });
-
-UX_STEP_CB(ux_menu_reset_3_step, pb, ui_menu_reset_action(ACCEPT),
-           {
-               &C_icon_validate_14,
-               "Yes",
-           });
-
-UX_FLOW(ux_flow_reset, &ux_menu_reset_1_step, &ux_menu_reset_2_step, &ux_menu_reset_3_step);
+UX_FLOW(ux_flow_reset, &ux_menu_reset_really_step, &ux_menu_reset_no_step, &ux_menu_reset_yes_step);
 
 void ui_menu_reset_display(void) { ux_flow_init(0, ux_flow_reset, 0); }
 
@@ -674,28 +634,28 @@ void ui_menu_settings_display(void) {
 /* ---------------------------- PUBLIC ADDRESS UX ---------------------------- */
 void ui_menu_pubaddr_action(void);
 
-UX_STEP_NOCB(ux_menu_pubaddr_1_step, nn,
+UX_STEP_NOCB(ux_menu_pubaddr_meta_step, nn,
          {
              .line1 = G_monero_vstate.ux_addr_type,
              .line2 = G_monero_vstate.ux_addr_info
          });
 
-UX_STEP_NOCB(ux_menu_pubaddr_2_step, paging,
+UX_STEP_NOCB(ux_menu_pubaddr_address_step, paging,
         {
             .title = "Address",
             .text = G_monero_vstate.ux_address
         });
 
-UX_STEP_CB(ux_menu_pubaddr_3_step, pb, ui_menu_pubaddr_action(),
+UX_STEP_CB(ux_menu_pubaddr_back_step, pb, ui_menu_pubaddr_action(),
         {
             .icon = &C_icon_back,
             .line1 = "Back"
         });
 
 UX_FLOW(ux_flow_pubaddr,
-        &ux_menu_pubaddr_1_step,
-        &ux_menu_pubaddr_2_step,
-        &ux_menu_pubaddr_3_step,
+        &ux_menu_pubaddr_meta_step,
+        &ux_menu_pubaddr_address_step,
+        &ux_menu_pubaddr_back_step,
         FLOW_LOOP
         );
 
@@ -760,7 +720,7 @@ void ui_menu_pubaddr_display(void) {
 /* --------------------------------- MAIN UX --------------------------------- */
 
 UX_STEP_CB(
-    ux_menu_main_1_step,
+    ux_menu_main_address_step,
     pnn,
     ui_menu_pubaddr_display(),
     {
@@ -770,20 +730,20 @@ UX_STEP_CB(
     });
 
 UX_STEP_CB(
-    ux_menu_main_2_step,
+    ux_menu_main_settings_step,
     pb,
     ui_menu_settings_display(),
     {&C_icon_coggle, "Settings"}
 );
 
 UX_STEP_NOCB(
-    ux_menu_main_3_step,
+    ux_menu_main_version_step,
     bn,
     {"Version", LOKI_VERSION_STRING}
 );
 
 UX_STEP_CB(
-    ux_menu_main_4_step,
+    ux_menu_main_quit_step,
     pb,
     os_sched_exit(0),
     {&C_icon_dashboard_x, "Quit app"}
@@ -791,10 +751,10 @@ UX_STEP_CB(
 
 UX_FLOW(
     ux_flow_main,
-    &ux_menu_main_1_step,
-    &ux_menu_main_2_step,
-    &ux_menu_main_3_step,
-    &ux_menu_main_4_step,
+    &ux_menu_main_address_step,
+    &ux_menu_main_settings_step,
+    &ux_menu_main_version_step,
+    &ux_menu_main_quit_step,
     FLOW_LOOP
 );
 
