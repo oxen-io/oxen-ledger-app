@@ -254,7 +254,8 @@ UX_FLOW(ux_flow_validation,
         &ux_menu_validation_amount_step,
         &ux_menu_validation_recipient_step,
         &ux_menu_validation_accept_step,
-        &ux_menu_validation_reject_step);
+        &ux_menu_validation_reject_step,
+        FLOW_LOOP);
 
 void ui_menu_validation_display(void) { ux_flow_init(0, ux_flow_validation, NULL); }
 
