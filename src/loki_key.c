@@ -26,13 +26,8 @@
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 static void monero_payment_id_to_str(const unsigned char *payment_id, char *str) {
-    for (int i = 0; i < 8; i++) {
-        if (payment_id[i] <= 0xF) {
-            snprintf(str + i * 2, 3, "0%x", payment_id[i]);
-        } else {
-            snprintf(str + i * 2, 3, "%x", payment_id[i]);
-        }
-    }
+    for (int i = 0; i < 8; i++)
+        snprintf(str + i * 2, 3, "%02x", payment_id[i]);
 }
 
 int monero_apdu_display_address(void) {
