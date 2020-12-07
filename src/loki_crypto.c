@@ -558,6 +558,29 @@ void loki_generate_key_image_signature(unsigned char *sig, unsigned char *img, u
     monero_subm(sig+32, k, tmp); // r = k - xc
 }
 
+/* ----------------------------------------------------------------------- */
+/* ---                                                                 --- */
+/* ----------------------------------------------------------------------- */
+void loki_generate_signature(unsigned char *sig, unsigned char *hash, unsigned char *A, unsigned char *a) {
+    unsigned char r[32];
+    unsigned char tmp[32];
+
+    monero_rng_mod_order(r); // r = random ]0..L[
+    monero_ecmul_G(tmp, r); // R = rG
+
+    monero_keccak_init_H(); // Need to calculate H(M || A || R)
+    monero_keccak_update_H(hash, 32); // H(M
+    monero_keccak_update_H(A, 32);    //     || A
+    monero_keccak_update_H(tmp, 32);  //          || R)
+    // sig = [c,s]
+    // c = H(M||A||R) mod L:
+    monero_keccak_final_H(sig);
+    monero_reduce(sig, sig);
+
+    monero_multm(tmp, sig, a); // ac
+    monero_subm(sig+32, r, tmp); // s = r - ac
+}
+
 /* ======================================================================= */
 /*                               SUB ADDRESS                               */
 /* ======================================================================= */
