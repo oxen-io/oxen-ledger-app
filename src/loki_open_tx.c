@@ -1,7 +1,8 @@
 /*****************************************************************************
- *   Ledger Monero App.
+ *   Ledger Loki App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
+ *   (c) 2020 Loki Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
