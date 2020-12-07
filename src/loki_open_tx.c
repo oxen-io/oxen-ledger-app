@@ -44,11 +44,10 @@ void monero_reset_tx(int reset_tx_cnt) {
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 int monero_apdu_open_tx(void) {
-    unsigned int account;
+    uint16_t txversion, txtype;
 
-    account = monero_io_fetch_u32();
-    uint8_t txversion = monero_io_fetch_u8();
-    uint8_t txtype = monero_io_fetch_u8();
+    txversion = monero_io_fetch_u16();
+    txtype = monero_io_fetch_u16();
 
     if (txversion != 4)
         THROW(SW_WRONG_DATA_RANGE);
