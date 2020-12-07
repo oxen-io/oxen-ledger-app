@@ -17,8 +17,8 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#ifndef MONERO_TYPES_H
-#define MONERO_TYPES_H
+#ifndef LOKI_TYPES_H
+#define LOKI_TYPES_H
 
 #include "os_io_seproxyhal.h"
 
@@ -35,13 +35,6 @@
  *  So set up length to F0 minus 2 bytes for SW
  */
 #define MONERO_APDU_LENGTH 0xFE
-
-/* big private DO */
-#define MONERO_EXT_PRIVATE_DO_LENGTH 512
-/* will be fixed..1024 is not enougth */
-#define MONERO_EXT_CARD_HOLDER_CERT_LENTH 2560
-/* random choice */
-#define MONERO_EXT_CHALLENGE_LENTH 254
 
 /* --- ... --- */
 #define MAINNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX            114
@@ -67,7 +60,7 @@ enum network_type {
     FAKECHAIN = 3
 };
 
-struct monero_nv_state_s {
+typedef struct loki_nv_state_t {
     /* magic */
     unsigned char magic[8];
 
@@ -115,9 +108,7 @@ struct monero_nv_state_s {
         char words[26][WORDS_MAX_LENGTH];
         char words_list[25 * WORDS_MAX_LENGTH + 25];
     };
-};
-
-typedef struct monero_nv_state_s monero_nv_state_t;
+} loki_nv_state_t;
 
 enum device_mode { NONE, TRANSACTION_CREATE_REAL, TRANSACTION_CREATE_FAKE, TRANSACTION_PARSE };
 
@@ -129,7 +120,7 @@ enum txtype { TXTYPE_STANDARD, TXTYPE_STATE_CHANGE, TXTYPE_UNLOCK, TXTYPE_STAKE,
 
 #define MONERO_IO_BUFFER_LENGTH 288
 
-struct monero_v_state_s {
+typedef struct monero_v_state_t {
     unsigned char state;
     unsigned char protocol;
 
@@ -146,7 +137,6 @@ struct monero_v_state_s {
     unsigned char io_le;
     unsigned short io_length;
     unsigned short io_offset;
-    unsigned short io_mark;
     unsigned char io_buffer[MONERO_IO_BUFFER_LENGTH];
 
     unsigned char options;
@@ -256,8 +246,7 @@ struct monero_v_state_s {
         };
         unsigned char tmp[160]; // Used as extra temp storage in loki_proof, loki_clsag
     };
-};
-typedef struct monero_v_state_s monero_v_state_t;
+} monero_v_state_t;
 
 #define SIZEOF_TX_VSTATE (sizeof(monero_v_state_t) - OFFSETOF(monero_v_state_t, state))
 
@@ -271,7 +260,6 @@ typedef struct monero_v_state_s monero_v_state_t;
 
 /* ---  ...  --- */
 #define IO_OFFSET_END  (unsigned int)-1
-#define IO_OFFSET_MARK (unsigned int)-2
 
 #define ENCRYPTED_PAYMENT_ID_TAIL 0x8d
 
@@ -283,7 +271,6 @@ typedef struct monero_v_state_s monero_v_state_t;
 
 /* ---  INS  --- */
 
-#define INS_NONE         0x00
 #define INS_RESET        0x02
 #define INS_LOCK_DISPLAY 0x04
 
@@ -294,7 +281,6 @@ typedef struct monero_v_state_s monero_v_state_t;
 #define INS_PUT_KEY            0x22
 #define INS_GET_CHACHA8_PREKEY 0x24
 #define INS_VERIFY_KEY         0x26
-#define INS_MANAGE_SEEDWORDS   0x28
 
 #define INS_SECRET_KEY_TO_PUBLIC_KEY 0x30
 #define INS_GEN_KEY_DERIVATION       0x32

@@ -28,7 +28,6 @@ class Type(enum.IntEnum):
 
 @enum.unique
 class InsType(enum.IntEnum):
-    INS_NONE = 0x00
     INS_RESET = 0x02
     INS_LOCK_DISPLAY = 0x04
 
@@ -37,7 +36,6 @@ class InsType(enum.IntEnum):
     INS_PUT_KEY = 0x22
     INS_GET_CHACHA8_PREKEY = 0x24
     INS_VERIFY_KEY = 0x26
-    INS_MANAGE_SEEDWORDS = 0x28
 
     INS_SECRET_KEY_TO_PUBLIC_KEY = 0x30
     INS_GEN_KEY_DERIVATION = 0x32

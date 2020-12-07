@@ -135,17 +135,17 @@ void loki_install(unsigned char netId) {
     unsigned char c;
 
     // full reset data
-    monero_nvm_write((void*)N_monero_pstate, NULL, sizeof(monero_nv_state_t));
+    nvm_write((void*)N_monero_pstate, NULL, sizeof(monero_nv_state_t));
 
     // set mode key
     c = KEY_MODE_SEED;
     nvm_write((void*)&N_monero_pstate->key_mode, &c, 1);
 
     // set net id
-    monero_nvm_write((void*)&N_monero_pstate->network_id, &netId, 1);
+    nvm_write((void*)&N_monero_pstate->network_id, &netId, 1);
 
     // write magic
-    monero_nvm_write((void*)N_monero_pstate->magic, (void*)C_MAGIC, sizeof(C_MAGIC));
+    nvm_write((void*)N_monero_pstate->magic, (void*)C_MAGIC, sizeof(C_MAGIC));
 }
 
 /* ----------------------------------------------------------------------- */

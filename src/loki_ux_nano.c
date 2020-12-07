@@ -23,7 +23,6 @@
 #include "loki_api.h"
 #include "loki_vars.h"
 
-#include "loki_ux_msg.h"
 #include "os_io_seproxyhal.h"
 #include "glyphs.h"
 
@@ -327,7 +326,7 @@ unsigned int ui_menu_export_viewkey_action(unsigned int value) {
     if (value & 0x10000) { // remember
         value &= ~0x10000;
         unsigned char val = value == ACCEPT ? VIEWKEY_EXPORT_ALWAYS_ALLOW : VIEWKEY_EXPORT_ALWAYS_DENY;
-        monero_nvm_write((void*)&N_monero_pstate->viewkey_export_mode, &val, sizeof(unsigned char));
+        nvm_write((void*)&N_monero_pstate->viewkey_export_mode, &val, sizeof(unsigned char));
     }
 
     if (value == ACCEPT) {
@@ -365,7 +364,7 @@ const char* viewkey_export_submenu_getter(unsigned int idx) {
 void viewkey_export_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(viewkey_export_submenu_values)) {
         unsigned char val = idx;
-        monero_nvm_write((void*)&N_monero_pstate->viewkey_export_mode, &val, sizeof(unsigned char));
+        nvm_write((void*)&N_monero_pstate->viewkey_export_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_VIEW_KEY_EXPORT);
@@ -477,7 +476,7 @@ const char* truncate_addrs_submenu_getter(unsigned int idx) {
 void truncate_addrs_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(truncate_addrs_values)) {
         unsigned char val = idx;
-        monero_nvm_write((void*)&N_monero_pstate->truncate_addrs_mode, &val, sizeof(unsigned char));
+        nvm_write((void*)&N_monero_pstate->truncate_addrs_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_ADDRESS_CONFIRM);
@@ -512,7 +511,7 @@ const char* confirm_fee_submenu_getter(unsigned int idx) {
 void confirm_fee_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(confirm_fee_values)) {
         unsigned char val = idx;
-        monero_nvm_write((void*)&N_monero_pstate->confirm_fee_mode, &val, sizeof(unsigned char));
+        nvm_write((void*)&N_monero_pstate->confirm_fee_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_FEE_CONFIRM);
@@ -539,7 +538,7 @@ const char* confirm_change_submenu_getter(unsigned int idx) {
 void confirm_change_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(confirm_change_values)) {
         unsigned char val = idx;
-        monero_nvm_write((void*)&N_monero_pstate->confirm_change_mode, &val, sizeof(unsigned char));
+        nvm_write((void*)&N_monero_pstate->confirm_change_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_CHANGE_CONFIRM);
@@ -566,7 +565,7 @@ void ui_menu_reset_display(void) { ux_flow_init(0, ux_flow_reset, 0); }
 void ui_menu_reset_action(unsigned int value) {
     if (value == ACCEPT) {
         unsigned char magic[4] = {0};
-        monero_nvm_write((void*)N_monero_pstate->magic, magic, 4);
+        nvm_write((void*)N_monero_pstate->magic, magic, 4);
         monero_init();
     }
     ui_menu_main_display();

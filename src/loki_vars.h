@@ -17,8 +17,8 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#ifndef MONERO_VARS_H
-#define MONERO_VARS_H
+#ifndef LOKI_VARS_H
+#define LOKI_VARS_H
 
 #include "os.h"
 #include "cx.h"
@@ -36,10 +36,6 @@ extern monero_v_state_t G_monero_vstate;
 
 extern monero_nv_state_t N_state_pic;
 #define N_monero_pstate ((WIDE monero_nv_state_t *)PIC(&N_state_pic))
-
-#ifdef MONERO_DEBUG_MAIN
-extern int apdu_n;
-#endif
 
 extern ux_state_t ux;
 #endif

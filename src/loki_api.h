@@ -17,8 +17,8 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#ifndef MONERO_API_H
-#define MONERO_API_H
+#ifndef LOKI_API_H
+#define LOKI_API_H
 
 #include <stdint.h>
 
@@ -324,8 +324,6 @@ void monero_rng_mod_order(unsigned char *r);
 void monero_io_discard(int clear);
 void monero_io_clear(void);
 void monero_io_set_offset(unsigned int offset);
-void monero_io_mark(void);
-void monero_io_rewind(void);
 void monero_io_hole(unsigned int sz);
 void monero_io_inserted(unsigned int len);
 void monero_io_insert(unsigned char const *buffer, unsigned int len);
@@ -358,18 +356,5 @@ int monero_io_fetch_decrypt(unsigned char *buffer, int len, int type);
 int monero_io_fetch_decrypt_key(unsigned char *buffer);
 
 int monero_io_do(unsigned int io_flags);
-/* ----------------------------------------------------------------------- */
-/* ---                                DEBUG                           ---- */
-/* ----------------------------------------------------------------------- */
-#ifdef MONERO_DEBUG
-
-#include "loki_debug.h"
-
-#else
-
-#define monero_nvm_write   nvm_write
-#define monero_io_exchange io_exchange
-
-#endif
 
 #endif

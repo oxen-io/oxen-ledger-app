@@ -17,8 +17,6 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#ifndef MONERO_DEBUG_MAIN
-
 #include "os.h"
 #include "cx.h"
 #include "loki_types.h"
@@ -216,5 +214,3 @@ __attribute__((section(".boot"))) int main(void) {
     }
     app_exit();
 }
-
-#endif

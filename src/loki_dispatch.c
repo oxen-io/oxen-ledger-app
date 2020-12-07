@@ -96,7 +96,6 @@ int check_ins_access(void) {
         case INS_GET_SUBADDRESS:
         case INS_GET_SUBADDRESS_SPEND_PUBLIC_KEY:
         case INS_GET_SUBADDRESS_SECRET_KEY:
-        case INS_MANAGE_SEEDWORDS:
         case INS_UNBLIND:
         case INS_STEALTH:
         case INS_GET_TX_PROOF:
