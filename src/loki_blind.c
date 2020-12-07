@@ -36,7 +36,7 @@ int monero_apdu_blind() {
     monero_io_fetch(v, 32);
     monero_io_discard(1);
 
-    if ((G_monero_vstate.options & 0x03) == 2) {
+    if ((G_loki_state.options & 0x03) == 2) {
         os_memset(k, 0, 32);
         monero_ecdhHash(AKout, AKout);
         for (int i = 0; i < 8; i++) {
@@ -93,7 +93,7 @@ int monero_apdu_unblind() {
 
     monero_io_discard(1);
 
-    monero_unblind(v, k, AKout, G_monero_vstate.options & 0x03);
+    monero_unblind(v, k, AKout, G_loki_state.options & 0x03);
 
     // ret all
     monero_io_insert(v, 32);

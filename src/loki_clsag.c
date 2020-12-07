@@ -47,8 +47,8 @@ int monero_apdu_clsag_prepare() {
     unsigned char H[32];
     unsigned char W[32];
 
-    G_monero_vstate.tx_sign_cnt++;
-    if (G_monero_vstate.tx_sign_cnt == 0) {
+    G_loki_state.tx_sign_cnt++;
+    if (G_loki_state.tx_sign_cnt == 0) {
         monero_lock_and_throw(SW_SECURITY_MAX_SIGNATURE_REACHED);
     }
 
@@ -92,26 +92,26 @@ int monero_apdu_clsag_hash() {
 
     // We init hash if we just came off [1], or we just finished a [2,0].  In either case we require
     // the current command be [2,1] or [2,0] (i.e. first of multipart, or single-part):
-    if (G_monero_vstate.tx_state_p1 == 1 || LOKI_TX_STATE_P_EQUALS(2, 0)) {
-        if (G_monero_vstate.io_p2 > 1)
+    if (G_loki_state.tx_state_p1 == 1 || LOKI_TX_STATE_P_EQUALS(2, 0)) {
+        if (G_loki_state.io_p2 > 1)
             THROW(SW_SUBCOMMAND_NOT_ALLOWED);
         monero_keccak_init_H();
     } else if (!(
-                G_monero_vstate.io_p2 == 0 || // this chunk is last, *or*:
-                G_monero_vstate.io_p2 == (G_monero_vstate.tx_state_p2 == 255 ? 1 : G_monero_vstate.tx_state_p2 + 1) // this chunk properly follows the previous
+                G_loki_state.io_p2 == 0 || // this chunk is last, *or*:
+                G_loki_state.io_p2 == (G_loki_state.tx_state_p2 == 255 ? 1 : G_loki_state.tx_state_p2 + 1) // this chunk properly follows the previous
             )) {
         THROW(SW_SUBCOMMAND_NOT_ALLOWED);
     }
 
-    monero_keccak_update_H(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
-                           G_monero_vstate.io_length - G_monero_vstate.io_offset);
+    monero_keccak_update_H(G_loki_state.io_buffer + G_loki_state.io_offset,
+                           G_loki_state.io_length - G_loki_state.io_offset);
     monero_io_discard(1);
 
-    if (G_monero_vstate.io_p2 == 0) {
+    if (G_loki_state.io_p2 == 0) {
         monero_keccak_final_H(c);
         monero_reduce(c, c);
         monero_io_insert(c, 32);
-        os_memmove(G_monero_vstate.clsag_c, c, 32);
+        os_memmove(G_loki_state.clsag_c, c, 32);
     }
     return SW_OK;
 }
@@ -138,16 +138,16 @@ bool device_default::clsag_sign(const rct::key &c,
 */
 int monero_apdu_clsag_sign() {
     unsigned char s[32];
-    unsigned char *a = &G_monero_vstate.tmp[0];
-    unsigned char *p = &G_monero_vstate.tmp[32];
-    unsigned char *z = &G_monero_vstate.tmp[64];
-    unsigned char *mu_P = &G_monero_vstate.tmp[96];
-    unsigned char *mu_C = &G_monero_vstate.tmp[128];
+    unsigned char *a = &G_loki_state.tmp[0];
+    unsigned char *p = &G_loki_state.tmp[32];
+    unsigned char *z = &G_loki_state.tmp[64];
+    unsigned char *mu_P = &G_loki_state.tmp[96];
+    unsigned char *mu_C = &G_loki_state.tmp[128];
 
-    if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_FAKE) {
+    if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_FAKE) {
         monero_io_fetch(a, 32);
         monero_io_fetch(p, 32);
-    } else if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
+    } else if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         monero_io_fetch_decrypt(a, 32, TYPE_ALPHA);
         monero_io_fetch_decrypt(p, 32, TYPE_SCALAR);
     } else {
@@ -168,7 +168,7 @@ int monero_apdu_clsag_sign() {
     monero_reduce(z, z);
     monero_reduce(mu_P, mu_P);
     monero_reduce(mu_C, mu_C);
-    monero_reduce(G_monero_vstate.clsag_c, G_monero_vstate.clsag_c);
+    monero_reduce(G_loki_state.clsag_c, G_loki_state.clsag_c);
 
     // s0_p_mu_P = mu_P*p
     // s0_add_z_mu_C = mu_C*z + s0_p_mu_P
@@ -183,7 +183,7 @@ int monero_apdu_clsag_sign() {
     // s = p*mu_P + mu_C*z
     monero_addm(s, s, mu_P);
     // mu_P = c * (p*mu_P + mu_C*z)
-    monero_multm(mu_P, G_monero_vstate.clsag_c, s);
+    monero_multm(mu_P, G_loki_state.clsag_c, s);
     // s = a - c*(p*mu_P + mu_C*z)
     monero_subm(s, a, mu_P);
 

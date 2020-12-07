@@ -36,17 +36,17 @@ int monero_apdu_get_tx_proof(void) {
     unsigned char XY[32];
     unsigned char sig_c[32];
     unsigned char sig_r[32];
-#define k (G_monero_vstate.tmp + 128) // We go 32 bytes into this
+#define k (G_loki_state.tmp + 128) // We go 32 bytes into this
 
-    msg = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
+    msg = G_loki_state.io_buffer + G_loki_state.io_offset;
     monero_io_fetch(NULL, 32);
-    R = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
+    R = G_loki_state.io_buffer + G_loki_state.io_offset;
     monero_io_fetch(NULL, 32);
-    A = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
+    A = G_loki_state.io_buffer + G_loki_state.io_offset;
     monero_io_fetch(NULL, 32);
-    B = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
+    B = G_loki_state.io_buffer + G_loki_state.io_offset;
     monero_io_fetch(NULL, 32);
-    D = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
+    D = G_loki_state.io_buffer + G_loki_state.io_offset;
     monero_io_fetch(NULL, 32);
     monero_io_fetch_decrypt_key(r);
 
@@ -55,11 +55,11 @@ int monero_apdu_get_tx_proof(void) {
     // Generate random k
     monero_rng_mod_order(k);
     // tmp = msg
-    os_memmove(G_monero_vstate.tmp + 32 * 0, msg, 32);
+    os_memmove(G_loki_state.tmp + 32 * 0, msg, 32);
     // tmp = msg || D
-    os_memmove(G_monero_vstate.tmp + 32 * 1, D, 32);
+    os_memmove(G_loki_state.tmp + 32 * 1, D, 32);
 
-    if (G_monero_vstate.options & 1) {
+    if (G_loki_state.options & 1) {
         // X = kB
         monero_ecmul_k(XY, B, k);
     } else {
@@ -67,12 +67,12 @@ int monero_apdu_get_tx_proof(void) {
         monero_ecmul_G(XY, k);
     }
     // tmp = msg || D || X
-    os_memmove(G_monero_vstate.tmp + 32 * 2, XY, 32);
+    os_memmove(G_loki_state.tmp + 32 * 2, XY, 32);
 
     // Y = kA
     monero_ecmul_k(XY, A, k);
     // tmp = msg || D || X || Y
-    os_memmove(G_monero_vstate.tmp + 32 * 3, XY, 32);
+    os_memmove(G_loki_state.tmp + 32 * 3, XY, 32);
 
 /* Monero V2 proofs (not currently present in Loki).
  *
@@ -80,21 +80,21 @@ int monero_apdu_get_tx_proof(void) {
 
     monero_keccak_H((unsigned char *)"TXPROOF_V2", 10, sep);
     // tmp = msg || D || X || Y || sep
-    os_memmove(G_monero_vstate.tmp + 32 * 4, sep, 32);
+    os_memmove(G_loki_state.tmp + 32 * 4, sep, 32);
     // tmp = msg || D || X || Y || sep || R
-    os_memmove(G_monero_vstate.tmp + 32 * 5, R, 32);
+    os_memmove(G_loki_state.tmp + 32 * 5, R, 32);
     // tmp = msg || D || X || Y || sep || R || A
-    os_memmove(G_monero_vstate.tmp + 32 * 6, A, 32);
+    os_memmove(G_loki_state.tmp + 32 * 6, A, 32);
     // tmp = msg || D || X || Y || sep || R || B or [0]
-    os_memmove(G_monero_vstate.tmp + 32 * 7, B, 32);
+    os_memmove(G_loki_state.tmp + 32 * 7, B, 32);
 
-    monero_hash_to_scalar(sig_c, &G_monero_vstate.tmp[0], 32 * 8);
+    monero_hash_to_scalar(sig_c, &G_loki_state.tmp[0], 32 * 8);
 */
 
     // sig_c = H_n(tmp)
-    monero_hash_to_scalar(sig_c, &G_monero_vstate.tmp[0], 32 * 4);
+    monero_hash_to_scalar(sig_c, &G_loki_state.tmp[0], 32 * 4);
     // Monero V2 proof version:
-    //monero_hash_to_scalar(sig_c, &G_monero_vstate.tmp[0], 32 * 8);
+    //monero_hash_to_scalar(sig_c, &G_loki_state.tmp[0], 32 * 8);
 
     // sig_c*r
     monero_multm(XY, sig_c, r);

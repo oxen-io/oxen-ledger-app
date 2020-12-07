@@ -61,14 +61,14 @@ static void monero_uint642str(uint64_t val, char *str) {
 /* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_init(void) {
     monero_keccak_init_H();
-    if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
+    if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         if (monero_io_fetch_varint16() != 4) // tx version; we only support v4 txes
             THROW(SW_WRONG_DATA_RANGE);
 
         uint16_t txtype = monero_io_fetch_varint16();
         uint64_t timelock = monero_io_fetch_varint();
 
-        if (G_monero_vstate.tx_type != txtype)
+        if (G_loki_state.tx_type != txtype)
             THROW(SW_WRONG_DATA_RANGE);
 
         if (timelock != 0 && txtype != TXTYPE_STANDARD)
@@ -82,7 +82,7 @@ int monero_apdu_prefix_hash_init(void) {
         // At this stage we only want to check for a timelock and prompt if necessary (to prevent
         // accidental timelocked transactions).
         if (timelock != 0) {
-            monero_uint642str(timelock, G_monero_vstate.ux_amount);
+            monero_uint642str(timelock, G_loki_state.ux_amount);
             ui_menu_timelock_validation_display();
             return 0;
         } else {
@@ -98,12 +98,12 @@ int monero_apdu_prefix_hash_init(void) {
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_update(void) {
-    monero_keccak_update_H(G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
-                           G_monero_vstate.io_length - G_monero_vstate.io_offset);
+    monero_keccak_update_H(G_loki_state.io_buffer + G_loki_state.io_offset,
+                           G_loki_state.io_length - G_loki_state.io_offset);
     monero_io_discard(0);
-    if (G_monero_vstate.io_p2 == 0) {
-        monero_keccak_final_H(G_monero_vstate.prefixH);
-        monero_io_insert(G_monero_vstate.prefixH, 32);
+    if (G_loki_state.io_p2 == 0) {
+        monero_keccak_final_H(G_loki_state.prefixH);
+        monero_io_insert(G_loki_state.prefixH, 32);
     }
 
     return SW_OK;

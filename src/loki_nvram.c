@@ -23,4 +23,4 @@
 #include "loki_api.h"
 #include "loki_vars.h"
 
-monero_nv_state_t N_state_pic;
+loki_nv_state_t N_state_pic;

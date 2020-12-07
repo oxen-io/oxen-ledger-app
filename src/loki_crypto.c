@@ -309,18 +309,18 @@ void monero_ge_fromfe_frombytes(unsigned char *ge, unsigned char *bytes) {
 
 #define Pxy uv._Pxy
 #else
-#define u  (G_monero_vstate.io_buffer + 0 * 32)
-#define v  (G_monero_vstate.io_buffer + 1 * 32)
-#define w  (G_monero_vstate.io_buffer + 2 * 32)
-#define x  (G_monero_vstate.io_buffer + 3 * 32)
-#define y  (G_monero_vstate.io_buffer + 4 * 32)
-#define z  (G_monero_vstate.io_buffer + 5 * 32)
-#define rX (G_monero_vstate.io_buffer + 6 * 32)
-#define rY (G_monero_vstate.io_buffer + 7 * 32)
-#define rZ (G_monero_vstate.io_buffer + 8 * 32)
+#define u  (G_loki_state.io_buffer + 0 * 32)
+#define v  (G_loki_state.io_buffer + 1 * 32)
+#define w  (G_loki_state.io_buffer + 2 * 32)
+#define x  (G_loki_state.io_buffer + 3 * 32)
+#define y  (G_loki_state.io_buffer + 4 * 32)
+#define z  (G_loki_state.io_buffer + 5 * 32)
+#define rX (G_loki_state.io_buffer + 6 * 32)
+#define rY (G_loki_state.io_buffer + 7 * 32)
+#define rZ (G_loki_state.io_buffer + 8 * 32)
 
-    //#define uv7 (G_monero_vstate.io_buffer+9*32)
-    //#define v3  (G_monero_vstate.io_buffer+10*32)
+    //#define uv7 (G_loki_state.io_buffer+9*32)
+    //#define v3  (G_loki_state.io_buffer+10*32)
     union {
         unsigned char _Pxy[65];
         struct {
@@ -605,11 +605,11 @@ void monero_derive_subaddress_public_key(unsigned char *x, unsigned char *pub,
 /* ----------------------------------------------------------------------- */
 void monero_get_subaddress_spend_public_key(unsigned char *x, unsigned char *index) {
     // m = Hs(a || index_major || index_minor)
-    monero_get_subaddress_secret_key(x, G_monero_vstate.view_priv, index);
+    monero_get_subaddress_secret_key(x, G_loki_state.view_priv, index);
     // M = m*G
     monero_secret_key_to_public_key(x, x);
     // D = B + M
-    monero_ecadd(x, x, G_monero_vstate.spend_pub);
+    monero_ecadd(x, x, G_loki_state.spend_pub);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -619,7 +619,7 @@ void monero_get_subaddress(unsigned char *C, unsigned char *D, unsigned char *in
     // retrieve D
     monero_get_subaddress_spend_public_key(D, index);
     // C = a*D
-    monero_ecmul_k(C, D, G_monero_vstate.view_priv);
+    monero_ecmul_k(C, D, G_loki_state.view_priv);
 }
 
 /* ----------------------------------------------------------------------- */

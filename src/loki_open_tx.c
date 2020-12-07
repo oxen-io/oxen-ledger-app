@@ -27,17 +27,17 @@
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 void monero_reset_tx(int reset_tx_cnt) {
-    os_memset(G_monero_vstate.r, 0, 32);
-    os_memset(G_monero_vstate.R, 0, 32);
-    cx_rng(G_monero_vstate.hmac_key, 32);
+    os_memset(G_loki_state.r, 0, 32);
+    os_memset(G_loki_state.R, 0, 32);
+    cx_rng(G_loki_state.hmac_key, 32);
 
     monero_keccak_init_H();
     monero_sha256_commitment_init();
     monero_sha256_outkeys_init();
-    G_monero_vstate.tx_in_progress = 0;
-    G_monero_vstate.tx_output_cnt = 0;
+    G_loki_state.tx_in_progress = 0;
+    G_loki_state.tx_output_cnt = 0;
     if (reset_tx_cnt) {
-        G_monero_vstate.tx_cnt = 0;
+        G_loki_state.tx_cnt = 0;
     }
 }
 
@@ -58,29 +58,29 @@ int monero_apdu_open_tx(void) {
     monero_io_discard(1);
 
     monero_reset_tx(0);
-    G_monero_vstate.tx_type = txtype;
-    G_monero_vstate.tx_cnt++;
+    G_loki_state.tx_type = txtype;
+    G_loki_state.tx_cnt++;
     ui_menu_opentx_display();
-    if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
+    if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         // return 0;
     }
     return monero_apdu_open_tx_cont();
 }
 
 int monero_apdu_open_tx_cont(void) {
-    G_monero_vstate.tx_in_progress = 1;
+    G_loki_state.tx_in_progress = 1;
 
 #ifdef DEBUG_HWDEVICE
-    os_memset(G_monero_vstate.hmac_key, 0xab, 32);
+    os_memset(G_loki_state.hmac_key, 0xab, 32);
 #else
-    cx_rng(G_monero_vstate.hmac_key, 32);
+    cx_rng(G_loki_state.hmac_key, 32);
 #endif
 
-    monero_rng_mod_order(G_monero_vstate.r);
-    monero_ecmul_G(G_monero_vstate.R, G_monero_vstate.r);
+    monero_rng_mod_order(G_loki_state.r);
+    monero_ecmul_G(G_loki_state.R, G_loki_state.r);
 
-    monero_io_insert(G_monero_vstate.R, 32);
-    monero_io_insert_encrypt(G_monero_vstate.r, 32, TYPE_SCALAR);
+    monero_io_insert(G_loki_state.R, 32);
+    monero_io_insert_encrypt(G_loki_state.r, 32, TYPE_SCALAR);
     monero_io_insert(C_FAKE_SEC_VIEW_KEY, 32);
     monero_io_insert_hmac_for((void*)C_FAKE_SEC_VIEW_KEY, 32, TYPE_SCALAR);
     monero_io_insert(C_FAKE_SEC_SPEND_KEY, 32);
@@ -93,7 +93,7 @@ int monero_apdu_open_tx_cont(void) {
 /* ----------------------------------------------------------------------- */
 int monero_apdu_close_tx(void) {
     monero_io_discard(1);
-    monero_reset_tx(G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL);
+    monero_reset_tx(G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL);
     ui_menu_main_display();
     return SW_OK;
 }
@@ -113,7 +113,7 @@ int monero_abort_tx(void) {
 int monero_apdu_set_signature_mode(void) {
     unsigned int sig_mode;
 
-    G_monero_vstate.tx_sig_mode = TRANSACTION_CREATE_FAKE;
+    G_loki_state.tx_sig_mode = TRANSACTION_CREATE_FAKE;
 
     sig_mode = monero_io_fetch_u8();
     monero_io_discard(0);
@@ -124,8 +124,8 @@ int monero_apdu_set_signature_mode(void) {
         default:
             monero_lock_and_throw(SW_WRONG_DATA);
     }
-    G_monero_vstate.tx_sig_mode = sig_mode;
+    G_loki_state.tx_sig_mode = sig_mode;
 
-    monero_io_insert_u32(G_monero_vstate.tx_sig_mode);
+    monero_io_insert_u32(G_loki_state.tx_sig_mode);
     return SW_OK;
 }

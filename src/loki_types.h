@@ -120,7 +120,7 @@ enum txtype { TXTYPE_STANDARD, TXTYPE_STATE_CHANGE, TXTYPE_UNLOCK, TXTYPE_STAKE,
 
 #define MONERO_IO_BUFFER_LENGTH 288
 
-typedef struct monero_v_state_t {
+typedef struct loki_v_state_t {
     unsigned char state;
     unsigned char protocol;
 
@@ -246,9 +246,7 @@ typedef struct monero_v_state_t {
         };
         unsigned char tmp[160]; // Used as extra temp storage in loki_proof, loki_clsag
     };
-} monero_v_state_t;
-
-#define SIZEOF_TX_VSTATE (sizeof(monero_v_state_t) - OFFSETOF(monero_v_state_t, state))
+} loki_v_state_t;
 
 #define STATE_IDLE 0xC0
 

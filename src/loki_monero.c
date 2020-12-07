@@ -117,8 +117,8 @@ unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned c
     unsigned char offset;
     unsigned short prefix;
 
-    // data[0] = N_monero_pstate->network_id;
-    switch (N_monero_pstate->network_id) {
+    // data[0] = N_loki_state->network_id;
+    switch (N_loki_state->network_id) {
         case TESTNET:
             if (paymentID) {
                 prefix = TESTNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
@@ -158,8 +158,8 @@ unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned c
         os_memmove(data + offset, paymentID, 8);
         offset += ADDR_PAYMENTID_SIZE;
     }
-    monero_keccak_F(data, offset, G_monero_vstate.addr_checksum_hash);
-    os_memmove(data + offset, G_monero_vstate.addr_checksum_hash, ADDR_CHECKSUM_SIZE);
+    monero_keccak_F(data, offset, G_loki_state.addr_checksum_hash);
+    os_memmove(data + offset, G_loki_state.addr_checksum_hash, ADDR_CHECKSUM_SIZE);
     offset += ADDR_CHECKSUM_SIZE;
 
     unsigned char full_block_count = offset / FULL_BLOCK_SIZE;

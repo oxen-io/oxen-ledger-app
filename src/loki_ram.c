@@ -31,6 +31,4 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 ux_state_t G_ux;
 bolos_ux_params_t G_ux_params;
 
-monero_v_state_t G_monero_vstate;
-
-//_Static_assert(sizeof(G_monero_vstate) == 2088, "unexpected size");
+loki_v_state_t G_loki_state;

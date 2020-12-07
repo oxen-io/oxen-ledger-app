@@ -46,7 +46,7 @@ int monero_apdu_display_address(void) {
 
     major = (index[0] << 0) | (index[1] << 8) | (index[2] << 16) | (index[3] << 24);
     minor = (index[4] << 0) | (index[5] << 8) | (index[6] << 16) | (index[7] << 24);
-    if ((minor | major) && (G_monero_vstate.io_p1 == 1)) {
+    if ((minor | major) && (G_loki_state.io_p1 == 1)) {
         THROW(SW_WRONG_DATA);
     }
 
@@ -54,26 +54,26 @@ int monero_apdu_display_address(void) {
     if (minor | major) {
         monero_get_subaddress(C, D, index);
     } else {
-        os_memmove(C, G_monero_vstate.view_pub, 32);
-        os_memmove(D, G_monero_vstate.spend_pub, 32);
+        os_memmove(C, G_loki_state.view_pub, 32);
+        os_memmove(D, G_loki_state.spend_pub, 32);
     }
 
     // prepare UI
     if (minor | major) {
-        G_monero_vstate.disp_addr_M = major;
-        G_monero_vstate.disp_addr_m = minor;
-        G_monero_vstate.disp_addr_mode = DISP_SUB;
+        G_loki_state.disp_addr_M = major;
+        G_loki_state.disp_addr_m = minor;
+        G_loki_state.disp_addr_mode = DISP_SUB;
     } else {
-        if (G_monero_vstate.io_p1 == 1) {
-            monero_payment_id_to_str(payment_id, G_monero_vstate.payment_id);
-            G_monero_vstate.disp_addr_mode = DISP_INTEGRATED;
+        if (G_loki_state.io_p1 == 1) {
+            monero_payment_id_to_str(payment_id, G_loki_state.payment_id);
+            G_loki_state.disp_addr_mode = DISP_INTEGRATED;
         } else {
-            G_monero_vstate.disp_addr_mode = DISP_MAIN;
+            G_loki_state.disp_addr_mode = DISP_MAIN;
         }
     }
 
     ui_menu_any_pubaddr_display(C, D, (minor | major) ? 1 : 0,
-                                (G_monero_vstate.io_p1 == 1) ? payment_id : NULL);
+                                (G_loki_state.io_p1 == 1) ? payment_id : NULL);
     return 0;
 }
 
@@ -93,7 +93,7 @@ int monero_apdu_put_key(void) {
     unsigned char sec[32];
 
     // option + priv/pub view key + priv/pub spend key + base58 address
-    if (G_monero_vstate.io_length != (1 + 32 * 2 + 32 * 2 + 95)) {
+    if (G_loki_state.io_length != (1 + 32 * 2 + 32 * 2 + 95)) {
         THROW(SW_WRONG_LENGTH);
         return SW_WRONG_LENGTH;
     }
@@ -106,7 +106,7 @@ int monero_apdu_put_key(void) {
         THROW(SW_WRONG_DATA);
         return SW_WRONG_DATA;
     }
-    nvm_write((void *)N_monero_pstate->view_priv, sec, 32);
+    nvm_write((void *)N_loki_state->view_priv, sec, 32);
 
     // spend key
     monero_io_fetch(sec, 32);
@@ -116,11 +116,11 @@ int monero_apdu_put_key(void) {
         THROW(SW_WRONG_DATA);
         return SW_WRONG_DATA;
     }
-    nvm_write((void *)N_monero_pstate->spend_priv, sec, 32);
+    nvm_write((void *)N_loki_state->spend_priv, sec, 32);
 
     // change mode
     unsigned char key_mode = KEY_MODE_EXTERNAL;
-    nvm_write((void *)&N_monero_pstate->key_mode, &key_mode, 1);
+    nvm_write((void *)&N_loki_state->key_mode, &key_mode, 1);
 
     monero_io_discard(1);
 
@@ -131,7 +131,7 @@ int monero_apdu_get_network(void) {
     // We sent back "LOKI" followed by the network type byte
     monero_io_discard(1);
     uint8_t nettype;
-    switch (N_monero_pstate->network_id) {
+    switch (N_loki_state->network_id) {
         case MAINNET: nettype = 0; break;
         case TESTNET: nettype = 1; break;
         case DEVNET: nettype = 2; break;
@@ -148,23 +148,23 @@ int monero_apdu_get_network(void) {
 /* ----------------------------------------------------------------------- */
 int monero_apdu_get_key(void) {
     monero_io_discard(1);
-    switch (G_monero_vstate.io_p1) {
+    switch (G_loki_state.io_p1) {
         // get pub
         case 1:
-            monero_io_insert(G_monero_vstate.view_pub, 32);
-            monero_io_insert(G_monero_vstate.spend_pub, 32);
+            monero_io_insert(G_loki_state.view_pub, 32);
+            monero_io_insert(G_loki_state.spend_pub, 32);
             // public base address
             unsigned char wallet_len = loki_wallet_address(
-                    (char *)G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
-                    G_monero_vstate.view_pub, G_monero_vstate.spend_pub, 0, NULL);
+                    (char *)G_loki_state.io_buffer + G_loki_state.io_offset,
+                    G_loki_state.view_pub, G_loki_state.spend_pub, 0, NULL);
             monero_io_inserted(wallet_len);
             break;
 
         // get private
         case 2:
             // view key
-            if (G_monero_vstate.export_view_key) {
-                monero_io_insert(G_monero_vstate.view_priv, 32);
+            if (G_loki_state.export_view_key) {
+                monero_io_insert(G_loki_state.view_priv, 32);
             } else {
                 ui_export_viewkey_display();
                 return 0;
@@ -184,19 +184,19 @@ int monero_apdu_get_key(void) {
             path[3] = 0x00000000;
             path[4] = 0x00000000;
 
-            os_perso_derive_node_bip32(CX_CURVE_SECP256K1, path, 5, seed, G_monero_vstate.view_priv);
+            os_perso_derive_node_bip32(CX_CURVE_SECP256K1, path, 5, seed, G_loki_state.view_priv);
             monero_io_insert(seed, 32);
 
-            monero_io_insert(G_monero_vstate.spend_priv, 32);
-            monero_io_insert(G_monero_vstate.view_priv, 32);
+            monero_io_insert(G_loki_state.spend_priv, 32);
+            monero_io_insert(G_loki_state.view_priv, 32);
 
             break;
         }
 
             // get info
         case 4:
-            monero_io_insert(G_monero_vstate.view_priv, 32);
-            monero_io_insert(G_monero_vstate.spend_priv, 32);
+            monero_io_insert(G_loki_state.view_priv, 32);
+            monero_io_insert(G_loki_state.spend_priv, 32);
             break;
 #endif
 
@@ -217,15 +217,15 @@ int monero_apdu_verify_key(void) {
 
     monero_io_fetch_decrypt_key(priv);
     monero_io_fetch(pub, 32);
-    switch (G_monero_vstate.io_p1) {
+    switch (G_loki_state.io_p1) {
         case 0:
             monero_secret_key_to_public_key(computed_pub, priv);
             break;
         case 1:
-            os_memmove(computed_pub, G_monero_vstate.view_pub, 32);
+            os_memmove(computed_pub, G_loki_state.view_pub, 32);
             break;
         case 2:
-            os_memmove(computed_pub, G_monero_vstate.spend_pub, 32);
+            os_memmove(computed_pub, G_loki_state.spend_pub, 32);
             break;
         default:
             THROW(SW_WRONG_P1P2);
@@ -248,11 +248,11 @@ int monero_apdu_get_chacha8_prekey(/*char  *prekey*/) {
     unsigned char pre[32];
 
     monero_io_discard(0);
-    os_memmove(abt, G_monero_vstate.view_priv, 32);
-    os_memmove(abt + 32, G_monero_vstate.spend_priv, 32);
+    os_memmove(abt, G_loki_state.view_priv, 32);
+    os_memmove(abt + 32, G_loki_state.spend_priv, 32);
     abt[64] = CHACHA8_KEY_TAIL;
     monero_keccak_F(abt, 65, pre);
-    monero_io_insert((unsigned char *)G_monero_vstate.keccakF.acc, 200);
+    monero_io_insert((unsigned char *)G_loki_state.keccakF.acc, 200);
     return SW_OK;
 }
 #undef CHACHA8_KEY_TAIL
@@ -268,14 +268,14 @@ int monero_apdu_sc_add(/*unsigned char *r, unsigned char *s1, unsigned char *s2*
     monero_io_fetch_decrypt(s1, 32, TYPE_SCALAR);
     monero_io_fetch_decrypt(s2, 32, TYPE_SCALAR);
     monero_io_discard(0);
-    if (G_monero_vstate.tx_in_progress) {
+    if (G_loki_state.tx_in_progress) {
         // During a transaction, only "last_derive_secret_key+last_get_subaddress_secret_key"
         // is allowed, in order to match the call at
         // https://github.com/monero-project/monero/blob/v0.15.0.5/src/cryptonote_basic/cryptonote_format_utils.cpp#L331
         //
         //      hwdev.sc_secret_add(scalar_step2, scalar_step1,subaddr_sk);
-        if ((os_memcmp(s1, G_monero_vstate.last_derive_secret_key, 32) != 0) ||
-            (os_memcmp(s2, G_monero_vstate.last_get_subaddress_secret_key, 32) != 0)) {
+        if ((os_memcmp(s1, G_loki_state.last_derive_secret_key, 32) != 0) ||
+            (os_memcmp(s2, G_loki_state.last_get_subaddress_secret_key, 32) != 0)) {
             monero_lock_and_throw(SW_WRONG_DATA);
         }
     }
@@ -431,7 +431,7 @@ int monero_apdu_derive_secret_key(/*const crypto::key_derivation &derivation, co
     monero_derive_secret_key(drvsec, derivation, output_index, sec);
 
     // sec key
-    os_memmove(G_monero_vstate.last_derive_secret_key, drvsec, 32);
+    os_memmove(G_loki_state.last_derive_secret_key, drvsec, 32);
     monero_io_insert_encrypt(drvsec, 32, TYPE_SCALAR);
     return SW_OK;
 }
@@ -444,8 +444,8 @@ int monero_apdu_derive_secret_key(/*const crypto::key_derivation &derivation, co
 // decrypt an arbitrary value), which is only ever set randomly.
 int loki_apdu_get_tx_secret_key(void) {
     monero_io_discard(0);
-    if (G_monero_vstate.tx_in_progress && G_monero_vstate.tx_type == TXTYPE_STAKE) {
-        monero_io_insert(G_monero_vstate.r, 32);
+    if (G_loki_state.tx_in_progress && G_loki_state.tx_type == TXTYPE_STAKE) {
+        monero_io_insert(G_loki_state.r, 32);
         return SW_OK;
     }
     THROW(SW_COMMAND_NOT_ALLOWED);
@@ -509,17 +509,17 @@ int loki_apdu_generate_unlock_signature(void) {
     unsigned char sec[32];
     unsigned char *pub;
 
-    if (G_monero_vstate.io_p1 == 0) {
+    if (G_loki_state.io_p1 == 0) {
         // Confirm the unlock with the user
         monero_io_discard(1);
         ui_menu_unlock_validation_display();
         return 0;
-    } else if (G_monero_vstate.io_p1 != 1 || !G_monero_vstate.tx_special_confirmed) {
+    } else if (G_loki_state.io_p1 != 1 || !G_loki_state.tx_special_confirmed) {
         monero_lock_and_throw(SW_WRONG_DATA);
     }
 
     // fetch
-    pub = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
+    pub = G_loki_state.io_buffer + G_loki_state.io_offset;
     monero_io_fetch(NULL, 32);
     monero_io_fetch_decrypt(sec, 32, TYPE_SCALAR);
     monero_io_discard(0);
@@ -535,60 +535,60 @@ int loki_apdu_generate_unlock_signature(void) {
 // Generates an LNS hash
 int loki_apdu_generate_lns_hash(void) {
 
-    if (G_monero_vstate.io_p1 == 0) {
+    if (G_loki_state.io_p1 == 0) {
         // Confirm the LNS initialization with the user
         monero_io_discard(1);
         ui_menu_lns_validation_display();
         return 0;
-    } else if (G_monero_vstate.io_p1 != 1 || !G_monero_vstate.tx_special_confirmed) {
+    } else if (G_loki_state.io_p1 != 1 || !G_loki_state.tx_special_confirmed) {
         monero_lock_and_throw(SW_WRONG_DATA);
     }
 
     // We init hash if we just came off [0] (in which case current cmd must be [1,1] or [1,0], i.e.
     // the first of multipart, or single-part.
-    if (G_monero_vstate.tx_state_p1 == 0) {
-        if (G_monero_vstate.io_p2 > 1)
+    if (G_loki_state.tx_state_p1 == 0) {
+        if (G_loki_state.io_p2 > 1)
             THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-        loki_hash_init_blake2b(&G_monero_vstate.blake2bF);
+        loki_hash_init_blake2b(&G_loki_state.blake2bF);
     // Otherwise we are in the hashing step so make sure the piece we receive properly follows
     } else if (!(
-                G_monero_vstate.io_p2 == 0 || // this chunk is last, *or*:
-                G_monero_vstate.io_p2 == (G_monero_vstate.tx_state_p2 == 255 ? 1 : G_monero_vstate.tx_state_p2 + 1) // this chunk properly follows the previous
+                G_loki_state.io_p2 == 0 || // this chunk is last, *or*:
+                G_loki_state.io_p2 == (G_loki_state.tx_state_p2 == 255 ? 1 : G_loki_state.tx_state_p2 + 1) // this chunk properly follows the previous
                 )) {
         THROW(SW_SUBCOMMAND_NOT_ALLOWED);
     }
 
-    monero_hash_update((cx_hash_t *)&G_monero_vstate.blake2bF,
-            G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
-            G_monero_vstate.io_length - G_monero_vstate.io_offset);
+    monero_hash_update((cx_hash_t *)&G_loki_state.blake2bF,
+            G_loki_state.io_buffer + G_loki_state.io_offset,
+            G_loki_state.io_length - G_loki_state.io_offset);
     monero_io_discard(1);
 
-    if (G_monero_vstate.io_p2 == 0) // This was the last data piece
-        monero_hash_final((cx_hash_t *)&G_monero_vstate.blake2bF, G_monero_vstate.lns_hash);
+    if (G_loki_state.io_p2 == 0) // This was the last data piece
+        monero_hash_final((cx_hash_t *)&G_loki_state.blake2bF, G_loki_state.lns_hash);
 
     return SW_OK;
 }
 
 int loki_apdu_generate_lns_signature(void) {
     unsigned char subaddr_index[8];
-#define SKEY &G_monero_vstate.tmp[0]
-#define PKEY &G_monero_vstate.tmp[32]
-#define STMP &G_monero_vstate.tmp[64]
-#define SIGNATURE &G_monero_vstate.tmp[64]
+#define SKEY &G_loki_state.tmp[0]
+#define PKEY &G_loki_state.tmp[32]
+#define STMP &G_loki_state.tmp[64]
+#define SIGNATURE &G_loki_state.tmp[64]
 
     monero_io_fetch(subaddr_index, 8);
     monero_io_discard(1);
 
     if (os_memcmp(subaddr_index, "\0\0\0\0\0\0\0\0", 8) == 0) {
-        os_memmove(SKEY, G_monero_vstate.spend_priv, 32);
-        os_memmove(PKEY, G_monero_vstate.spend_pub, 32);
+        os_memmove(SKEY, G_loki_state.spend_priv, 32);
+        os_memmove(PKEY, G_loki_state.spend_pub, 32);
     } else {
-        monero_get_subaddress_secret_key(STMP, G_monero_vstate.view_priv, subaddr_index);
-        monero_addm(SKEY, STMP, G_monero_vstate.spend_priv);
+        monero_get_subaddress_secret_key(STMP, G_loki_state.view_priv, subaddr_index);
+        monero_addm(SKEY, STMP, G_loki_state.spend_priv);
         monero_ecmul_G(PKEY, SKEY);
     }
 
-    loki_generate_signature(SIGNATURE, G_monero_vstate.lns_hash, PKEY, SKEY);
+    loki_generate_signature(SIGNATURE, G_loki_state.lns_hash, PKEY, SKEY);
     monero_io_insert(SIGNATURE, 64);
 
     return SW_OK;
@@ -673,7 +673,7 @@ int monero_apdu_get_subaddress_secret_key(/*const crypto::secret_key& sec, const
 
     monero_get_subaddress_secret_key(sub_sec, sec, index);
 
-    os_memmove(G_monero_vstate.last_get_subaddress_secret_key, sub_sec, 32);
+    os_memmove(G_loki_state.last_get_subaddress_secret_key, sub_sec, 32);
     monero_io_insert_encrypt(sub_sec, 32, TYPE_SCALAR);
     return SW_OK;
 }
@@ -703,11 +703,11 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
 
     tx_version = monero_io_fetch_u32();
     monero_io_fetch_decrypt_key(tx_key);
-    txkey_pub = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
+    txkey_pub = G_loki_state.io_buffer + G_loki_state.io_offset;
     monero_io_fetch(NULL, 32);
-    Aout = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
+    Aout = G_loki_state.io_buffer + G_loki_state.io_offset;
     monero_io_fetch(NULL, 32);
-    Bout = G_monero_vstate.io_buffer + G_monero_vstate.io_offset;
+    Bout = G_loki_state.io_buffer + G_loki_state.io_offset;
     monero_io_fetch(NULL, 32);
     output_index = monero_io_fetch_u32();
     is_change = monero_io_fetch_u8();
@@ -718,7 +718,7 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
     }
 
     // update outkeys hash control
-    if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
+    if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         monero_sha256_outkeys_update(Aout, 32);
         monero_sha256_outkeys_update(Bout, 32);
         monero_sha256_outkeys_update(&is_change, 1);
@@ -737,7 +737,7 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
 
     // derivation
     if (is_change) {
-        monero_generate_key_derivation(derivation, txkey_pub, G_monero_vstate.view_priv);
+        monero_generate_key_derivation(derivation, txkey_pub, G_loki_state.view_priv);
     } else {
         monero_generate_key_derivation(
             derivation, Aout,
@@ -746,7 +746,7 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
 
     // compute amount key AKout (scalar1), version is always greater than 1
     monero_derivation_to_scalar(amount_key, derivation, output_index);
-    if (G_monero_vstate.tx_sig_mode == TRANSACTION_CREATE_REAL) {
+    if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         monero_sha256_outkeys_update(amount_key, 32);
     }
 
@@ -760,6 +760,6 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
     if (need_additional_txkeys) {
         monero_io_insert(additional_txkey_pub, 32);
     }
-    G_monero_vstate.tx_output_cnt++;
+    G_loki_state.tx_output_cnt++;
     return SW_OK;
 }
