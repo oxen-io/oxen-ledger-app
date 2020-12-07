@@ -160,9 +160,6 @@ int monero_dispatch(void) {
         case INS_DISPLAY_ADDRESS:
             sw = monero_apdu_display_address();
             break;
-        case INS_MANAGE_SEEDWORDS:
-            sw = monero_apdu_manage_seedwords();
-            break;
 
             /* --- PROVISIONING--- */
         case INS_VERIFY_KEY:

@@ -66,40 +66,13 @@ void ui_menu_pinlock_display(void) {
 #define UI_SETTINGS_ADDRESS_CONFIRM 3
 #define UI_SETTINGS_CHANGE_CONFIRM  4
 #define UI_SETTINGS_SELECT_NETWORK  5
-#define UI_SETTINGS_SEED_WORDS      6
-#define UI_SETTINGS_RESET           7
-#define UI_SETTINGS_BACK            8
+#define UI_SETTINGS_RESET           6
+#define UI_SETTINGS_BACK            7
 
 void ui_menu_settings_display(void);
 void ui_menu_settings_display_select(unsigned int idx);
 
 
-/* -------------------------------------- 25 WORDS --------------------------------------- */
-void ui_menu_words_display(void);
-void ui_menu_words_clear(void);
-
-UX_STEP_NOCB(ux_menu_words_seed_step,
-             paging,
-             {
-                 .title = "Electrum Seed",
-                 .text = "NOTSET",
-             });
-
-UX_STEP_CB(ux_menu_words_clear_step, bn, ui_menu_words_clear(),
-           {"CLEAR WORDS", "(Does not wipe wallet)"});
-
-UX_STEP_CB(ux_menu_words_back_step, pb, ui_menu_main_display(), {&C_icon_back, "Back"});
-
-UX_FLOW(ux_flow_words, &ux_menu_words_seed_step, &ux_menu_words_clear_step, &ux_menu_words_back_step);
-
-void ui_menu_words_clear(void) {
-    monero_clear_words();
-    ui_menu_main_display();
-}
-
-void ui_menu_words_display(void) { ux_flow_init(0, ux_flow_words, NULL); }
-
-void settings_show_25_words(void) { ui_menu_words_display(); }
 /* -------------------------------- INFO UX --------------------------------- */
 unsigned int ui_menu_info_action(void);
 
@@ -601,7 +574,7 @@ void ui_menu_reset_action(unsigned int value) {
 /* ------------------------------- SETTINGS UX ------------------------------- */
 
 const char* const settings_submenu_getter_values[] = {
-    "<< Main menu", "View key export", "Fee confirm", "Address confirm", "Change confirm", "Select Network", "Show 25 words", "Reset", "Back",
+    "<< Main menu", "View key export", "Fee confirm", "Address confirm", "Change confirm", "Select Network", "Reset", "Back",
 };
 
 const char* settings_submenu_getter(unsigned int idx) {
@@ -618,7 +591,6 @@ void settings_submenu_selector(unsigned int idx) {
         case UI_SETTINGS_ADDRESS_CONFIRM: ui_menu_truncate_addrs_display(); break;
         case UI_SETTINGS_CHANGE_CONFIRM: ui_menu_confirm_change_display(); break;
         case UI_SETTINGS_SELECT_NETWORK: ui_menu_network_display(); break;
-        case UI_SETTINGS_SEED_WORDS: ui_menu_words_display(); break;
         case UI_SETTINGS_RESET: ui_menu_reset_display(); break;
         default: ui_menu_main_display(); // UI_SETTINGS_BACK_TO_MAIN, UI_SETTINGS_BACK
     }
