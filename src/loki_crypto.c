@@ -150,6 +150,8 @@ void monero_hash_init_sha256(cx_sha256_t *hasher) { cx_sha256_init(hasher); }
 
 void monero_hash_init_keccak(cx_sha3_t *hasher) { cx_keccak_init(hasher, 256); }
 
+void loki_hash_init_blake2b(cx_blake2b_t *hasher) { cx_blake2b_init(hasher, 256); }
+
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */

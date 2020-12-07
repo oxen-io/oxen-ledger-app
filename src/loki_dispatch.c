@@ -85,6 +85,7 @@ int check_ins_access(void) {
         case INS_GEN_KEY_IMAGE:
         case INS_GEN_KEY_IMAGE_SIGNATURE:
         case INS_GEN_UNLOCK_SIGNATURE:
+        case INS_GEN_LNS_SIGNATURE:
         case INS_SECRET_KEY_TO_PUBLIC_KEY:
         case INS_SECRET_KEY_ADD:
         case INS_GENERATE_KEYPAIR:
@@ -454,6 +455,26 @@ int monero_dispatch(void) {
                 // [UNLOCK,1,0] is the post-confirmation step and must follow immediately the
                 // [UNLOCK,0,0] (which is where we ask for confirmation).
                 sw = loki_apdu_generate_unlock_signature();
+            else
+                THROW(SW_COMMAND_NOT_ALLOWED);
+
+            update_protocol();
+            break;
+
+        /* --- LNS --- */
+        case INS_GEN_LNS_SIGNATURE:
+            if (G_monero_vstate.tx_in_progress)
+                THROW(SW_COMMAND_NOT_ALLOWED);
+            // Initialization: must not be in the middle of something else
+            if (LOKI_IO_P_EQUALS(0, 0) && G_monero_vstate.tx_state_ins == 0)
+                sw = loki_apdu_generate_lns_hash();
+            // [0,0]->[1,x] or [1,x]->[1,y] -- we receive data to hash in multiple parts
+            else if (G_monero_vstate.tx_state_ins == INS_GEN_LNS_SIGNATURE &&
+                        (LOKI_TX_STATE_P_EQUALS(0, 0) || G_monero_vstate.tx_state_p1 == 1) && G_monero_vstate.io_p1 == 1)
+                sw = loki_apdu_generate_lns_hash();
+            // [1,0] -> [2,0] gives the account indices and uses the hash built in the [1,x] steps to make the signature
+            else if (LOKI_TX_STATE_INS_P_EQUALS(INS_GEN_LNS_SIGNATURE, 1, 0) && LOKI_IO_P_EQUALS(2, 0))
+                sw = loki_apdu_generate_lns_signature();
             else
                 THROW(SW_COMMAND_NOT_ALLOWED);
 

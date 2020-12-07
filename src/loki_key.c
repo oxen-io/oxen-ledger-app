@@ -690,6 +690,69 @@ int loki_apdu_generate_unlock_signature(void) {
     monero_io_insert(signature, 64);
     return SW_OK;
 }
+
+// Generates an LNS hash
+int loki_apdu_generate_lns_hash(void) {
+
+    if (G_monero_vstate.io_p1 == 0) {
+        // Confirm the LNS initialization with the user
+        monero_io_discard(1);
+        ui_menu_lns_validation_display();
+        return 0;
+    } else if (G_monero_vstate.io_p1 != 1 || !G_monero_vstate.tx_special_confirmed) {
+        monero_lock_and_throw(SW_WRONG_DATA);
+    }
+
+    // We init hash if we just came off [0] (in which case current cmd must be [1,1] or [1,0], i.e.
+    // the first of multipart, or single-part.
+    if (G_monero_vstate.tx_state_p1 == 0) {
+        if (G_monero_vstate.io_p2 > 1)
+            THROW(SW_SUBCOMMAND_NOT_ALLOWED);
+        loki_hash_init_blake2b(&G_monero_vstate.blake2bF);
+    // Otherwise we are in the hashing step so make sure the piece we receive properly follows
+    } else if (!(
+                G_monero_vstate.io_p2 == 0 || // this chunk is last, *or*:
+                G_monero_vstate.io_p2 == (G_monero_vstate.tx_state_p2 == 255 ? 1 : G_monero_vstate.tx_state_p2 + 1) // this chunk properly follows the previous
+                )) {
+        THROW(SW_SUBCOMMAND_NOT_ALLOWED);
+    }
+
+    monero_hash_update((cx_hash_t *)&G_monero_vstate.blake2bF,
+            G_monero_vstate.io_buffer + G_monero_vstate.io_offset,
+            G_monero_vstate.io_length - G_monero_vstate.io_offset);
+    monero_io_discard(1);
+
+    if (G_monero_vstate.io_p2 == 0) // This was the last data piece
+        monero_hash_final((cx_hash_t *)&G_monero_vstate.blake2bF, G_monero_vstate.lns_hash);
+
+    return SW_OK;
+}
+
+int loki_apdu_generate_lns_signature(void) {
+    unsigned char subaddr_index[8];
+#define SKEY &G_monero_vstate.tmp[0]
+#define PKEY &G_monero_vstate.tmp[32]
+#define STMP &G_monero_vstate.tmp[64]
+#define SIGNATURE &G_monero_vstate.tmp[64]
+
+    monero_io_fetch(subaddr_index, 8);
+    monero_io_discard(1);
+
+    if (os_memcmp(subaddr_index, "\0\0\0\0\0\0\0\0", 8) == 0) {
+        os_memmove(SKEY, G_monero_vstate.spend_priv, 32);
+        os_memmove(PKEY, G_monero_vstate.spend_pub, 32);
+    } else {
+        monero_get_subaddress_secret_key(STMP, G_monero_vstate.view_priv, subaddr_index);
+        monero_addm(SKEY, STMP, G_monero_vstate.spend_priv);
+        monero_ecmul_G(PKEY, SKEY);
+    }
+
+    loki_generate_signature(SIGNATURE, G_monero_vstate.lns_hash, PKEY, SKEY);
+    monero_io_insert(SIGNATURE, 64);
+
+    return SW_OK;
+}
+
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */

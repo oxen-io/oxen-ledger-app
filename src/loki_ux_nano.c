@@ -305,7 +305,7 @@ UX_FLOW(ux_flow_stake_validation,
 
 void ui_menu_stake_validation_display(void) { ux_flow_init(0, ux_flow_stake_validation, NULL); }
 
-/** Common menu items for special transaction (i.e. unlocks) */
+/** Common menu items for special transaction (i.e. unlocks and LNS) */
 void ui_menu_special_validation_action(unsigned int value) {
     if (value == ACCEPT) G_monero_vstate.tx_special_confirmed = 1;
     ui_menu_validation_action(value);
@@ -322,6 +322,15 @@ UX_FLOW(ux_flow_unlock_validation,
         &ux_menu_special_validation_accept_step,
         &ux_menu_special_validation_reject_step);
 void ui_menu_unlock_validation_display(void) { ux_flow_init(0, ux_flow_unlock_validation, NULL); }
+
+/* LNS */
+UX_STEP_NOCB(ux_menu_lns_validation_1_step, bb, {"Confirm Loki", "Name Service TX"});
+UX_FLOW(ux_flow_lns_validation,
+        &ux_menu_lns_validation_1_step,
+        &ux_menu_special_validation_accept_step,
+        &ux_menu_special_validation_reject_step);
+
+void ui_menu_lns_validation_display(void) { ux_flow_init(0, ux_flow_lns_validation, NULL); }
 
 /* -------------------------------- EXPORT VIEW KEY UX --------------------------------- */
 unsigned int ui_menu_export_viewkey_action(unsigned int value);

@@ -53,6 +53,8 @@ int loki_apdu_get_tx_secret_key(void);
 int monero_apdu_generate_key_image(void);
 int loki_apdu_generate_key_image_signature(void);
 int loki_apdu_generate_unlock_signature(void);
+int loki_apdu_generate_lns_hash(void);
+int loki_apdu_generate_lns_signature(void);
 int monero_apdu_derive_subaddress_public_key(void);
 int monero_apdu_get_subaddress(void);
 int monero_apdu_get_subaddress_spend_public_key(void);
@@ -119,6 +121,7 @@ int monero_unblind(unsigned char *v, unsigned char *k, unsigned char *AKout,
 void ui_menu_validation_display(void);
 void ui_menu_stake_validation_display(void);
 void ui_menu_unlock_validation_display(void);
+void ui_menu_lns_validation_display(void);
 void ui_menu_fee_validation_display(void);
 void ui_menu_change_validation_display(void);
 void ui_menu_timelock_validation_display(void);
@@ -190,6 +193,7 @@ void monero_aes_generate(cx_aes_key_t *sk);
 /* Compute Monero-Hash of data*/
 void monero_hash_init_keccak(cx_sha3_t *hasher);
 void monero_hash_init_sha256(cx_sha256_t *hasher);
+void loki_hash_init_blake2b(cx_blake2b_t *hasher);
 void monero_hash_update(cx_hash_t *hasher, unsigned char *buf, unsigned int len);
 int monero_hash_final(cx_hash_t *hasher, unsigned char *out);
 int monero_hash(unsigned int algo, cx_hash_t *hasher, unsigned char *buf, unsigned int len,
