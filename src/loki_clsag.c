@@ -115,15 +115,6 @@ int monero_apdu_clsag_hash() {
     return SW_OK;
 }
 
-// Sets the clsag_hash directly (i.e. from an externally or previously calculated value).
-int monero_apdu_clsag_hash_set() {
-    monero_io_fetch(G_monero_vstate.clsag_c, 32);
-    monero_check_scalar_not_null(G_monero_vstate.clsag_c);
-    monero_reduce(G_monero_vstate.clsag_c, G_monero_vstate.clsag_c);
-    monero_io_discard(1);
-    return SW_OK;
-}
-
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */

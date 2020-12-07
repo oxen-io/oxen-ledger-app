@@ -414,9 +414,9 @@ int monero_dispatch(void) {
 
         /* --- CLSAG --- */
         case INS_CLSAG:
-            // If we are going to [CLSAG, 1, 0] then we must be coming from either [VALIDATE, 3] or [CLSAG, 4, 0]
+            // If we are going to [CLSAG, 1, 0] then we must be coming from either [VALIDATE, 3] or [CLSAG, 3, 0]
             if (LOKI_IO_P_EQUALS(1, 0)) {
-                if ((G_monero_vstate.tx_state_ins == INS_VALIDATE && G_monero_vstate.tx_state_p1 == 3) || LOKI_TX_STATE_INS_P_EQUALS(INS_CLSAG, 4, 0))
+                if ((G_monero_vstate.tx_state_ins == INS_VALIDATE && G_monero_vstate.tx_state_p1 == 3) || LOKI_TX_STATE_INS_P_EQUALS(INS_CLSAG, 3, 0))
                     sw = monero_apdu_clsag_prepare();
                 else
                     THROW(SW_SUBCOMMAND_NOT_ALLOWED);
@@ -427,12 +427,8 @@ int monero_dispatch(void) {
                 if ((LOKI_TX_STATE_P_EQUALS(1, 0) || G_monero_vstate.tx_state_p1 == 2) && G_monero_vstate.io_p1 == 2)
                     sw = monero_apdu_clsag_hash();
 
-                // [1,0]->[3,0] for bypassing on-device `c` calculation
-                else if (LOKI_TX_STATE_P_EQUALS(1, 0) && LOKI_IO_P_EQUALS(3, 0))
-                    sw = monero_apdu_clsag_hash_set();
-
-                // [2,0]->[4,0] or [3,0]->[4,0] (2 is hashing, 3 is external hashing)
-                else if ((LOKI_TX_STATE_P_EQUALS(2, 0) || LOKI_TX_STATE_P_EQUALS(3, 0)) && LOKI_IO_P_EQUALS(4, 0))
+                // [2,0]->[3,0] - sign
+                else if (LOKI_TX_STATE_P_EQUALS(2, 0) && LOKI_IO_P_EQUALS(3, 0))
                     sw = monero_apdu_clsag_sign();
 
                 else
