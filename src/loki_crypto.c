@@ -603,13 +603,12 @@ static const char C_sub_address_prefix[] = {'S', 'u', 'b', 'A', 'd', 'd', 'r', 0
 
 void monero_get_subaddress_secret_key(unsigned char *sub_s, unsigned char *s,
                                       unsigned char *index) {
-    unsigned char in[sizeof(C_sub_address_prefix) + 32 + 8];
+    cx_keccak_init(&G_loki_state.keccak, 256);
 
-    os_memmove(in, C_sub_address_prefix, sizeof(C_sub_address_prefix)),
-        os_memmove(in + sizeof(C_sub_address_prefix), s, 32);
-    os_memmove(in + sizeof(C_sub_address_prefix) + 32, index, 8);
-    // hash_to_scalar with more that 32bytes:
-    loki_keccak_256(&G_loki_state.keccak, in, sizeof(in), sub_s);
+    loki_hash_update(&G_loki_state.keccak, C_sub_address_prefix, sizeof(C_sub_address_prefix));
+    loki_hash_update(&G_loki_state.keccak, s, 32);
+    loki_hash_update(&G_loki_state.keccak, index, 8);
+    loki_hash_final(&G_loki_state.keccak, sub_s);
     monero_reduce(sub_s, sub_s);
 }
 
@@ -758,43 +757,22 @@ void monero_ecsub(unsigned char *W, unsigned char *P, unsigned char *Q) {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-/*
-    static key ecdhHash(const key &k)
-    {
-        char data[38];
-        rct::key hash;
-        memcpy(data, "amount", 6);
-        memcpy(data + 6, &k, sizeof(k));
-        cn_fast_hash(hash, data, sizeof(data));
-        return hash;
-    }
-*/
 void monero_ecdhHash(unsigned char *x, unsigned char *k) {
-    unsigned char data[38];
-    os_memmove(data, "amount", 6);
-    os_memmove(data + 6, k, 32);
-    loki_keccak_256(&G_loki_state.keccak, data, 38, x);
+    cx_keccak_init(&G_loki_state.keccak, 256);
+    loki_hash_update(&G_loki_state.keccak, "amount", 6);
+    loki_hash_update(&G_loki_state.keccak, k, 32);
+    loki_hash_final(&G_loki_state.keccak, x);
 }
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-/*
-    key genCommitmentMask(const key &sk)
-    {
-        char data[15 + sizeof(key)];
-        memcpy(data, "commitment_mask", 15);
-        memcpy(data + 15, &sk, sizeof(sk));
-        key scalar;
-        hash_to_scalar(scalar, data, sizeof(data));
-        return scalar;
-    }
-*/
 void monero_genCommitmentMask(unsigned char *c, unsigned char *sk) {
-    unsigned char data[15 + 32];
-    os_memmove(data, "commitment_mask", 15);
-    os_memmove(data + 15, sk, 32);
-    monero_hash_to_scalar(c, data, 15 + 32);
+    cx_keccak_init(&G_loki_state.keccak, 256);
+    loki_hash_update(&G_loki_state.keccak, "commitment_mask", 15);
+    loki_hash_update(&G_loki_state.keccak, sk, 32);
+    loki_hash_final(&G_loki_state.keccak, c);
+    monero_reduce(c, c);
 }
 
 /* ----------------------------------------------------------------------- */
