@@ -62,13 +62,13 @@ void monero_aes_derive(cx_aes_key_t *sk, unsigned char *seed32, unsigned char *a
                        unsigned char *b) {
     unsigned char h1[32];
 
-    monero_keccak_init_H();
-    monero_keccak_update_H(seed32, 32);
-    monero_keccak_update_H(a, 32);
-    monero_keccak_update_H(b, 32);
-    monero_keccak_final_H(h1);
+    cx_keccak_init(&G_loki_state.keccak_alt, 256);
+    loki_hash_update(&G_loki_state.keccak_alt, seed32, 32);
+    loki_hash_update(&G_loki_state.keccak_alt, a, 32);
+    loki_hash_update(&G_loki_state.keccak_alt, b, 32);
+    loki_hash_final(&G_loki_state.keccak_alt, h1);
 
-    monero_keccak_H(h1, 32, h1);
+    loki_keccak_256(&G_loki_state.keccak_alt, h1, 32, h1);
 
     cx_aes_init_key(h1, 16, sk);
 }
@@ -147,38 +147,12 @@ void monero_reverse32(unsigned char *rscal, unsigned char *scal) {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-void monero_hash_init_sha256(cx_sha256_t *hasher) { cx_sha256_init(hasher); }
 
-void monero_hash_init_keccak(cx_sha3_t *hasher) { cx_keccak_init(hasher, 256); }
-
-void loki_hash_init_blake2b(cx_blake2b_t *hasher) { cx_blake2b_init(hasher, 256); }
-
-/* ----------------------------------------------------------------------- */
-/* ---                                                                 --- */
-/* ----------------------------------------------------------------------- */
-void monero_hash_update(cx_hash_t *hasher, unsigned char *buf, unsigned int len) {
-    cx_hash(hasher, 0, buf, len, NULL, 0);
-}
-
-/* ----------------------------------------------------------------------- */
-/* ---                                                                 --- */
-/* ----------------------------------------------------------------------- */
-int monero_hash_final(cx_hash_t *hasher, unsigned char *out) {
-    return cx_hash(hasher, CX_LAST, NULL, 0, out, 32);
-}
-
-/* ----------------------------------------------------------------------- */
-/* ---                                                                 --- */
-/* ----------------------------------------------------------------------- */
-int monero_hash(unsigned int algo, cx_hash_t *hasher, unsigned char *buf, unsigned int len,
-                unsigned char *out) {
-    hasher->algo = algo;
-    if (algo == CX_SHA256) {
-        cx_sha256_init((cx_sha256_t *)hasher);
-    } else {
-        cx_keccak_init((cx_sha3_t *)hasher, 256);
-    }
-    return cx_hash(hasher, CX_LAST, buf, len, out, 32);
+// Does a one-shot Keccak-256 hash.  (Note that this is not *quite* the same as SHA-3: SHA-3
+// appends two bits (01) to the end of the message).
+int loki_keccak_256(cx_sha3_t *hasher, unsigned char *buf, unsigned int len, unsigned char *out) {
+    cx_keccak_init(hasher, 256);
+    return cx_hash((cx_hash_t *) hasher, CX_LAST, buf, len, out, 32);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -446,7 +420,7 @@ setsign:
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 void monero_hash_to_scalar(unsigned char *scalar, unsigned char *raw, unsigned int raw_len) {
-    monero_keccak_F(raw, raw_len, scalar);
+    loki_keccak_256(&G_loki_state.keccak, raw, raw_len, scalar);
     monero_reduce(scalar, scalar);
 }
 
@@ -454,7 +428,7 @@ void monero_hash_to_scalar(unsigned char *scalar, unsigned char *raw, unsigned i
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 void monero_hash_to_ec(unsigned char *ec, unsigned char *ec_pub) {
-    monero_keccak_F(ec_pub, 32, ec);
+    loki_keccak_256(&G_loki_state.keccak, ec_pub, 32, ec);
     monero_ge_fromfe_frombytes(ec, ec);
     monero_ecmul_8(ec, ec);
 }
@@ -486,7 +460,7 @@ void monero_derivation_to_scalar(unsigned char *scalar, unsigned char *drv_data,
     os_memmove(varint, drv_data, 32);
     len_varint = monero_encode_varint(varint + 32, 8, out_idx);
     len_varint += 32;
-    monero_keccak_F(varint, len_varint, varint);
+    loki_keccak_256(&G_loki_state.keccak, varint, len_varint, varint);
     monero_reduce(scalar, varint);
 }
 
@@ -541,20 +515,20 @@ void loki_generate_key_image_signature(unsigned char *sig, unsigned char *img, u
     unsigned char k[32];
     unsigned char tmp[32];
 
-    monero_keccak_init_H(); // Need to calculate H(I || L || R)
-    monero_keccak_update_H(img, 32); // H(I ||...
+    cx_keccak_init(&G_loki_state.keccak_alt, 256); // Need to calculate H(I || L || R)
+    loki_hash_update(&G_loki_state.keccak_alt, img, 32); // H(I ||...
 
     monero_rng_mod_order(k); // k = random ]0..L[
     monero_ecmul_G(tmp, k); // L0 = kG
-    monero_keccak_update_H(tmp, 32); // H(...|| L ||...)
+    loki_hash_update(&G_loki_state.keccak_alt, tmp, 32); // H(...|| L ||...)
 
     monero_hash_to_ec(tmp, P); // H(P)
     monero_ecmul_k(tmp, tmp, k); // R = kH(P)
-    monero_keccak_update_H(tmp, 32); // H(...|| R)
+    loki_hash_update(&G_loki_state.keccak_alt, tmp, 32); // H(...|| R)
 
     // sig = [c,r]
     // c = H(I || L || R) mod L
-    monero_keccak_final_H(sig);
+    loki_hash_final(&G_loki_state.keccak_alt, sig);
     monero_reduce(sig, sig);
 
     monero_multm(tmp, x, sig); // xc
@@ -571,13 +545,13 @@ void loki_generate_signature(unsigned char *sig, unsigned char *hash, unsigned c
     monero_rng_mod_order(r); // r = random ]0..L[
     monero_ecmul_G(tmp, r); // R = rG
 
-    monero_keccak_init_H(); // Need to calculate H(M || A || R)
-    monero_keccak_update_H(hash, 32); // H(M
-    monero_keccak_update_H(A, 32);    //     || A
-    monero_keccak_update_H(tmp, 32);  //          || R)
+    cx_keccak_init(&G_loki_state.keccak_alt, 256); // Need to calculate H(M || A || R)
+    loki_hash_update(&G_loki_state.keccak_alt, hash, 32); // H(M
+    loki_hash_update(&G_loki_state.keccak_alt, A, 32);    //     || A
+    loki_hash_update(&G_loki_state.keccak_alt, tmp, 32);  //          || R)
     // sig = [c,s]
     // c = H(M||A||R) mod L:
-    monero_keccak_final_H(sig);
+    loki_hash_final(&G_loki_state.keccak_alt, sig);
     monero_reduce(sig, sig);
 
     monero_multm(tmp, sig, a); // ac
@@ -635,7 +609,7 @@ void monero_get_subaddress_secret_key(unsigned char *sub_s, unsigned char *s,
         os_memmove(in + sizeof(C_sub_address_prefix), s, 32);
     os_memmove(in + sizeof(C_sub_address_prefix) + 32, index, 8);
     // hash_to_scalar with more that 32bytes:
-    monero_keccak_F(in, sizeof(in), sub_s);
+    loki_keccak_256(&G_loki_state.keccak, in, sizeof(in), sub_s);
     monero_reduce(sub_s, sub_s);
 }
 
@@ -799,7 +773,7 @@ void monero_ecdhHash(unsigned char *x, unsigned char *k) {
     unsigned char data[38];
     os_memmove(data, "amount", 6);
     os_memmove(data + 6, k, 32);
-    monero_keccak_F(data, 38, x);
+    loki_keccak_256(&G_loki_state.keccak, data, 38, x);
 }
 
 /* ----------------------------------------------------------------------- */

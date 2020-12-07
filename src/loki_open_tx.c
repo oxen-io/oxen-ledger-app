@@ -31,9 +31,9 @@ void monero_reset_tx(int reset_tx_cnt) {
     os_memset(G_loki_state.R, 0, 32);
     cx_rng(G_loki_state.hmac_key, 32);
 
-    monero_keccak_init_H();
-    monero_sha256_commitment_init();
-    monero_sha256_outkeys_init();
+    cx_keccak_init(&G_loki_state.keccak_alt, 256);
+    cx_sha256_init(&G_loki_state.sha256_alt);
+    cx_sha256_init(&G_loki_state.sha256);
     G_loki_state.tx_in_progress = 0;
     G_loki_state.tx_output_cnt = 0;
     if (reset_tx_cnt) {

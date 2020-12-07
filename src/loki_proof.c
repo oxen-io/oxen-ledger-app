@@ -78,7 +78,7 @@ int monero_apdu_get_tx_proof(void) {
  *
  * Note that changing this will require enlarging tmp!
 
-    monero_keccak_H((unsigned char *)"TXPROOF_V2", 10, sep);
+    loki_keccak_256(&G_loki_state.keccak_alt, (unsigned char *)"TXPROOF_V2", 10, sep);
     // tmp = msg || D || X || Y || sep
     os_memmove(G_loki_state.tmp + 32 * 4, sep, 32);
     // tmp = msg || D || X || Y || sep || R

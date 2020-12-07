@@ -33,10 +33,10 @@
 int monero_apdu_clsag_prehash_init(void) {
     if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         if (G_loki_state.io_p2 == 1) {
-            monero_sha256_outkeys_final(G_loki_state.OUTK);
-            monero_sha256_outkeys_init();
-            monero_sha256_commitment_init();
-            monero_keccak_init_H();
+            loki_hash_final(&G_loki_state.sha256, G_loki_state.OUTK);
+            cx_sha256_init(&G_loki_state.sha256);
+            cx_sha256_init(&G_loki_state.sha256_alt);
+            cx_keccak_init(&G_loki_state.keccak_alt, 256);
         }
     }
     // We always confirm fees for LNS because often this is the *only* confirmation for an LNS tx
@@ -44,7 +44,7 @@ int monero_apdu_clsag_prehash_init(void) {
         ? CONFIRM_FEE_ALWAYS
         : N_loki_state->confirm_fee_mode;
 
-    monero_keccak_update_H(G_loki_state.io_buffer + G_loki_state.io_offset,
+    loki_hash_update(&G_loki_state.keccak_alt, G_loki_state.io_buffer + G_loki_state.io_offset,
                            G_loki_state.io_length - G_loki_state.io_offset);
     if ((G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) && (G_loki_state.io_p2 == 1)
             && confirm_fee_mode != CONFIRM_FEE_NEVER) {
@@ -106,10 +106,10 @@ int monero_apdu_clsag_prehash_update(void) {
 
     // update CLSAG prehash
     if ((G_loki_state.options & 0x03) == 0x02) {
-        monero_keccak_update_H(v, 8);
+        loki_hash_update(&G_loki_state.keccak_alt, v, 8);
     } else {
-        monero_keccak_update_H(k, 32);
-        monero_keccak_update_H(v, 32);
+        loki_hash_update(&G_loki_state.keccak_alt, k, 32);
+        loki_hash_update(&G_loki_state.keccak_alt, v, 32);
     }
 
     if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
@@ -132,10 +132,10 @@ int monero_apdu_clsag_prehash_update(void) {
             G_loki_state.ux_address[pos] = 0; // null terminate
         }
         // update destination hash control
-        monero_sha256_outkeys_update(Aout, 32);
-        monero_sha256_outkeys_update(Bout, 32);
-        monero_sha256_outkeys_update(&is_change, 1);
-        monero_sha256_outkeys_update(aH, 32);
+        loki_hash_update(&G_loki_state.sha256, Aout, 32);
+        loki_hash_update(&G_loki_state.sha256, Bout, 32);
+        loki_hash_update(&G_loki_state.sha256, &is_change, 1);
+        loki_hash_update(&G_loki_state.sha256, aH, 32);
 
         // check C = aH+kG
         monero_unblind(v, k, aH, G_loki_state.options & 0x03);
@@ -150,17 +150,17 @@ int monero_apdu_clsag_prehash_update(void) {
             monero_lock_and_throw(SW_SECURITY_COMMITMENT_CONTROL);
         }
         // update commitment hash control
-        monero_sha256_commitment_update(C, 32);
+        loki_hash_update(&G_loki_state.sha256_alt, C, 32);
 
         if ((G_loki_state.options & IN_OPTION_MORE_COMMAND) == 0) {
             // finalize and check destination hash_control
-            monero_sha256_outkeys_final(k);
+            loki_hash_final(&G_loki_state.sha256, k);
             if (os_memcmp(k, G_loki_state.OUTK, 32)) {
                 monero_lock_and_throw(SW_SECURITY_OUTKEYS_CHAIN_CONTROL);
             }
             // finalize commitment hash control
-            monero_sha256_commitment_final(G_loki_state.commitment_hash);
-            monero_sha256_commitment_init();
+            loki_hash_final(&G_loki_state.sha256_alt, G_loki_state.commitment_hash);
+            cx_sha256_init(&G_loki_state.sha256_alt);
         }
 
         // ask user
@@ -201,30 +201,30 @@ int monero_apdu_clsag_prehash_finalize(void) {
         // accumulate
         monero_io_fetch(H, 32);
         monero_io_discard(1);
-        monero_keccak_update_H(H, 32);
-        monero_sha256_commitment_update(H, 32);
+        loki_hash_update(&G_loki_state.keccak_alt, H, 32);
+        loki_hash_update(&G_loki_state.sha256_alt, H, 32);
     } else {
         // Finalize and check commitment hash control
         if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-            monero_sha256_commitment_final(H);
+            loki_hash_final(&G_loki_state.sha256_alt, H);
             if (os_memcmp(H, G_loki_state.commitment_hash, 32)) {
                 monero_lock_and_throw(SW_SECURITY_COMMITMENT_CHAIN_CONTROL);
             }
         }
         // compute last H
-        monero_keccak_final_H(H);
+        loki_hash_final(&G_loki_state.keccak_alt, H);
         // compute last prehash
         monero_io_fetch(message, 32);
         monero_io_fetch(proof, 32);
         monero_io_discard(1);
-        monero_keccak_init_H();
+        cx_keccak_init(&G_loki_state.keccak_alt, 256);
         if (os_memcmp(message, G_loki_state.prefixH, 32) != 0) {
             monero_lock_and_throw(SW_SECURITY_PREFIX_HASH);
         }
-        monero_keccak_update_H(message, 32);
-        monero_keccak_update_H(H, 32);
-        monero_keccak_update_H(proof, 32);
-        monero_keccak_final_H(H);
+        loki_hash_update(&G_loki_state.keccak_alt, message, 32);
+        loki_hash_update(&G_loki_state.keccak_alt, H, 32);
+        loki_hash_update(&G_loki_state.keccak_alt, proof, 32);
+        loki_hash_final(&G_loki_state.keccak_alt, H);
 
         monero_io_insert(H, 32);
     }

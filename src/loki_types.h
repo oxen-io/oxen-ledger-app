@@ -193,10 +193,12 @@ typedef struct loki_v_state_t {
 
     /* hashing */
     union {
-        cx_sha3_t keccakF;
-        cx_blake2b_t blake2bF;
+        cx_sha3_t keccak;
+        cx_blake2b_t blake2b;
     };
-    cx_sha3_t keccakH;
+    cx_sha3_t keccak_alt;
+    cx_sha256_t sha256;
+    cx_sha256_t sha256_alt;
     unsigned char prefixH[32];
     union {
         unsigned char clsag_c[32];
@@ -205,12 +207,8 @@ typedef struct loki_v_state_t {
         unsigned char lns_hash[32];
     };
 
-    /* -- track tx-in/out and commitment -- */
-    cx_sha256_t sha256_out_keys;
+    /* -- track tx-in/out -- */
     unsigned char OUTK[32];
-
-    cx_sha256_t sha256_commitment;
-    //commitment_hash
 
     /* ------------------------------------------ */
     /* ---               UI/UX                --- */

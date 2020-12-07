@@ -47,7 +47,7 @@ int monero_apdu_stealth(void) {
 
     // compute mask
     drv[32] = ENCRYPTED_PAYMENT_ID_TAIL;
-    monero_keccak_F(drv, 33, sec);
+    loki_keccak_256(&G_loki_state.keccak, drv, 33, sec);
 
     // stealth!
     for (i = 0; i < 8; i++) {

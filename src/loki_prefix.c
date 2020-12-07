@@ -60,7 +60,7 @@ static void monero_uint642str(uint64_t val, char *str) {
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_init(void) {
-    monero_keccak_init_H();
+    cx_keccak_init(&G_loki_state.keccak_alt, 256);
     if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         if (monero_io_fetch_varint16() != 4) // tx version; we only support v4 txes
             THROW(SW_WRONG_DATA_RANGE);
@@ -98,11 +98,11 @@ int monero_apdu_prefix_hash_init(void) {
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_update(void) {
-    monero_keccak_update_H(G_loki_state.io_buffer + G_loki_state.io_offset,
+    loki_hash_update(&G_loki_state.keccak_alt, G_loki_state.io_buffer + G_loki_state.io_offset,
                            G_loki_state.io_length - G_loki_state.io_offset);
     monero_io_discard(0);
     if (G_loki_state.io_p2 == 0) {
-        monero_keccak_final_H(G_loki_state.prefixH);
+        loki_hash_final(&G_loki_state.keccak_alt, G_loki_state.prefixH);
         monero_io_insert(G_loki_state.prefixH, 32);
     }
 

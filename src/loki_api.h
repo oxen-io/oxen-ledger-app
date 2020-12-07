@@ -190,42 +190,13 @@ extern const unsigned char C_ED25519_ORDER[];
 void monero_aes_derive(cx_aes_key_t *sk, unsigned char *seed32, unsigned char *a, unsigned char *b);
 void monero_aes_generate(cx_aes_key_t *sk);
 
-/* Compute Monero-Hash of data*/
-void monero_hash_init_keccak(cx_sha3_t *hasher);
-void monero_hash_init_sha256(cx_sha256_t *hasher);
-void loki_hash_init_blake2b(cx_blake2b_t *hasher);
-void monero_hash_update(cx_hash_t *hasher, unsigned char *buf, unsigned int len);
-int monero_hash_final(cx_hash_t *hasher, unsigned char *out);
-int monero_hash(unsigned int algo, cx_hash_t *hasher, unsigned char *buf, unsigned int len,
-                unsigned char *out);
+int loki_keccak_256(cx_sha3_t *hasher, unsigned char *buf, unsigned int len, unsigned char *out);
 
-#define monero_keccak_init_F() monero_hash_init_keccak(&G_loki_state.keccakF)
-#define monero_keccak_update_F(buf, len) \
-    monero_hash_update((cx_hash_t *)&G_loki_state.keccakF, (buf), (len))
-#define monero_keccak_final_F(out) monero_hash_final((cx_hash_t *)&G_loki_state.keccakF, (out))
-#define monero_keccak_F(buf, len, out) \
-    monero_hash(CX_KECCAK, (cx_hash_t *)&G_loki_state.keccakF, (buf), (len), (out))
-
-#define monero_keccak_init_H() monero_hash_init_keccak(&G_loki_state.keccakH)
-#define monero_keccak_update_H(buf, len) \
-    monero_hash_update((cx_hash_t *)&G_loki_state.keccakH, (buf), (len))
-#define monero_keccak_final_H(out) monero_hash_final((cx_hash_t *)&G_loki_state.keccakH, (out))
-#define monero_keccak_H(buf, len, out) \
-    monero_hash(CX_KECCAK, (cx_hash_t *)&G_loki_state.keccakH, (buf), (len), (out))
-
-#define monero_sha256_commitment_init() \
-    monero_hash_init_sha256(&G_loki_state.sha256_commitment)
-#define monero_sha256_commitment_update(buf, len) \
-    monero_hash_update((cx_hash_t *)&G_loki_state.sha256_commitment, (buf), (len))
-#define monero_sha256_commitment_final(out)                            \
-    monero_hash_final((cx_hash_t *)&G_loki_state.sha256_commitment, (out))
-
-#define monero_sha256_outkeys_init() \
-    monero_hash_init_sha256(&G_loki_state.sha256_out_keys)
-#define monero_sha256_outkeys_update(buf, len) \
-    monero_hash_update((cx_hash_t *)&G_loki_state.sha256_out_keys, (buf), (len))
-#define monero_sha256_outkeys_final(out) \
-    monero_hash_final((cx_hash_t *)&G_loki_state.sha256_out_keys, (out))
+#define loki_hash_update(hasher, buf, len) \
+    cx_hash((cx_hash_t *)hasher, 0, buf, len, NULL, 0);
+// Finalizes a 32-byte hash and copies it to `out`
+#define loki_hash_final(hasher, out) \
+    cx_hash((cx_hash_t *)hasher, CX_LAST, NULL, 0, out, 32);
 
 /*
  *  check 1<s<N, else throw

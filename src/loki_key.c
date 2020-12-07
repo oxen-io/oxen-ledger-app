@@ -251,8 +251,8 @@ int monero_apdu_get_chacha8_prekey(/*char  *prekey*/) {
     os_memmove(abt, G_loki_state.view_priv, 32);
     os_memmove(abt + 32, G_loki_state.spend_priv, 32);
     abt[64] = CHACHA8_KEY_TAIL;
-    monero_keccak_F(abt, 65, pre);
-    monero_io_insert((unsigned char *)G_loki_state.keccakF.acc, 200);
+    loki_keccak_256(&G_loki_state.keccak, abt, 65, pre);
+    monero_io_insert((unsigned char *)G_loki_state.keccak.acc, 200);
     return SW_OK;
 }
 #undef CHACHA8_KEY_TAIL
@@ -549,7 +549,7 @@ int loki_apdu_generate_lns_hash(void) {
     if (G_loki_state.tx_state_p1 == 0) {
         if (G_loki_state.io_p2 > 1)
             THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-        loki_hash_init_blake2b(&G_loki_state.blake2bF);
+        cx_blake2b_init(&G_loki_state.blake2b, 256);
     // Otherwise we are in the hashing step so make sure the piece we receive properly follows
     } else if (!(
                 G_loki_state.io_p2 == 0 || // this chunk is last, *or*:
@@ -558,13 +558,13 @@ int loki_apdu_generate_lns_hash(void) {
         THROW(SW_SUBCOMMAND_NOT_ALLOWED);
     }
 
-    monero_hash_update((cx_hash_t *)&G_loki_state.blake2bF,
+    loki_hash_update((cx_hash_t *)&G_loki_state.blake2b,
             G_loki_state.io_buffer + G_loki_state.io_offset,
             G_loki_state.io_length - G_loki_state.io_offset);
     monero_io_discard(1);
 
     if (G_loki_state.io_p2 == 0) // This was the last data piece
-        monero_hash_final((cx_hash_t *)&G_loki_state.blake2bF, G_loki_state.lns_hash);
+        loki_hash_final((cx_hash_t *)&G_loki_state.blake2b, G_loki_state.lns_hash);
 
     return SW_OK;
 }
@@ -719,9 +719,9 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
 
     // update outkeys hash control
     if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-        monero_sha256_outkeys_update(Aout, 32);
-        monero_sha256_outkeys_update(Bout, 32);
-        monero_sha256_outkeys_update(&is_change, 1);
+        loki_hash_update(&G_loki_state.sha256, Aout, 32);
+        loki_hash_update(&G_loki_state.sha256, Bout, 32);
+        loki_hash_update(&G_loki_state.sha256, &is_change, 1);
     }
 
     // make additional tx pubkey if necessary
@@ -747,7 +747,7 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
     // compute amount key AKout (scalar1), version is always greater than 1
     monero_derivation_to_scalar(amount_key, derivation, output_index);
     if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-        monero_sha256_outkeys_update(amount_key, 32);
+        loki_hash_update(&G_loki_state.sha256, amount_key, 32);
     }
 
     // compute ephemeral output key

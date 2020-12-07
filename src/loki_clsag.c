@@ -95,7 +95,7 @@ int monero_apdu_clsag_hash() {
     if (G_loki_state.tx_state_p1 == 1 || LOKI_TX_STATE_P_EQUALS(2, 0)) {
         if (G_loki_state.io_p2 > 1)
             THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-        monero_keccak_init_H();
+        cx_keccak_init(&G_loki_state.keccak_alt, 256);
     } else if (!(
                 G_loki_state.io_p2 == 0 || // this chunk is last, *or*:
                 G_loki_state.io_p2 == (G_loki_state.tx_state_p2 == 255 ? 1 : G_loki_state.tx_state_p2 + 1) // this chunk properly follows the previous
@@ -103,12 +103,12 @@ int monero_apdu_clsag_hash() {
         THROW(SW_SUBCOMMAND_NOT_ALLOWED);
     }
 
-    monero_keccak_update_H(G_loki_state.io_buffer + G_loki_state.io_offset,
+    loki_hash_update(&G_loki_state.keccak_alt, G_loki_state.io_buffer + G_loki_state.io_offset,
                            G_loki_state.io_length - G_loki_state.io_offset);
     monero_io_discard(1);
 
     if (G_loki_state.io_p2 == 0) {
-        monero_keccak_final_H(c);
+        loki_hash_final(&G_loki_state.keccak_alt, c);
         monero_reduce(c, c);
         monero_io_insert(c, 32);
         os_memmove(G_loki_state.clsag_c, c, 32);

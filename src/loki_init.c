@@ -89,9 +89,9 @@ void monero_init_private_key(void) {
     switch (N_loki_state->key_mode) {
         case KEY_MODE_SEED:
 
-            monero_keccak_F(seed, 32, G_loki_state.spend_priv);
+            loki_keccak_256(&G_loki_state.keccak, seed, 32, G_loki_state.spend_priv);
             monero_reduce(G_loki_state.spend_priv, G_loki_state.spend_priv);
-            monero_keccak_F(G_loki_state.spend_priv, 32, G_loki_state.view_priv);
+            loki_keccak_256(&G_loki_state.keccak, G_loki_state.spend_priv, 32, G_loki_state.view_priv);
             monero_reduce(G_loki_state.view_priv, G_loki_state.view_priv);
             break;
 
