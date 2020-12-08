@@ -298,7 +298,7 @@ typedef struct loki_v_state_t {
 #define INS_SET_SIGNATURE_MODE  0x72
 #define INS_GET_ADDITIONAL_KEY  0x74
 #define INS_GET_TX_SECRET_KEY   0x75
-#define INS_STEALTH             0x76
+#define INS_ENCRYPT_PAYMENT_ID  0x76
 #define INS_GEN_COMMITMENT_MASK 0x77
 #define INS_BLIND               0x78
 #define INS_UNBLIND             0x7A

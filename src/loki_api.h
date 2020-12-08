@@ -67,7 +67,7 @@ int monero_apdu_open_tx_cont(void);
 void monero_reset_tx(int reset_tx_cnt);
 int monero_apdu_open_subtx(void);
 int monero_apdu_set_signature_mode(void);
-int monero_apdu_stealth(void);
+int monero_apdu_encrypt_payment_id(void);
 int monero_apdu_blind(void);
 int monero_apdu_unblind(void);
 int monero_apdu_gen_commitment_mask(void);

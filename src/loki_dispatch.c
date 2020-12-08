@@ -97,7 +97,7 @@ int check_ins_access(void) {
         case INS_GET_SUBADDRESS_SPEND_PUBLIC_KEY:
         case INS_GET_SUBADDRESS_SECRET_KEY:
         case INS_UNBLIND:
-        case INS_STEALTH:
+        case INS_ENCRYPT_PAYMENT_ID:
         case INS_GET_TX_PROOF:
         case INS_GET_TX_SECRET_KEY:
         case INS_CLOSE_TX:
@@ -265,19 +265,19 @@ int monero_dispatch(void) {
             sw = monero_apdu_set_signature_mode();
             break;
 
-            /* --- STEATH PAYMENT --- */
-        case INS_STEALTH:
+            /* --- PAYMENT ID encryption --- */
+        case INS_ENCRYPT_PAYMENT_ID:
             // 1. state machine check
             if (G_loki_state.tx_in_progress == 1) {
                 if ((G_loki_state.tx_state_ins != INS_OPEN_TX) &&
-                    (G_loki_state.tx_state_ins != INS_STEALTH)) {
+                    (G_loki_state.tx_state_ins != INS_ENCRYPT_PAYMENT_ID)) {
                     THROW(SW_COMMAND_NOT_ALLOWED);
                 }
                 if (!LOKI_IO_P_EQUALS(0, 0))
                     THROW(SW_WRONG_P1P2);
             }
             // 2. command process
-            sw = monero_apdu_stealth();
+            sw = monero_apdu_encrypt_payment_id();
             if (G_loki_state.tx_in_progress == 1) {
                 update_protocol();
             }
@@ -288,7 +288,7 @@ int monero_dispatch(void) {
             // 1. state machine check
             if ((G_loki_state.tx_state_ins != INS_OPEN_TX) &&
                 (G_loki_state.tx_state_ins != INS_GEN_TXOUT_KEYS) &&
-                (G_loki_state.tx_state_ins != INS_STEALTH)) {
+                (G_loki_state.tx_state_ins != INS_ENCRYPT_PAYMENT_ID)) {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
             if (!LOKI_IO_P_EQUALS(0, 0))

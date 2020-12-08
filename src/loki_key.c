@@ -763,3 +763,36 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
     G_loki_state.tx_output_cnt++;
     return SW_OK;
 }
+
+int monero_apdu_encrypt_payment_id(void) {
+    int i;
+    unsigned char pub[32];
+    unsigned char sec[32];
+    unsigned char drv[33];
+    unsigned char payID[8];
+
+    // fetch pub
+    monero_io_fetch(pub, 32);
+    // fetch sec
+    monero_io_fetch_decrypt_key(sec);
+    // fetch paymentID
+    monero_io_fetch(payID, 8);
+
+    monero_io_discard(0);
+
+    // Compute Dout
+    monero_generate_key_derivation(drv, pub, sec);
+
+    // compute mask
+    drv[32] = ENCRYPTED_PAYMENT_ID_TAIL;
+    loki_keccak_256(&G_loki_state.keccak, drv, 33, sec);
+
+    // encrypt
+    for (i = 0; i < 8; i++) {
+        payID[i] = payID[i] ^ sec[i];
+    }
+
+    monero_io_insert(payID, 8);
+
+    return SW_OK;
+}
