@@ -127,7 +127,7 @@ void ui_menu_lns_fee_validation_display(void);
 void ui_menu_change_validation_display(void);
 void ui_menu_timelock_validation_display(void);
 
-void ui_menu_opentx_display(void);
+void ui_menu_opentx_display(unsigned char final_step);
 /* ----------------------------------------------------------------------- */
 /* ---                          KEYS & ADDRESS                        ---- */
 /* ----------------------------------------------------------------------- */

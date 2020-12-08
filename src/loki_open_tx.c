@@ -60,7 +60,7 @@ int monero_apdu_open_tx(void) {
     monero_reset_tx(0);
     G_loki_state.tx_type = txtype;
     G_loki_state.tx_cnt++;
-    ui_menu_opentx_display();
+    ui_menu_opentx_display(0);
     if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         // return 0;
     }

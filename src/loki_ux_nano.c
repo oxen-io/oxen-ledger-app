@@ -75,20 +75,24 @@ void ui_menu_settings_display_select(unsigned int idx);
 /* -------------------------------- INFO UX --------------------------------- */
 unsigned int ui_menu_info_action(void);
 
-UX_STEP_CB(ux_menu_info_show_step, nn, ui_menu_info_action(),
-           {
-               G_loki_state.ux_info1,
-               G_loki_state.ux_info2,
-           });
-
+UX_STEP_CB(ux_menu_info_show_step, nn, ui_menu_info_action(), {G_loki_state.ux_info1, G_loki_state.ux_info2});
 UX_FLOW(ux_flow_info, &ux_menu_info_show_step);
 
+
+UX_STEP_CB(ux_menu_info_icon1_step, pb, ui_menu_info_action(), {&C_icon_tx1, G_loki_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon2_step, pb, ui_menu_info_action(), {&C_icon_tx2, G_loki_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon3_step, pb, ui_menu_info_action(), {&C_icon_tx3, G_loki_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon4_step, pb, ui_menu_info_action(), {&C_icon_tx4, G_loki_state.ux_info1});
+UX_FLOW(ux_flow_info_icon1, &ux_menu_info_icon1_step);
+UX_FLOW(ux_flow_info_icon2, &ux_menu_info_icon2_step);
+UX_FLOW(ux_flow_info_icon3, &ux_menu_info_icon3_step);
+UX_FLOW(ux_flow_info_icon4, &ux_menu_info_icon4_step);
+
 unsigned int ui_menu_info_action(void) {
-    if (G_loki_state.protocol_barrier == PROTOCOL_LOCKED) {
+    if (G_loki_state.protocol_barrier == PROTOCOL_LOCKED)
         ui_menu_pinlock_display();
-    } else {
+    else
         ui_menu_main_display();
-    }
     return 0;
 }
 
@@ -103,66 +107,25 @@ void ui_menu_info_display2(const char* line1, const char* line2) {
 void ui_menu_info_display(void) { ux_flow_init(0, ux_flow_info, NULL); }
 
 /* -------------------------------- OPEN TX UX --------------------------------- */
-const char* processing_tx() {
+static const char* processing_tx(void) {
     return
         G_loki_state.tx_type == TXTYPE_STAKE ? "Processing Stake" :
         G_loki_state.tx_type == TXTYPE_LNS ? "Processing LNS" :
-        G_loki_state.tx_type == TXTYPE_UNLOCK ? "ProcessingUnlock" :
+        G_loki_state.tx_type == TXTYPE_UNLOCK ? "Processing Unlck" :
         "Processing TX";
 }
 
-#if 0
-unsigned int ui_menu_opentx_action(unsigned int value);
-
-UX_STEP_NOCB(ux_menu_opentx_process_step, nn, {"Process", "new TX?"});
-
-LOKI_UX_ACCEPT_REJECT(ux_menu_opentx, ui_menu_opentx_action)
-
-UX_FLOW(ux_flow_opentx, &ux_menu_opentx_process_step, &ux_menu_opentx_accept_step, &ux_menu_opentx_reject_step);
-
-unsigned int ui_menu_opentx_action(unsigned int value) {
-    unsigned int sw;
-    unsigned char x[32];
-
-    monero_io_discard(0);
-    os_memset(x, 0, 32);
-    sw = SW_OK;
-
-    if (value == ACCEPT) {
-        sw = monero_apdu_open_tx_cont();
-        ui_menu_info_display2(processing_tx(), "...");
-    } else {
-        monero_abort_tx();
-        sw = SW_DENY;
-        ui_menu_info_display2("Tansaction", "aborted");
-    }
-    monero_io_insert_u16(sw);
-    monero_io_do(IO_RETURN_AFTER_TX);
-    return 0;
-}
-
-void ui_menu_opentx_display(void) {
-  if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-    ux_flow_init(0, ux_flow_opentx,NULL);
-  } else {
-    snprintf(G_loki_state.ux_info1, sizeof(G_loki_state.ux_info1), "Prepare new");
-    snprintf(G_loki_state.ux_info2, sizeof(G_loki_state.ux_info2), "TX / %d", G_loki_state.tx_cnt);
-    ui_menu_info_display();
-  }
-}
-#else
-void ui_menu_opentx_display(void) {
-    uint8_t i;
-
+void ui_menu_opentx_display(unsigned char final_step) {
+    unsigned char page;
     os_memmove(G_loki_state.ux_info1, processing_tx(), sizeof(G_loki_state.ux_info1)-1);
     G_loki_state.ux_info1[sizeof(G_loki_state.ux_info1)-1] = 0;
-    for (i = 0; (i < G_loki_state.tx_cnt) && (i < 12); i++) {
-        G_loki_state.ux_info2[i] = '.';
-    }
-    G_loki_state.ux_info2[i] = 0;
-    ui_menu_info_display();
+
+    page = G_loki_state.tx_cnt % 3;
+    if (final_step)                        ux_flow_init(0, ux_flow_info_icon4, NULL);
+    else if (G_loki_state.tx_cnt % 3 == 1) ux_flow_init(0, ux_flow_info_icon1, NULL);
+    else if (G_loki_state.tx_cnt % 3 == 2) ux_flow_init(0, ux_flow_info_icon2, NULL);
+    else                                   ux_flow_init(0, ux_flow_info_icon3, NULL);
 }
-#endif
 
 /* ----------------- FEE/CHANGE/TIMELOCK VALIDATION ----------------- */
 
@@ -204,7 +167,7 @@ void ui_menu_amount_validation_action(unsigned int value) {
     }
     monero_io_insert_u16(sw);
     monero_io_do(IO_RETURN_AFTER_TX);
-    ui_menu_info_display2(processing_tx(), "...");
+    ui_menu_opentx_display(1);
 }
 
 void ui_menu_fee_validation_display(void) { ux_flow_init(0, ux_flow_fee, NULL); }
@@ -241,7 +204,7 @@ void ui_menu_validation_action(unsigned int value) {
     }
     monero_io_insert_u16(sw);
     monero_io_do(IO_RETURN_AFTER_TX);
-    ui_menu_info_display2(processing_tx(), "...");
+    ui_menu_opentx_display(1);
 }
 
 // Same as above, but for stake txes: we don't need to show the recipient (because we have already
