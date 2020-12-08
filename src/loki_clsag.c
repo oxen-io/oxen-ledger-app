@@ -109,7 +109,7 @@ int monero_apdu_clsag_hash() {
 
     if (G_loki_state.io_p2 == 0) {
         loki_hash_final(&G_loki_state.keccak_alt, c);
-        monero_reduce(c, c);
+        monero_reduce(c);
         monero_io_insert(c, 32);
         os_memmove(G_loki_state.clsag_c, c, 32);
     }
@@ -163,12 +163,12 @@ int monero_apdu_clsag_sign() {
     monero_check_scalar_not_null(p);
     monero_check_scalar_not_null(z);
 
-    monero_reduce(a, a);
-    monero_reduce(p, p);
-    monero_reduce(z, z);
-    monero_reduce(mu_P, mu_P);
-    monero_reduce(mu_C, mu_C);
-    monero_reduce(G_loki_state.clsag_c, G_loki_state.clsag_c);
+    monero_reduce(a);
+    monero_reduce(p);
+    monero_reduce(z);
+    monero_reduce(mu_P);
+    monero_reduce(mu_C);
+    monero_reduce(G_loki_state.clsag_c);
 
     // s0_p_mu_P = mu_P*p
     // s0_add_z_mu_C = mu_C*z + s0_p_mu_P

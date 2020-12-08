@@ -164,31 +164,6 @@ void monero_io_insert_u8(unsigned int v8) {
     G_loki_state.io_offset += 1;
 }
 
-void monero_io_insert_t(unsigned int T) {
-    if (T & 0xFF00) {
-        monero_io_insert_u16(T);
-    } else {
-        monero_io_insert_u8(T);
-    }
-}
-
-void monero_io_insert_tl(unsigned int T, unsigned int L) {
-    monero_io_insert_t(T);
-    if (L < 128) {
-        monero_io_insert_u8(L);
-    } else if (L < 256) {
-        monero_io_insert_u16(0x8100 | L);
-    } else {
-        monero_io_insert_u8(0x82);
-        monero_io_insert_u16(L);
-    }
-}
-
-void monero_io_insert_tlv(unsigned int T, unsigned int L, unsigned char const* V) {
-    monero_io_insert_tl(T, L);
-    monero_io_insert(V, L);
-}
-
 /* ----------------------------------------------------------------------- */
 /* FECTH data from received buffer                                         */
 /* ----------------------------------------------------------------------- */
@@ -383,43 +358,6 @@ unsigned int monero_io_fetch_u8(void) {
     v8 = G_loki_state.io_buffer[G_loki_state.io_offset];
     G_loki_state.io_offset += 1;
     return v8;
-}
-
-int monero_io_fetch_t(unsigned int* T) {
-    *T = monero_io_fetch_u8();
-    if ((*T & 0x1F) == 0x1F) {
-        *T = (*T << 8) | monero_io_fetch_u8();
-    }
-    return 0;
-}
-
-int monero_io_fetch_l(unsigned int* L) {
-    *L = monero_io_fetch_u8();
-
-    if ((*L & 0x80) != 0) {
-        *L &= 0x7F;
-        if (*L == 1) {
-            *L = monero_io_fetch_u8();
-        } else if (*L == 2) {
-            *L = monero_io_fetch_u16();
-        } else {
-            *L = -1;
-        }
-    }
-    return 0;
-}
-
-int monero_io_fetch_tl(unsigned int* T, unsigned int* L) {
-    monero_io_fetch_t(T);
-    monero_io_fetch_l(L);
-    return 0;
-}
-
-int monero_io_fetch_nv(unsigned char* buffer, int len) {
-    monero_io_assert_available(len);
-    nvm_write(buffer, G_loki_state.io_buffer + G_loki_state.io_offset, len);
-    G_loki_state.io_offset += len;
-    return len;
 }
 
 /* ----------------------------------------------------------------------- */

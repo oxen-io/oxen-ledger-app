@@ -120,32 +120,20 @@ unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned c
     // data[0] = N_loki_state->network_id;
     switch (N_loki_state->network_id) {
         case TESTNET:
-            if (paymentID) {
-                prefix = TESTNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
-            } else if (is_subbadress) {
-                prefix = TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
-            } else {
-                prefix = TESTNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
-            }
+            if (paymentID)          prefix = TESTNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
+            else if (is_subbadress) prefix = TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
+            else                    prefix = TESTNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
             break;
         case DEVNET:
-            if (paymentID) {
-                prefix = DEVNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
-            } else if (is_subbadress) {
-                prefix = DEVNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
-            } else {
-                prefix = DEVNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
-            }
+            if (paymentID)          prefix = DEVNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
+            else if (is_subbadress) prefix = DEVNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
+            else                    prefix = DEVNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
             break;
 #ifndef LOKI_ALPHA
         case MAINNET:
-            if (paymentID) {
-                prefix = MAINNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
-            } else if (is_subbadress) {
-                prefix = MAINNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
-            } else {
-                prefix = MAINNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
-            }
+            if (paymentID)          prefix = MAINNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
+            else if (is_subbadress) prefix = MAINNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
+            else                    prefix = MAINNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
             break;
 #endif
     }

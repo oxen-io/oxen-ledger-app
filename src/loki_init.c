@@ -90,9 +90,9 @@ void monero_init_private_key(void) {
         case KEY_MODE_SEED:
 
             loki_keccak_256(&G_loki_state.keccak, seed, 32, G_loki_state.spend_priv);
-            monero_reduce(G_loki_state.spend_priv, G_loki_state.spend_priv);
+            monero_reduce(G_loki_state.spend_priv);
             loki_keccak_256(&G_loki_state.keccak, G_loki_state.spend_priv, 32, G_loki_state.view_priv);
-            monero_reduce(G_loki_state.view_priv, G_loki_state.view_priv);
+            monero_reduce(G_loki_state.view_priv);
             break;
 
         case KEY_MODE_EXTERNAL:
@@ -135,24 +135,30 @@ void loki_install(unsigned char netId) {
     unsigned char c;
 
     // full reset data
-    nvm_write((void*)N_loki_state, NULL, sizeof(loki_nv_state_t));
+    nvm_write(N_loki_state, NULL, sizeof(loki_nv_state_t));
 
     // set mode key
     c = KEY_MODE_SEED;
-    nvm_write((void*)&N_loki_state->key_mode, &c, 1);
+    nvm_write(&N_loki_state->key_mode, &c, 1);
 
     // set net id
-    nvm_write((void*)&N_loki_state->network_id, &netId, 1);
+    nvm_write(&N_loki_state->network_id, &netId, 1);
 
     // write magic
-    nvm_write((void*)N_loki_state->magic, (void*)C_MAGIC, sizeof(C_MAGIC));
+    nvm_write(N_loki_state->magic, (void *)C_MAGIC, sizeof(C_MAGIC));
+
+#if DEBUG_HWDEVICE
+    // Default into always-export-view-key mode when doing a debug build because it's annoying to
+    // have to confirm the view key export every time when doing dev/debugging work.
+    unsigned char always_export = VIEWKEY_EXPORT_ALWAYS_ALLOW;
+    nvm_write(&N_loki_state->viewkey_export_mode, &always_export, 1);
+#endif
 }
 
 /* ----------------------------------------------------------------------- */
 /* --- Reset                                                           --- */
 /* ----------------------------------------------------------------------- */
 const char* const loki_supported_client[] = {
-    "7.",
     "8.",
 };
 #define LOKI_SUPPORTED_CLIENT_SIZE (sizeof(loki_supported_client) / sizeof(char*))

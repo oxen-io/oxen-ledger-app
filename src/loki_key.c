@@ -80,9 +80,9 @@ int monero_apdu_display_address(void) {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int is_fake_view_key(unsigned char *s) { return os_memcmp(s, C_FAKE_SEC_VIEW_KEY, 32) == 0; }
+int is_fake_view_key(const unsigned char *s) { return os_memcmp(s, C_FAKE_SEC_VIEW_KEY, 32) == 0; }
 
-int is_fake_spend_key(unsigned char *s) { return os_memcmp(s, C_FAKE_SEC_SPEND_KEY, 32) == 0; }
+int is_fake_spend_key(const unsigned char *s) { return os_memcmp(s, C_FAKE_SEC_SPEND_KEY, 32) == 0; }
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
@@ -558,13 +558,13 @@ int loki_apdu_generate_lns_hash(void) {
         THROW(SW_SUBCOMMAND_NOT_ALLOWED);
     }
 
-    loki_hash_update((cx_hash_t *)&G_loki_state.blake2b,
+    loki_hash_update(&G_loki_state.blake2b,
             G_loki_state.io_buffer + G_loki_state.io_offset,
             G_loki_state.io_length - G_loki_state.io_offset);
     monero_io_discard(1);
 
     if (G_loki_state.io_p2 == 0) // This was the last data piece
-        loki_hash_final((cx_hash_t *)&G_loki_state.blake2b, G_loki_state.lns_hash);
+        loki_hash_final(&G_loki_state.blake2b, G_loki_state.lns_hash);
 
     return SW_OK;
 }
