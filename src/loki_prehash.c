@@ -65,7 +65,10 @@ int monero_apdu_clsag_prehash_init(void) {
         if (amount > 0) {
             // ask user
             loki_currency_str(amount, G_loki_state.ux_amount);
-            ui_menu_fee_validation_display();
+            if (G_loki_state.tx_type == TXTYPE_LNS)
+                ui_menu_lns_fee_validation_display();
+            else
+                ui_menu_fee_validation_display();
             return 0;
         }
         return SW_OK;
