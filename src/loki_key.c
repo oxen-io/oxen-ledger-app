@@ -590,6 +590,8 @@ int loki_apdu_generate_lns_signature(void) {
 
     loki_generate_signature(SIGNATURE, G_loki_state.lns_hash, PKEY, SKEY);
     monero_io_insert(SIGNATURE, 64);
+    os_memset(G_loki_state.tmp, 0, 128);
+    os_memset(G_loki_state.lns_hash, 0, 32);
 
     return SW_OK;
 }

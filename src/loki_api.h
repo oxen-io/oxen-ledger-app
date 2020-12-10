@@ -33,6 +33,7 @@ void monero_wipe_private_key(void);
 
 void monero_init_ux(void);
 int monero_dispatch(void);
+void clear_protocol(void);
 
 int monero_apdu_get_network(void);
 int monero_apdu_put_key(void);

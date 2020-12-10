@@ -241,7 +241,7 @@ int monero_dispatch(void) {
             /* --- START TX --- */
         case INS_OPEN_TX:
             // state machine check
-            if (G_loki_state.tx_state_ins != 0) {
+            if (!(G_loki_state.tx_state_ins == 0 || G_loki_state.tx_state_ins == INS_GEN_LNS_SIGNATURE)) {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
             // 2. command process

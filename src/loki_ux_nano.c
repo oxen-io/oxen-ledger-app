@@ -220,8 +220,17 @@ void ui_menu_stake_validation_display(void) { ux_flow_init(0, ux_flow_stake_vali
 
 /** Common menu items for special transaction (i.e. unlocks and LNS) */
 void ui_menu_special_validation_action(unsigned int value) {
-    if (value == ACCEPT) G_loki_state.tx_special_confirmed = 1;
-    ui_menu_validation_action(value);
+    unsigned short sw;
+    if (value == ACCEPT) {
+        G_loki_state.tx_special_confirmed = 1;
+        sw = SW_OK;
+    } else {
+        clear_protocol();
+        sw = SW_DENY;
+    }
+    monero_io_insert_u16(sw);
+    monero_io_do(IO_RETURN_AFTER_TX);
+    ui_menu_main_display();
 }
 LOKI_UX_ACCEPT_REJECT(ux_menu_special_validation, ui_menu_special_validation_action);
 
