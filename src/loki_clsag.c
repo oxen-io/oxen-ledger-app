@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
 
 #include "os.h"
 #include "cx.h"
-#include "loki_types.h"
-#include "loki_api.h"
-#include "loki_vars.h"
+#include "oxen_types.h"
+#include "oxen_api.h"
+#include "oxen_vars.h"
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
@@ -47,8 +47,8 @@ int monero_apdu_clsag_prepare() {
     unsigned char H[32];
     unsigned char W[32];
 
-    G_loki_state.tx_sign_cnt++;
-    if (G_loki_state.tx_sign_cnt == 0) {
+    G_oxen_state.tx_sign_cnt++;
+    if (G_oxen_state.tx_sign_cnt == 0) {
         monero_lock_and_throw(SW_SECURITY_MAX_SIGNATURE_REACHED);
     }
 
@@ -92,26 +92,26 @@ int monero_apdu_clsag_hash() {
 
     // We init hash if we just came off [1], or we just finished a [2,0].  In either case we require
     // the current command be [2,1] or [2,0] (i.e. first of multipart, or single-part):
-    if (G_loki_state.tx_state_p1 == 1 || LOKI_TX_STATE_P_EQUALS(2, 0)) {
-        if (G_loki_state.io_p2 > 1)
+    if (G_oxen_state.tx_state_p1 == 1 || LOKI_TX_STATE_P_EQUALS(2, 0)) {
+        if (G_oxen_state.io_p2 > 1)
             THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-        cx_keccak_init(&G_loki_state.keccak_alt, 256);
+        cx_keccak_init(&G_oxen_state.keccak_alt, 256);
     } else if (!(
-                G_loki_state.io_p2 == 0 || // this chunk is last, *or*:
-                G_loki_state.io_p2 == (G_loki_state.tx_state_p2 == 255 ? 1 : G_loki_state.tx_state_p2 + 1) // this chunk properly follows the previous
+                G_oxen_state.io_p2 == 0 || // this chunk is last, *or*:
+                G_oxen_state.io_p2 == (G_oxen_state.tx_state_p2 == 255 ? 1 : G_oxen_state.tx_state_p2 + 1) // this chunk properly follows the previous
             )) {
         THROW(SW_SUBCOMMAND_NOT_ALLOWED);
     }
 
-    loki_hash_update(&G_loki_state.keccak_alt, G_loki_state.io_buffer + G_loki_state.io_offset,
-                           G_loki_state.io_length - G_loki_state.io_offset);
+    oxen_hash_update(&G_oxen_state.keccak_alt, G_oxen_state.io_buffer + G_oxen_state.io_offset,
+                           G_oxen_state.io_length - G_oxen_state.io_offset);
     monero_io_discard(1);
 
-    if (G_loki_state.io_p2 == 0) {
-        loki_hash_final(&G_loki_state.keccak_alt, c);
+    if (G_oxen_state.io_p2 == 0) {
+        oxen_hash_final(&G_oxen_state.keccak_alt, c);
         monero_reduce(c);
         monero_io_insert(c, 32);
-        os_memmove(G_loki_state.clsag_c, c, 32);
+        os_memmove(G_oxen_state.clsag_c, c, 32);
     }
     return SW_OK;
 }
@@ -138,16 +138,16 @@ bool device_default::clsag_sign(const rct::key &c,
 */
 int monero_apdu_clsag_sign() {
     unsigned char s[32];
-    unsigned char *a = &G_loki_state.tmp[0];
-    unsigned char *p = &G_loki_state.tmp[32];
-    unsigned char *z = &G_loki_state.tmp[64];
-    unsigned char *mu_P = &G_loki_state.tmp[96];
-    unsigned char *mu_C = &G_loki_state.tmp[128];
+    unsigned char *a = &G_oxen_state.tmp[0];
+    unsigned char *p = &G_oxen_state.tmp[32];
+    unsigned char *z = &G_oxen_state.tmp[64];
+    unsigned char *mu_P = &G_oxen_state.tmp[96];
+    unsigned char *mu_C = &G_oxen_state.tmp[128];
 
-    if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_FAKE) {
+    if (G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_FAKE) {
         monero_io_fetch(a, 32);
         monero_io_fetch(p, 32);
-    } else if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
+    } else if (G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         monero_io_fetch_decrypt(a, 32, TYPE_ALPHA);
         monero_io_fetch_decrypt(p, 32, TYPE_SCALAR);
     } else {
@@ -168,7 +168,7 @@ int monero_apdu_clsag_sign() {
     monero_reduce(z);
     monero_reduce(mu_P);
     monero_reduce(mu_C);
-    monero_reduce(G_loki_state.clsag_c);
+    monero_reduce(G_oxen_state.clsag_c);
 
     // s0_p_mu_P = mu_P*p
     // s0_add_z_mu_C = mu_C*z + s0_p_mu_P
@@ -183,7 +183,7 @@ int monero_apdu_clsag_sign() {
     // s = p*mu_P + mu_C*z
     monero_addm(s, s, mu_P);
     // mu_P = c * (p*mu_P + mu_C*z)
-    monero_multm(mu_P, G_loki_state.clsag_c, s);
+    monero_multm(mu_P, G_oxen_state.clsag_c, s);
     // s = a - c*(p*mu_P + mu_C*z)
     monero_subm(s, a, mu_P);
 

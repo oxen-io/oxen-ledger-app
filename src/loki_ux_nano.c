@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
 
 #include "os.h"
 #include "cx.h"
-#include "loki_types.h"
-#include "loki_api.h"
-#include "loki_vars.h"
+#include "oxen_types.h"
+#include "oxen_api.h"
+#include "oxen_vars.h"
 
 #include "os_io_seproxyhal.h"
 #include "glyphs.h"
@@ -49,7 +49,7 @@ void ui_menu_pinlock_display(void) {
     } ux_params;
 
     os_global_pin_invalidate();
-    G_loki_state.protocol_barrier = PROTOCOL_LOCKED_UNLOCKABLE;
+    G_oxen_state.protocol_barrier = PROTOCOL_LOCKED_UNLOCKABLE;
     ux_params.ux_id = BOLOS_UX_VALIDATE_PIN;
     ux_params.len = sizeof(ux_params.u.validate_pin);
     ux_params.u.validate_pin.cancellable = 0;
@@ -75,21 +75,21 @@ void ui_menu_settings_display_select(unsigned int idx);
 /* -------------------------------- INFO UX --------------------------------- */
 unsigned int ui_menu_info_action(void);
 
-UX_STEP_CB(ux_menu_info_show_step, nn, ui_menu_info_action(), {G_loki_state.ux_info1, G_loki_state.ux_info2});
+UX_STEP_CB(ux_menu_info_show_step, nn, ui_menu_info_action(), {G_oxen_state.ux_info1, G_oxen_state.ux_info2});
 UX_FLOW(ux_flow_info, &ux_menu_info_show_step);
 
 
-UX_STEP_CB(ux_menu_info_icon1_step, pb, ui_menu_info_action(), {&C_icon_tx1, G_loki_state.ux_info1});
-UX_STEP_CB(ux_menu_info_icon2_step, pb, ui_menu_info_action(), {&C_icon_tx2, G_loki_state.ux_info1});
-UX_STEP_CB(ux_menu_info_icon3_step, pb, ui_menu_info_action(), {&C_icon_tx3, G_loki_state.ux_info1});
-UX_STEP_CB(ux_menu_info_icon4_step, pb, ui_menu_info_action(), {&C_icon_tx4, G_loki_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon1_step, pb, ui_menu_info_action(), {&C_icon_tx1, G_oxen_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon2_step, pb, ui_menu_info_action(), {&C_icon_tx2, G_oxen_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon3_step, pb, ui_menu_info_action(), {&C_icon_tx3, G_oxen_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon4_step, pb, ui_menu_info_action(), {&C_icon_tx4, G_oxen_state.ux_info1});
 UX_FLOW(ux_flow_info_icon1, &ux_menu_info_icon1_step);
 UX_FLOW(ux_flow_info_icon2, &ux_menu_info_icon2_step);
 UX_FLOW(ux_flow_info_icon3, &ux_menu_info_icon3_step);
 UX_FLOW(ux_flow_info_icon4, &ux_menu_info_icon4_step);
 
 unsigned int ui_menu_info_action(void) {
-    if (G_loki_state.protocol_barrier == PROTOCOL_LOCKED)
+    if (G_oxen_state.protocol_barrier == PROTOCOL_LOCKED)
         ui_menu_pinlock_display();
     else
         ui_menu_main_display();
@@ -97,10 +97,10 @@ unsigned int ui_menu_info_action(void) {
 }
 
 void ui_menu_info_display2(const char* line1, const char* line2) {
-    os_memmove(G_loki_state.ux_info1, line1, sizeof(G_loki_state.ux_info1)-1);
-    os_memmove(G_loki_state.ux_info2, line2, sizeof(G_loki_state.ux_info2)-1);
-    G_loki_state.ux_info1[sizeof(G_loki_state.ux_info1)-1] = 0;
-    G_loki_state.ux_info2[sizeof(G_loki_state.ux_info2)-1] = 0;
+    os_memmove(G_oxen_state.ux_info1, line1, sizeof(G_oxen_state.ux_info1)-1);
+    os_memmove(G_oxen_state.ux_info2, line2, sizeof(G_oxen_state.ux_info2)-1);
+    G_oxen_state.ux_info1[sizeof(G_oxen_state.ux_info1)-1] = 0;
+    G_oxen_state.ux_info2[sizeof(G_oxen_state.ux_info2)-1] = 0;
     ux_flow_init(0, ux_flow_info, NULL);
 }
 
@@ -109,21 +109,21 @@ void ui_menu_info_display(void) { ux_flow_init(0, ux_flow_info, NULL); }
 /* -------------------------------- OPEN TX UX --------------------------------- */
 static const char* processing_tx(void) {
     return
-        G_loki_state.tx_type == TXTYPE_STAKE ? "Processing Stake" :
-        G_loki_state.tx_type == TXTYPE_LNS ? "Processing LNS" :
-        G_loki_state.tx_type == TXTYPE_UNLOCK ? "Processing Unlck" :
+        G_oxen_state.tx_type == TXTYPE_STAKE ? "Processing Stake" :
+        G_oxen_state.tx_type == TXTYPE_LNS ? "Processing LNS" :
+        G_oxen_state.tx_type == TXTYPE_UNLOCK ? "Processing Unlck" :
         "Processing TX";
 }
 
 void ui_menu_opentx_display(unsigned char final_step) {
     unsigned char page;
-    os_memmove(G_loki_state.ux_info1, processing_tx(), sizeof(G_loki_state.ux_info1)-1);
-    G_loki_state.ux_info1[sizeof(G_loki_state.ux_info1)-1] = 0;
+    os_memmove(G_oxen_state.ux_info1, processing_tx(), sizeof(G_oxen_state.ux_info1)-1);
+    G_oxen_state.ux_info1[sizeof(G_oxen_state.ux_info1)-1] = 0;
 
-    page = G_loki_state.tx_cnt % 3;
+    page = G_oxen_state.tx_cnt % 3;
     if (final_step)                        ux_flow_init(0, ux_flow_info_icon4, NULL);
-    else if (G_loki_state.tx_cnt % 3 == 1) ux_flow_init(0, ux_flow_info_icon1, NULL);
-    else if (G_loki_state.tx_cnt % 3 == 2) ux_flow_init(0, ux_flow_info_icon2, NULL);
+    else if (G_oxen_state.tx_cnt % 3 == 1) ux_flow_init(0, ux_flow_info_icon1, NULL);
+    else if (G_oxen_state.tx_cnt % 3 == 2) ux_flow_init(0, ux_flow_info_icon2, NULL);
     else                                   ux_flow_init(0, ux_flow_info_icon3, NULL);
 }
 
@@ -132,7 +132,7 @@ void ui_menu_opentx_display(unsigned char final_step) {
 void ui_menu_amount_validation_action(unsigned int value);
 
 #define LOKI_UX_CONFIRM_AMOUNT_STEP(name, title) \
-    UX_STEP_NOCB(name, bn, {title, G_loki_state.ux_amount})
+    UX_STEP_NOCB(name, bn, {title, G_oxen_state.ux_amount})
 
 LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_fee_step, "Confirm Fee");
 LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_lns_fee_step, "Confirm LNS Fee");
@@ -178,10 +178,10 @@ void ui_menu_timelock_validation_display(void) { ux_flow_init(0, ux_flow_timeloc
 /* ----------------------------- USER DEST/AMOUNT VALIDATION ----------------------------- */
 void ui_menu_validation_action(unsigned int value);
 
-UX_STEP_NOCB(ux_menu_validation_amount_step, bn, {"Confirm Amount", G_loki_state.ux_amount});
+UX_STEP_NOCB(ux_menu_validation_amount_step, bn, {"Confirm Amount", G_oxen_state.ux_amount});
 
 UX_STEP_NOCB(ux_menu_validation_recipient_step, paging,
-             {"Recipient", G_loki_state.ux_address});
+             {"Recipient", G_oxen_state.ux_address});
 
 LOKI_UX_ACCEPT_REJECT(ux_menu_validation, ui_menu_validation_action);
 
@@ -209,7 +209,7 @@ void ui_menu_validation_action(unsigned int value) {
 
 // Same as above, but for stake txes: we don't need to show the recipient (because we have already
 // enforced that this wallet is the recipient).
-UX_STEP_NOCB(ux_menu_stake_validation_step, bn, {"Confirm Stake", G_loki_state.ux_amount});
+UX_STEP_NOCB(ux_menu_stake_validation_step, bn, {"Confirm Stake", G_oxen_state.ux_amount});
 
 UX_FLOW(ux_flow_stake_validation,
         &ux_menu_stake_validation_step,
@@ -222,7 +222,7 @@ void ui_menu_stake_validation_display(void) { ux_flow_init(0, ux_flow_stake_vali
 void ui_menu_special_validation_action(unsigned int value) {
     unsigned short sw;
     if (value == ACCEPT) {
-        G_loki_state.tx_special_confirmed = 1;
+        G_oxen_state.tx_special_confirmed = 1;
         sw = SW_OK;
     } else {
         clear_protocol();
@@ -243,7 +243,7 @@ UX_FLOW(ux_flow_unlock_validation,
 void ui_menu_unlock_validation_display(void) { ux_flow_init(0, ux_flow_unlock_validation, NULL); }
 
 /* LNS */
-UX_STEP_NOCB(ux_menu_lns_validation_step, bb, {"Confirm Loki", "Name Service TX"});
+UX_STEP_NOCB(ux_menu_lns_validation_step, bb, {"Confirm Oxen", "Name Service TX"});
 UX_FLOW(ux_flow_lns_validation,
         &ux_menu_lns_validation_step,
         &ux_menu_special_validation_accept_step,
@@ -275,7 +275,7 @@ UX_FLOW(ux_flow_export_viewkey,
         );
 
 void ui_export_viewkey_display(void) {
-    switch (N_loki_state->viewkey_export_mode) {
+    switch (N_oxen_state->viewkey_export_mode) {
         case VIEWKEY_EXPORT_ALWAYS_ALLOW:
             ui_menu_export_viewkey_action(ACCEPT);
             break;
@@ -298,15 +298,15 @@ unsigned int ui_menu_export_viewkey_action(unsigned int value) {
     if (value & 0x10000) { // remember
         value &= ~0x10000;
         unsigned char val = value == ACCEPT ? VIEWKEY_EXPORT_ALWAYS_ALLOW : VIEWKEY_EXPORT_ALWAYS_DENY;
-        nvm_write((void*)&N_loki_state->viewkey_export_mode, &val, sizeof(unsigned char));
+        nvm_write((void*)&N_oxen_state->viewkey_export_mode, &val, sizeof(unsigned char));
     }
 
     if (value == ACCEPT) {
-        monero_io_insert(G_loki_state.view_priv, 32);
-        G_loki_state.export_view_key = 1;
+        monero_io_insert(G_oxen_state.view_priv, 32);
+        G_oxen_state.export_view_key = 1;
     } else {
         monero_io_insert(x, 32);
-        G_loki_state.export_view_key = 0;
+        G_oxen_state.export_view_key = 0;
     }
     monero_io_insert_u16(sw);
     monero_io_do(IO_RETURN_AFTER_TX);
@@ -328,7 +328,7 @@ const char* const viewkey_export_submenu_values_selected[] = {
 const char* viewkey_export_submenu_getter(unsigned int idx) {
     if (idx >= ARRAYLEN(viewkey_export_submenu_values))
         return NULL;
-    if (N_loki_state->viewkey_export_mode == idx)
+    if (N_oxen_state->viewkey_export_mode == idx)
         return viewkey_export_submenu_values_selected[idx];
     return viewkey_export_submenu_values[idx];
 }
@@ -336,7 +336,7 @@ const char* viewkey_export_submenu_getter(unsigned int idx) {
 void viewkey_export_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(viewkey_export_submenu_values)) {
         unsigned char val = idx;
-        nvm_write((void*)&N_loki_state->viewkey_export_mode, &val, sizeof(unsigned char));
+        nvm_write((void*)&N_oxen_state->viewkey_export_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_VIEW_KEY_EXPORT);
@@ -344,7 +344,7 @@ void viewkey_export_submenu_selector(unsigned int idx) {
 
 void ui_menu_viewkey_export_display() {
     ux_menulist_init_select(G_ux.stack_count - 1, viewkey_export_submenu_getter, viewkey_export_submenu_selector,
-            N_loki_state->viewkey_export_mode);
+            N_oxen_state->viewkey_export_mode);
 }
 
 /* -------------------------------- NETWORK UX --------------------------------- */
@@ -391,7 +391,7 @@ const char* network_submenu_getter(unsigned int idx) {
             net = -1;
             break;
     }
-    if (N_loki_state->network_id == net) {
+    if (N_oxen_state->network_id == net) {
         return network_submenu_getter_values_selected[idx];
     } else {
         return network_submenu_getter_values[idx];
@@ -399,7 +399,7 @@ const char* network_submenu_getter(unsigned int idx) {
 }
 
 static void network_set_net(unsigned int network) {
-    loki_install(network);
+    oxen_install(network);
     monero_init();
 }
 
@@ -440,7 +440,7 @@ const char* const truncate_addrs_values_selected[] = {
 const char* truncate_addrs_submenu_getter(unsigned int idx) {
     if (idx >= ARRAYLEN(truncate_addrs_values))
         return NULL;
-    if (N_loki_state->truncate_addrs_mode == idx)
+    if (N_oxen_state->truncate_addrs_mode == idx)
         return truncate_addrs_values_selected[idx];
     return truncate_addrs_values[idx];
 }
@@ -448,7 +448,7 @@ const char* truncate_addrs_submenu_getter(unsigned int idx) {
 void truncate_addrs_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(truncate_addrs_values)) {
         unsigned char val = idx;
-        nvm_write((void*)&N_loki_state->truncate_addrs_mode, &val, sizeof(unsigned char));
+        nvm_write((void*)&N_oxen_state->truncate_addrs_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_ADDRESS_CONFIRM);
@@ -456,7 +456,7 @@ void truncate_addrs_submenu_selector(unsigned int idx) {
 
 void ui_menu_truncate_addrs_display() {
     ux_menulist_init_select(G_ux.stack_count - 1, truncate_addrs_submenu_getter, truncate_addrs_submenu_selector,
-            N_loki_state->truncate_addrs_mode);
+            N_oxen_state->truncate_addrs_mode);
 }
 
 /* -------------------------------- CONFIRM FEE --------------------------------- */
@@ -475,7 +475,7 @@ const char* const confirm_fee_values_selected[] = {
 const char* confirm_fee_submenu_getter(unsigned int idx) {
     if (idx >= ARRAYLEN(confirm_fee_values))
         return NULL;
-    if (N_loki_state->confirm_fee_mode == idx)
+    if (N_oxen_state->confirm_fee_mode == idx)
         return confirm_fee_values_selected[idx];
     return confirm_fee_values[idx];
 }
@@ -483,7 +483,7 @@ const char* confirm_fee_submenu_getter(unsigned int idx) {
 void confirm_fee_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(confirm_fee_values)) {
         unsigned char val = idx;
-        nvm_write((void*)&N_loki_state->confirm_fee_mode, &val, sizeof(unsigned char));
+        nvm_write((void*)&N_oxen_state->confirm_fee_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_FEE_CONFIRM);
@@ -491,7 +491,7 @@ void confirm_fee_submenu_selector(unsigned int idx) {
 
 void ui_menu_confirm_fee_display() {
     ux_menulist_init_select(G_ux.stack_count - 1, confirm_fee_submenu_getter, confirm_fee_submenu_selector,
-            N_loki_state->confirm_fee_mode);
+            N_oxen_state->confirm_fee_mode);
 }
 
 /* -------------------------------- CONFIRM CHANGE --------------------------------- */
@@ -502,7 +502,7 @@ const char* const confirm_change_values_selected[] = {"No*", "Yes*"};
 const char* confirm_change_submenu_getter(unsigned int idx) {
     if (idx >= ARRAYLEN(confirm_change_values))
         return NULL;
-    if (N_loki_state->confirm_change_mode == idx)
+    if (N_oxen_state->confirm_change_mode == idx)
         return confirm_change_values_selected[idx];
     return confirm_change_values[idx];
 }
@@ -510,7 +510,7 @@ const char* confirm_change_submenu_getter(unsigned int idx) {
 void confirm_change_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(confirm_change_values)) {
         unsigned char val = idx;
-        nvm_write((void*)&N_loki_state->confirm_change_mode, &val, sizeof(unsigned char));
+        nvm_write((void*)&N_oxen_state->confirm_change_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_CHANGE_CONFIRM);
@@ -518,7 +518,7 @@ void confirm_change_submenu_selector(unsigned int idx) {
 
 void ui_menu_confirm_change_display() {
     ux_menulist_init_select(G_ux.stack_count - 1, confirm_change_submenu_getter, confirm_change_submenu_selector,
-            N_loki_state->confirm_change_mode);
+            N_oxen_state->confirm_change_mode);
 }
 
 
@@ -537,7 +537,7 @@ void ui_menu_reset_display(void) { ux_flow_init(0, ux_flow_reset, 0); }
 void ui_menu_reset_action(unsigned int value) {
     if (value == ACCEPT) {
         unsigned char magic[4] = {0};
-        nvm_write((void*)N_loki_state->magic, magic, 4);
+        nvm_write((void*)N_oxen_state->magic, magic, 4);
         monero_init();
     }
     ui_menu_main_display();
@@ -580,14 +580,14 @@ void ui_menu_pubaddr_action(void);
 
 UX_STEP_NOCB(ux_menu_pubaddr_meta_step, nn,
          {
-             .line1 = G_loki_state.ux_addr_type,
-             .line2 = G_loki_state.ux_addr_info
+             .line1 = G_oxen_state.ux_addr_type,
+             .line2 = G_oxen_state.ux_addr_info
          });
 
 UX_STEP_NOCB(ux_menu_pubaddr_address_step, paging,
         {
             .title = "Address",
-            .text = G_loki_state.ux_address
+            .text = G_oxen_state.ux_address
         });
 
 UX_STEP_CB(ux_menu_pubaddr_back_step, pb, ui_menu_pubaddr_action(),
@@ -604,11 +604,11 @@ UX_FLOW(ux_flow_pubaddr,
         );
 
 void ui_menu_pubaddr_action(void) {
-    if (G_loki_state.disp_addr_mode) {
+    if (G_oxen_state.disp_addr_mode) {
         monero_io_insert_u16(SW_OK);
         monero_io_do(IO_RETURN_AFTER_TX);
     }
-    G_loki_state.disp_addr_mode = 0;
+    G_oxen_state.disp_addr_mode = 0;
     ui_menu_main_display();
 }
 
@@ -617,48 +617,48 @@ void ui_menu_pubaddr_action(void) {
  */
 void ui_menu_any_pubaddr_display(unsigned char* pub_view, unsigned char* pub_spend,
                                  unsigned char is_subbadress, unsigned char* paymentID) {
-    os_memset(G_loki_state.ux_address, 0, sizeof(G_loki_state.ux_address));
-    os_memset(G_loki_state.ux_addr_type, 0, sizeof(G_loki_state.ux_addr_type));
-    os_memset(G_loki_state.ux_addr_info, 0, sizeof(G_loki_state.ux_addr_info));
+    os_memset(G_oxen_state.ux_address, 0, sizeof(G_oxen_state.ux_address));
+    os_memset(G_oxen_state.ux_addr_type, 0, sizeof(G_oxen_state.ux_addr_type));
+    os_memset(G_oxen_state.ux_addr_info, 0, sizeof(G_oxen_state.ux_addr_info));
 
-    switch (G_loki_state.disp_addr_mode) {
+    switch (G_oxen_state.disp_addr_mode) {
         case 0:
         case DISP_MAIN:
-            os_memmove(G_loki_state.ux_addr_type, "Regular address", 15);
-            if (N_loki_state->network_id == MAINNET)
-                os_memmove(G_loki_state.ux_addr_info, "(mainnet)", 9);
-            else if (N_loki_state->network_id == TESTNET)
-                os_memmove(G_loki_state.ux_addr_info, "(testnet)", 9);
-            else if (N_loki_state->network_id == DEVNET)
-                os_memmove(G_loki_state.ux_addr_info, "(devnet)", 8);
+            os_memmove(G_oxen_state.ux_addr_type, "Regular address", 15);
+            if (N_oxen_state->network_id == MAINNET)
+                os_memmove(G_oxen_state.ux_addr_info, "(mainnet)", 9);
+            else if (N_oxen_state->network_id == TESTNET)
+                os_memmove(G_oxen_state.ux_addr_info, "(testnet)", 9);
+            else if (N_oxen_state->network_id == DEVNET)
+                os_memmove(G_oxen_state.ux_addr_info, "(devnet)", 8);
             break;
 
         case DISP_SUB:
-            os_memmove(G_loki_state.ux_addr_type, "Subaddress", 10);
+            os_memmove(G_oxen_state.ux_addr_type, "Subaddress", 10);
             // Copy these out because they are in a union with the ux_addr_info string
-            unsigned int M = G_loki_state.disp_addr_M;
-            unsigned int m = G_loki_state.disp_addr_m;
-            snprintf(G_loki_state.ux_addr_info, 31, "Maj/min: %d/%d", M, m);
+            unsigned int M = G_oxen_state.disp_addr_M;
+            unsigned int m = G_oxen_state.disp_addr_m;
+            snprintf(G_oxen_state.ux_addr_info, 31, "Maj/min: %d/%d", M, m);
             break;
 
         case DISP_INTEGRATED:
-            os_memmove(G_loki_state.ux_addr_type, "Integr. address", 15);
+            os_memmove(G_oxen_state.ux_addr_type, "Integr. address", 15);
             // Copy the payment id into place *first*, before the label, because it overlaps with ux_addr_info
-            os_memmove(G_loki_state.ux_addr_info + 9, G_loki_state.payment_id, 16);
-            os_memmove(G_loki_state.ux_addr_info, "Pay. ID: ", 9);
+            os_memmove(G_oxen_state.ux_addr_info + 9, G_oxen_state.payment_id, 16);
+            os_memmove(G_oxen_state.ux_addr_info, "Pay. ID: ", 9);
             break;
     }
 
-    loki_wallet_address(G_loki_state.ux_address, pub_view, pub_spend, is_subbadress, paymentID);
+    oxen_wallet_address(G_oxen_state.ux_address, pub_view, pub_spend, is_subbadress, paymentID);
     ux_layout_paging_reset();
     ux_flow_init(0, ux_flow_pubaddr, NULL);
 }
 
 void ui_menu_pubaddr_display(void) {
-    G_loki_state.disp_addr_mode = 0;
-    G_loki_state.disp_addr_M = 0;
-    G_loki_state.disp_addr_M = 0;
-    ui_menu_any_pubaddr_display(G_loki_state.view_pub, G_loki_state.spend_pub, 0, NULL);
+    G_oxen_state.disp_addr_mode = 0;
+    G_oxen_state.disp_addr_M = 0;
+    G_oxen_state.disp_addr_M = 0;
+    ui_menu_any_pubaddr_display(G_oxen_state.view_pub, G_oxen_state.spend_pub, 0, NULL);
 }
 
 /* --------------------------------- MAIN UX --------------------------------- */
@@ -668,9 +668,9 @@ UX_STEP_CB(
     pnn,
     ui_menu_pubaddr_display(),
     {
-        &C_icon_loki,
+        &C_icon_oxen,
         "LOKI wallet",
-        G_loki_state.ux_wallet_public_short_address
+        G_oxen_state.ux_wallet_public_short_address
     });
 
 UX_STEP_CB(

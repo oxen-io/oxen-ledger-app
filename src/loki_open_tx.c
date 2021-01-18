@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,25 +19,25 @@
 
 #include "os.h"
 #include "cx.h"
-#include "loki_types.h"
-#include "loki_api.h"
-#include "loki_vars.h"
+#include "oxen_types.h"
+#include "oxen_api.h"
+#include "oxen_vars.h"
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 void monero_reset_tx(int reset_tx_cnt) {
-    os_memset(G_loki_state.r, 0, 32);
-    os_memset(G_loki_state.R, 0, 32);
-    cx_rng(G_loki_state.hmac_key, 32);
+    os_memset(G_oxen_state.r, 0, 32);
+    os_memset(G_oxen_state.R, 0, 32);
+    cx_rng(G_oxen_state.hmac_key, 32);
 
-    cx_keccak_init(&G_loki_state.keccak_alt, 256);
-    cx_sha256_init(&G_loki_state.sha256_alt);
-    cx_sha256_init(&G_loki_state.sha256);
-    G_loki_state.tx_in_progress = 0;
-    G_loki_state.tx_output_cnt = 0;
+    cx_keccak_init(&G_oxen_state.keccak_alt, 256);
+    cx_sha256_init(&G_oxen_state.sha256_alt);
+    cx_sha256_init(&G_oxen_state.sha256);
+    G_oxen_state.tx_in_progress = 0;
+    G_oxen_state.tx_output_cnt = 0;
     if (reset_tx_cnt) {
-        G_loki_state.tx_cnt = 0;
+        G_oxen_state.tx_cnt = 0;
     }
 }
 
@@ -58,29 +58,29 @@ int monero_apdu_open_tx(void) {
     monero_io_discard(1);
 
     monero_reset_tx(0);
-    G_loki_state.tx_type = txtype;
-    G_loki_state.tx_cnt++;
+    G_oxen_state.tx_type = txtype;
+    G_oxen_state.tx_cnt++;
     ui_menu_opentx_display(0);
-    if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
+    if (G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         // return 0;
     }
     return monero_apdu_open_tx_cont();
 }
 
 int monero_apdu_open_tx_cont(void) {
-    G_loki_state.tx_in_progress = 1;
+    G_oxen_state.tx_in_progress = 1;
 
 #ifdef DEBUG_HWDEVICE
-    os_memset(G_loki_state.hmac_key, 0xab, 32);
+    os_memset(G_oxen_state.hmac_key, 0xab, 32);
 #else
-    cx_rng(G_loki_state.hmac_key, 32);
+    cx_rng(G_oxen_state.hmac_key, 32);
 #endif
 
-    monero_rng_mod_order(G_loki_state.r);
-    monero_ecmul_G(G_loki_state.R, G_loki_state.r);
+    monero_rng_mod_order(G_oxen_state.r);
+    monero_ecmul_G(G_oxen_state.R, G_oxen_state.r);
 
-    monero_io_insert(G_loki_state.R, 32);
-    monero_io_insert_encrypt(G_loki_state.r, 32, TYPE_SCALAR);
+    monero_io_insert(G_oxen_state.R, 32);
+    monero_io_insert_encrypt(G_oxen_state.r, 32, TYPE_SCALAR);
     monero_io_insert(C_FAKE_SEC_VIEW_KEY, 32);
     monero_io_insert_hmac_for((void*)C_FAKE_SEC_VIEW_KEY, 32, TYPE_SCALAR);
     monero_io_insert(C_FAKE_SEC_SPEND_KEY, 32);
@@ -93,7 +93,7 @@ int monero_apdu_open_tx_cont(void) {
 /* ----------------------------------------------------------------------- */
 int monero_apdu_close_tx(void) {
     monero_io_discard(1);
-    monero_reset_tx(G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL);
+    monero_reset_tx(G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL);
     ui_menu_main_display();
     return SW_OK;
 }
@@ -113,7 +113,7 @@ int monero_abort_tx(void) {
 int monero_apdu_set_signature_mode(void) {
     unsigned int sig_mode;
 
-    G_loki_state.tx_sig_mode = TRANSACTION_CREATE_FAKE;
+    G_oxen_state.tx_sig_mode = TRANSACTION_CREATE_FAKE;
 
     sig_mode = monero_io_fetch_u8();
     monero_io_discard(0);
@@ -124,8 +124,8 @@ int monero_apdu_set_signature_mode(void) {
         default:
             monero_lock_and_throw(SW_WRONG_DATA);
     }
-    G_loki_state.tx_sig_mode = sig_mode;
+    G_oxen_state.tx_sig_mode = sig_mode;
 
-    monero_io_insert_u32(G_loki_state.tx_sig_mode);
+    monero_io_insert_u32(G_oxen_state.tx_sig_mode);
     return SW_OK;
 }

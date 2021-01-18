@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ enum network_type {
     FAKECHAIN = 3
 };
 
-typedef struct loki_nv_state_t {
+typedef struct oxen_nv_state_t {
     /* magic */
     unsigned char magic[8];
 
@@ -108,7 +108,7 @@ typedef struct loki_nv_state_t {
         char words[26][WORDS_MAX_LENGTH];
         char words_list[25 * WORDS_MAX_LENGTH + 25];
     };
-} loki_nv_state_t;
+} oxen_nv_state_t;
 
 enum device_mode { NONE, TRANSACTION_CREATE_REAL, TRANSACTION_CREATE_FAKE, TRANSACTION_PARSE };
 
@@ -120,7 +120,7 @@ enum txtype { TXTYPE_STANDARD, TXTYPE_STATE_CHANGE, TXTYPE_UNLOCK, TXTYPE_STAKE,
 
 #define MONERO_IO_BUFFER_LENGTH 288
 
-typedef struct loki_v_state_t {
+typedef struct oxen_v_state_t {
     unsigned char state;
     unsigned char protocol;
 
@@ -242,9 +242,9 @@ typedef struct loki_v_state_t {
             // 0, but won't be if the value is greater than 9 digits).
             char ux_amount[22];
         };
-        unsigned char tmp[160]; // Used as extra temp storage in loki_proof, loki_clsag
+        unsigned char tmp[160]; // Used as extra temp storage in oxen_proof, oxen_clsag
     };
-} loki_v_state_t;
+} oxen_v_state_t;
 
 #define STATE_IDLE 0xC0
 

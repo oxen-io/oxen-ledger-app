@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,41 +19,41 @@
 
 #include "os.h"
 #include "cx.h"
-#include "loki_types.h"
-#include "loki_api.h"
-#include "loki_vars.h"
+#include "oxen_types.h"
+#include "oxen_api.h"
+#include "oxen_vars.h"
 
 void update_protocol(void) {
-    G_loki_state.tx_state_ins = G_loki_state.io_ins;
-    G_loki_state.tx_state_p1 = G_loki_state.io_p1;
-    G_loki_state.tx_state_p2 = G_loki_state.io_p2;
+    G_oxen_state.tx_state_ins = G_oxen_state.io_ins;
+    G_oxen_state.tx_state_p1 = G_oxen_state.io_p1;
+    G_oxen_state.tx_state_p2 = G_oxen_state.io_p2;
 }
 
 void clear_protocol(void) {
-    G_loki_state.tx_state_ins = 0;
-    G_loki_state.tx_state_p1 = 0;
-    G_loki_state.tx_state_p2 = 0;
+    G_oxen_state.tx_state_ins = 0;
+    G_oxen_state.tx_state_p1 = 0;
+    G_oxen_state.tx_state_p2 = 0;
 }
 
 int check_protocol(void) {
     /* if locked and pin is verified, unlock */
-    if ((G_loki_state.protocol_barrier == PROTOCOL_LOCKED_UNLOCKABLE) &&
+    if ((G_oxen_state.protocol_barrier == PROTOCOL_LOCKED_UNLOCKABLE) &&
         (os_global_pin_is_validated() == PIN_VERIFIED)) {
-        G_loki_state.protocol_barrier = PROTOCOL_UNLOCKED;
+        G_oxen_state.protocol_barrier = PROTOCOL_UNLOCKED;
     }
 
     /* if we are locked, deny all command! */
-    if (G_loki_state.protocol_barrier != PROTOCOL_UNLOCKED) {
+    if (G_oxen_state.protocol_barrier != PROTOCOL_UNLOCKED) {
         return SW_SECURITY_LOCKED;
     }
 
     /* the first command enforce the protocol version until application quits */
-    switch (G_loki_state.io_protocol_version) {
+    switch (G_oxen_state.io_protocol_version) {
         case 0x01: /* protocol V1 */
-            if (G_loki_state.protocol == 0xff) {
-                G_loki_state.protocol = G_loki_state.io_protocol_version;
+            if (G_oxen_state.protocol == 0xff) {
+                G_oxen_state.protocol = G_oxen_state.io_protocol_version;
             }
-            if (G_loki_state.protocol == G_loki_state.io_protocol_version) {
+            if (G_oxen_state.protocol == G_oxen_state.io_protocol_version) {
                 break;
             }
             // unknown protocol or hot protocol switch is not allowed
@@ -66,11 +66,11 @@ int check_protocol(void) {
 }
 
 int check_ins_access(void) {
-    if (G_loki_state.key_set != 1) {
+    if (G_oxen_state.key_set != 1) {
         return SW_KEY_NOT_SET;
     }
 
-    switch (G_loki_state.io_ins) {
+    switch (G_oxen_state.io_ins) {
         case INS_LOCK_DISPLAY:
         case INS_RESET:
         case INS_GET_NETWORK:
@@ -119,7 +119,7 @@ int check_ins_access(void) {
             if (os_global_pin_is_validated() != PIN_VERIFIED) {
                 return SW_SECURITY_PIN_LOCKED;
             }
-            if (G_loki_state.tx_in_progress != 1) {
+            if (G_oxen_state.tx_in_progress != 1) {
                 return SW_COMMAND_NOT_ALLOWED;
             }
             return SW_OK;
@@ -136,11 +136,11 @@ int monero_dispatch(void) {
         return sw;
     }
 
-    G_loki_state.options = monero_io_fetch_u8();
+    G_oxen_state.options = monero_io_fetch_u8();
 
     sw = 0x6F01;
 
-    switch (G_loki_state.io_ins) {
+    switch (G_oxen_state.io_ins) {
         case INS_RESET:
             sw = monero_apdu_reset();
             break;
@@ -187,7 +187,7 @@ int monero_dispatch(void) {
             sw = monero_apdu_generate_key_image();
             break;
         case INS_GEN_KEY_IMAGE_SIGNATURE:
-            sw = loki_apdu_generate_key_image_signature();
+            sw = oxen_apdu_generate_key_image_signature();
             break;
         case INS_SECRET_KEY_ADD:
             sw = monero_apdu_sc_add();
@@ -229,7 +229,7 @@ int monero_dispatch(void) {
         /// This call will only work when we have an open transaction *and* it is recognized as a /
         /// stake, but we don't explicitly enforce it to be called at any particular time.
         case INS_GET_TX_SECRET_KEY:
-            sw = loki_apdu_get_tx_secret_key();
+            sw = oxen_apdu_get_tx_secret_key();
             break;
 
 
@@ -241,7 +241,7 @@ int monero_dispatch(void) {
             /* --- START TX --- */
         case INS_OPEN_TX:
             // state machine check
-            if (!(G_loki_state.tx_state_ins == 0 || G_loki_state.tx_state_ins == INS_GEN_LNS_SIGNATURE)) {
+            if (!(G_oxen_state.tx_state_ins == 0 || G_oxen_state.tx_state_ins == INS_GEN_LNS_SIGNATURE)) {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
             // 2. command process
@@ -257,7 +257,7 @@ int monero_dispatch(void) {
             /* --- SIG MODE --- */
         case INS_SET_SIGNATURE_MODE:
             // 1. state machine check
-            if (G_loki_state.tx_in_progress != 0) {
+            if (G_oxen_state.tx_in_progress != 0) {
                 // Change sig mode during transacation is not allowed
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
@@ -268,9 +268,9 @@ int monero_dispatch(void) {
             /* --- PAYMENT ID encryption --- */
         case INS_ENCRYPT_PAYMENT_ID:
             // 1. state machine check
-            if (G_loki_state.tx_in_progress == 1) {
-                if ((G_loki_state.tx_state_ins != INS_OPEN_TX) &&
-                    (G_loki_state.tx_state_ins != INS_ENCRYPT_PAYMENT_ID)) {
+            if (G_oxen_state.tx_in_progress == 1) {
+                if ((G_oxen_state.tx_state_ins != INS_OPEN_TX) &&
+                    (G_oxen_state.tx_state_ins != INS_ENCRYPT_PAYMENT_ID)) {
                     THROW(SW_COMMAND_NOT_ALLOWED);
                 }
                 if (!LOKI_IO_P_EQUALS(0, 0))
@@ -278,7 +278,7 @@ int monero_dispatch(void) {
             }
             // 2. command process
             sw = monero_apdu_encrypt_payment_id();
-            if (G_loki_state.tx_in_progress == 1) {
+            if (G_oxen_state.tx_in_progress == 1) {
                 update_protocol();
             }
             break;
@@ -286,9 +286,9 @@ int monero_dispatch(void) {
             /* --- TX OUT KEYS --- */
         case INS_GEN_TXOUT_KEYS:
             // 1. state machine check
-            if ((G_loki_state.tx_state_ins != INS_OPEN_TX) &&
-                (G_loki_state.tx_state_ins != INS_GEN_TXOUT_KEYS) &&
-                (G_loki_state.tx_state_ins != INS_ENCRYPT_PAYMENT_ID)) {
+            if ((G_oxen_state.tx_state_ins != INS_OPEN_TX) &&
+                (G_oxen_state.tx_state_ins != INS_GEN_TXOUT_KEYS) &&
+                (G_oxen_state.tx_state_ins != INS_ENCRYPT_PAYMENT_ID)) {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
             if (!LOKI_IO_P_EQUALS(0, 0))
@@ -302,32 +302,32 @@ int monero_dispatch(void) {
         /* --- PREFIX HASH  --- */
         case INS_PREFIX_HASH:
             // init prefixhash state machine if this is the first step:
-            if (G_loki_state.tx_state_ins == INS_GEN_TXOUT_KEYS) {
-                G_loki_state.tx_state_ins = INS_PREFIX_HASH;
-                G_loki_state.tx_state_p1 = 0;
-                G_loki_state.tx_state_p2 = 0;
-            } else if (G_loki_state.tx_state_ins != INS_PREFIX_HASH) {
+            if (G_oxen_state.tx_state_ins == INS_GEN_TXOUT_KEYS) {
+                G_oxen_state.tx_state_ins = INS_PREFIX_HASH;
+                G_oxen_state.tx_state_p1 = 0;
+                G_oxen_state.tx_state_p2 = 0;
+            } else if (G_oxen_state.tx_state_ins != INS_PREFIX_HASH) {
                 // Otherwise we must be coming from a previous INS_PREFIX_HASH step
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
 
-            if (G_loki_state.tx_state_p1 == 0 && G_loki_state.io_p1 == 1) {
+            if (G_oxen_state.tx_state_p1 == 0 && G_oxen_state.io_p1 == 1) {
                 // We're going from initialization to our first subcommand, where we get basic tx
                 // parameters (version, type, locktime).
                 sw = monero_apdu_prefix_hash_init();
-            } else if (G_loki_state.io_p1 == 2 && (
+            } else if (G_oxen_state.io_p1 == 2 && (
                     // We've moving from first subcommand to phase 2 where we start receiving the
                     // full prefix; either [2,1] for the first piece of a multi-piece prefix, or
                     // [2,0] for a single-piece prefix:
-                    (G_loki_state.tx_state_p1 == 1 && G_loki_state.io_p2 <= 1)
+                    (G_oxen_state.tx_state_p1 == 1 && G_oxen_state.io_p2 <= 1)
                 ||
                     // We're already in phase 2, and moving on to the next piece.  We require that
                     // the next piece index (p2) equals 0 (meaning this is the last piece), or the
                     // old one plus 1.  If we hit 255 then we wrap around to 1, not 0 (unless the
                     // next one just happens to be the last piece).
-                    (G_loki_state.tx_state_p1 == 2 && G_loki_state.io_p1 == 2 && (
-                        G_loki_state.io_p2 == 0 ||
-                        G_loki_state.io_p2 == (G_loki_state.tx_state_p2 < 255 ? G_loki_state.tx_state_p2 + 1 : 1))
+                    (G_oxen_state.tx_state_p1 == 2 && G_oxen_state.io_p1 == 2 && (
+                        G_oxen_state.io_p2 == 0 ||
+                        G_oxen_state.io_p2 == (G_oxen_state.tx_state_p2 < 255 ? G_oxen_state.tx_state_p2 + 1 : 1))
                     )
             )) {
                 sw = monero_apdu_prefix_hash_update();
@@ -351,17 +351,17 @@ int monero_dispatch(void) {
             /* --- BLIND --- */
         case INS_BLIND:
             // 1. state machine check
-            if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_FAKE) {
-            } else if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-                if ((G_loki_state.tx_state_ins != INS_GEN_COMMITMENT_MASK) &&
-                    (G_loki_state.tx_state_ins != INS_BLIND)) {
+            if (G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_FAKE) {
+            } else if (G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
+                if ((G_oxen_state.tx_state_ins != INS_GEN_COMMITMENT_MASK) &&
+                    (G_oxen_state.tx_state_ins != INS_BLIND)) {
                     THROW(SW_COMMAND_NOT_ALLOWED);
                 }
             } else {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
             // 2. command process
-            if ((G_loki_state.io_p1 != 0) || (G_loki_state.io_p2 != 0)) {
+            if ((G_oxen_state.io_p1 != 0) || (G_oxen_state.io_p2 != 0)) {
                 THROW(SW_WRONG_P1P2);
             }
             sw = monero_apdu_blind();
@@ -371,37 +371,37 @@ int monero_dispatch(void) {
             /* --- VALIDATE/PREHASH --- */
         case INS_VALIDATE:
             // 1. state machine check
-            if ((G_loki_state.tx_state_ins != INS_BLIND) &&
-                (G_loki_state.tx_state_ins != INS_VALIDATE)) {
+            if ((G_oxen_state.tx_state_ins != INS_BLIND) &&
+                (G_oxen_state.tx_state_ins != INS_VALIDATE)) {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
             // init PREHASH state machine
-            if (G_loki_state.tx_state_ins == INS_BLIND) {
-                G_loki_state.tx_state_ins = INS_VALIDATE;
-                G_loki_state.tx_state_p1 = 1;
-                G_loki_state.tx_state_p2 = 0;
-                if ((G_loki_state.io_p1 != 1) || (G_loki_state.io_p2 != 1)) {
+            if (G_oxen_state.tx_state_ins == INS_BLIND) {
+                G_oxen_state.tx_state_ins = INS_VALIDATE;
+                G_oxen_state.tx_state_p1 = 1;
+                G_oxen_state.tx_state_p2 = 0;
+                if ((G_oxen_state.io_p1 != 1) || (G_oxen_state.io_p2 != 1)) {
                     THROW(SW_SUBCOMMAND_NOT_ALLOWED);
                 }
             }
             // check new state is allowed
-            if (G_loki_state.tx_state_p1 == G_loki_state.io_p1) {
-                if (G_loki_state.tx_state_p2 != G_loki_state.io_p2 - 1) {
+            if (G_oxen_state.tx_state_p1 == G_oxen_state.io_p1) {
+                if (G_oxen_state.tx_state_p2 != G_oxen_state.io_p2 - 1) {
                     THROW(SW_SUBCOMMAND_NOT_ALLOWED);
                 }
-            } else if (G_loki_state.tx_state_p1 == G_loki_state.io_p1 - 1) {
-                if (1 != G_loki_state.io_p2) {
+            } else if (G_oxen_state.tx_state_p1 == G_oxen_state.io_p1 - 1) {
+                if (1 != G_oxen_state.io_p2) {
                     THROW(SW_SUBCOMMAND_NOT_ALLOWED);
                 }
             } else {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
             // 2. command process
-            if (G_loki_state.io_p1 == 1) {
+            if (G_oxen_state.io_p1 == 1) {
                 sw = monero_apdu_clsag_prehash_init();
-            } else if (G_loki_state.io_p1 == 2) {
+            } else if (G_oxen_state.io_p1 == 2) {
                 sw = monero_apdu_clsag_prehash_update();
-            } else if (G_loki_state.io_p1 == 3) {
+            } else if (G_oxen_state.io_p1 == 3) {
                 sw = monero_apdu_clsag_prehash_finalize();
             } else {
                 THROW(SW_WRONG_P1P2);
@@ -413,15 +413,15 @@ int monero_dispatch(void) {
         case INS_CLSAG:
             // If we are going to [CLSAG, 1, 0] then we must be coming from either [VALIDATE, 3] or [CLSAG, 3, 0]
             if (LOKI_IO_P_EQUALS(1, 0)) {
-                if ((G_loki_state.tx_state_ins == INS_VALIDATE && G_loki_state.tx_state_p1 == 3) || LOKI_TX_STATE_INS_P_EQUALS(INS_CLSAG, 3, 0))
+                if ((G_oxen_state.tx_state_ins == INS_VALIDATE && G_oxen_state.tx_state_p1 == 3) || LOKI_TX_STATE_INS_P_EQUALS(INS_CLSAG, 3, 0))
                     sw = monero_apdu_clsag_prepare();
                 else
                     THROW(SW_SUBCOMMAND_NOT_ALLOWED);
-            } else if (G_loki_state.tx_state_ins == INS_CLSAG) {
+            } else if (G_oxen_state.tx_state_ins == INS_CLSAG) {
                 // Transitioning between CLSAG states
 
-                // [1,0]->[2,x] or [2,x]->[2,y] (loki_clsag.c does x/y validation)
-                if ((LOKI_TX_STATE_P_EQUALS(1, 0) || G_loki_state.tx_state_p1 == 2) && G_loki_state.io_p1 == 2)
+                // [1,0]->[2,x] or [2,x]->[2,y] (oxen_clsag.c does x/y validation)
+                if ((LOKI_TX_STATE_P_EQUALS(1, 0) || G_oxen_state.tx_state_p1 == 2) && G_oxen_state.io_p1 == 2)
                     sw = monero_apdu_clsag_hash();
 
                 // [2,0]->[3,0] - sign
@@ -439,15 +439,15 @@ int monero_dispatch(void) {
 
         /* --- Unlock --- */
         case INS_GEN_UNLOCK_SIGNATURE:
-            if (G_loki_state.tx_in_progress)
+            if (G_oxen_state.tx_in_progress)
                 THROW(SW_COMMAND_NOT_ALLOWED);
             // Initialization: must not be in the middle of something else
-            if (LOKI_IO_P_EQUALS(0, 0) && G_loki_state.tx_state_ins == 0)
-                sw = loki_apdu_generate_unlock_signature();
+            if (LOKI_IO_P_EQUALS(0, 0) && G_oxen_state.tx_state_ins == 0)
+                sw = oxen_apdu_generate_unlock_signature();
             else if (LOKI_IO_P_EQUALS(1, 0) && LOKI_TX_STATE_INS_P_EQUALS(INS_GEN_UNLOCK_SIGNATURE, 0, 0))
                 // [UNLOCK,1,0] is the post-confirmation step and must follow immediately the
                 // [UNLOCK,0,0] (which is where we ask for confirmation).
-                sw = loki_apdu_generate_unlock_signature();
+                sw = oxen_apdu_generate_unlock_signature();
             else
                 THROW(SW_COMMAND_NOT_ALLOWED);
 
@@ -456,18 +456,18 @@ int monero_dispatch(void) {
 
         /* --- LNS --- */
         case INS_GEN_LNS_SIGNATURE:
-            if (G_loki_state.tx_in_progress)
+            if (G_oxen_state.tx_in_progress)
                 THROW(SW_COMMAND_NOT_ALLOWED);
             // Initialization: must not be in the middle of something else
-            if (LOKI_IO_P_EQUALS(0, 0) && G_loki_state.tx_state_ins == 0)
-                sw = loki_apdu_generate_lns_hash();
+            if (LOKI_IO_P_EQUALS(0, 0) && G_oxen_state.tx_state_ins == 0)
+                sw = oxen_apdu_generate_lns_hash();
             // [0,0]->[1,x] or [1,x]->[1,y] -- we receive data to hash in multiple parts
-            else if (G_loki_state.tx_state_ins == INS_GEN_LNS_SIGNATURE &&
-                        (LOKI_TX_STATE_P_EQUALS(0, 0) || G_loki_state.tx_state_p1 == 1) && G_loki_state.io_p1 == 1)
-                sw = loki_apdu_generate_lns_hash();
+            else if (G_oxen_state.tx_state_ins == INS_GEN_LNS_SIGNATURE &&
+                        (LOKI_TX_STATE_P_EQUALS(0, 0) || G_oxen_state.tx_state_p1 == 1) && G_oxen_state.io_p1 == 1)
+                sw = oxen_apdu_generate_lns_hash();
             // [1,0] -> [2,0] gives the account indices and uses the hash built in the [1,x] steps to make the signature
             else if (LOKI_TX_STATE_INS_P_EQUALS(INS_GEN_LNS_SIGNATURE, 1, 0) && LOKI_IO_P_EQUALS(2, 0))
-                sw = loki_apdu_generate_lns_signature();
+                sw = oxen_apdu_generate_lns_signature();
             else
                 THROW(SW_COMMAND_NOT_ALLOWED);
 
