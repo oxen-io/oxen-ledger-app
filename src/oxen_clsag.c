@@ -92,7 +92,7 @@ int monero_apdu_clsag_hash() {
 
     // We init hash if we just came off [1], or we just finished a [2,0].  In either case we require
     // the current command be [2,1] or [2,0] (i.e. first of multipart, or single-part):
-    if (G_oxen_state.tx_state_p1 == 1 || LOKI_TX_STATE_P_EQUALS(2, 0)) {
+    if (G_oxen_state.tx_state_p1 == 1 || OXEN_TX_STATE_P_EQUALS(2, 0)) {
         if (G_oxen_state.io_p2 > 1)
             THROW(SW_SUBCOMMAND_NOT_ALLOWED);
         cx_keccak_init(&G_oxen_state.keccak_alt, 256);

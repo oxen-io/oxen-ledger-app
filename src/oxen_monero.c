@@ -22,7 +22,7 @@
 #include "oxen_api.h"
 #include "oxen_vars.h"
 
-#ifndef LOKI_ALPHA
+#ifndef OXEN_ALPHA
 const unsigned char C_MAINNET_NETWORK_ID[] = {0x46 ,0x61, 0x72, 0x62 ,0x61, 0x75, 0x74, 0x69,
                                               0x2a, 0x4c, 0x61, 0x75, 0x66, 0x65, 0x79, 0x00};
 #endif
@@ -129,7 +129,7 @@ unsigned char oxen_wallet_address(char* str_b58, unsigned char* view, unsigned c
             else if (is_subbadress) prefix = DEVNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
             else                    prefix = DEVNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
             break;
-#ifndef LOKI_ALPHA
+#ifndef OXEN_ALPHA
         case MAINNET:
             if (paymentID)          prefix = MAINNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
             else if (is_subbadress) prefix = MAINNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
@@ -174,7 +174,7 @@ void oxen_currency_str(uint64_t atomic_oxen, char *str) {
     unsigned char len, i, j;
     char tmp;
 
-    // Special case short circuit for 0 LOKI
+    // Special case short circuit for 0 OXEN
     if (atomic_oxen == 0) {
         str[0] = '0';
         str[1] = '.';
@@ -191,7 +191,7 @@ void oxen_currency_str(uint64_t atomic_oxen, char *str) {
         atomic_oxen /= 10;
     }
     if (len <= COIN_DECIMAL) {
-        // The value is less than 1 LOKI so add any needed significant 0's and add the '.0'
+        // The value is less than 1 OXEN so add any needed significant 0's and add the '.0'
         while (len < COIN_DECIMAL)
             str[len++] = '0';
         str[len++] = '.';

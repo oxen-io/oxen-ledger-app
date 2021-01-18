@@ -17,8 +17,8 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#ifndef LOKI_API_H
-#define LOKI_API_H
+#ifndef OXEN_API_H
+#define OXEN_API_H
 
 #include <stdint.h>
 

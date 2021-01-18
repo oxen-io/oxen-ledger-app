@@ -131,19 +131,19 @@ void ui_menu_opentx_display(unsigned char final_step) {
 
 void ui_menu_amount_validation_action(unsigned int value);
 
-#define LOKI_UX_CONFIRM_AMOUNT_STEP(name, title) \
+#define OXEN_UX_CONFIRM_AMOUNT_STEP(name, title) \
     UX_STEP_NOCB(name, bn, {title, G_oxen_state.ux_amount})
 
-LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_fee_step, "Confirm Fee");
-LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_lns_fee_step, "Confirm LNS Fee");
-LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_change_step, "Amount (change)");
-LOKI_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_timelock_step, "Timelock");
+OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_fee_step, "Confirm Fee");
+OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_lns_fee_step, "Confirm LNS Fee");
+OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_change_step, "Amount (change)");
+OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_timelock_step, "Timelock");
 
-#define LOKI_UX_ACCEPT_REJECT(basename, callback) \
+#define OXEN_UX_ACCEPT_REJECT(basename, callback) \
     UX_STEP_CB(basename##_accept_step, pb, callback(ACCEPT), {&C_icon_validate_14, "Accept"}); \
     UX_STEP_CB(basename##_reject_step, pb, callback(REJECT), {&C_icon_crossmark, "Reject"})
 
-LOKI_UX_ACCEPT_REJECT(ux_menu_validation_cf, ui_menu_amount_validation_action);
+OXEN_UX_ACCEPT_REJECT(ux_menu_validation_cf, ui_menu_amount_validation_action);
 
 UX_FLOW(ux_flow_fee, &ux_menu_validation_fee_step, &ux_menu_validation_cf_accept_step,
         &ux_menu_validation_cf_reject_step);
@@ -183,7 +183,7 @@ UX_STEP_NOCB(ux_menu_validation_amount_step, bn, {"Confirm Amount", G_oxen_state
 UX_STEP_NOCB(ux_menu_validation_recipient_step, paging,
              {"Recipient", G_oxen_state.ux_address});
 
-LOKI_UX_ACCEPT_REJECT(ux_menu_validation, ui_menu_validation_action);
+OXEN_UX_ACCEPT_REJECT(ux_menu_validation, ui_menu_validation_action);
 
 UX_FLOW(ux_flow_validation,
         &ux_menu_validation_amount_step,
@@ -232,7 +232,7 @@ void ui_menu_special_validation_action(unsigned int value) {
     monero_io_do(IO_RETURN_AFTER_TX);
     ui_menu_main_display();
 }
-LOKI_UX_ACCEPT_REJECT(ux_menu_special_validation, ui_menu_special_validation_action);
+OXEN_UX_ACCEPT_REJECT(ux_menu_special_validation, ui_menu_special_validation_action);
 
 /* Sign unlock output */
 UX_STEP_NOCB(ux_menu_unlock_validation_step, bb, {"Confirm Service", "Node Unlock"});
@@ -350,7 +350,7 @@ void ui_menu_viewkey_export_display() {
 /* -------------------------------- NETWORK UX --------------------------------- */
 
 const char* const network_submenu_getter_values[] = {
-#ifdef LOKI_ALPHA
+#ifdef OXEN_ALPHA
     "Unvailable",
 #else
     "Main Network",
@@ -359,7 +359,7 @@ const char* const network_submenu_getter_values[] = {
     "Dev Network",
     "Cancel"};
 const char* const network_submenu_getter_values_selected[] = {
-#ifdef LOKI_ALPHA
+#ifdef OXEN_ALPHA
     "Unvailable",
 #else
     "Main Network *",
@@ -375,7 +375,7 @@ const char* network_submenu_getter(unsigned int idx) {
     int net;
     switch (idx) {
         case 0:
-#ifdef LOKI_ALPHA
+#ifdef OXEN_ALPHA
             net = -1;
 #else
             net = MAINNET;
@@ -406,7 +406,7 @@ static void network_set_net(unsigned int network) {
 void network_submenu_selector(unsigned int idx) {
     switch (idx) {
         case 0:
-#ifndef LOKI_ALPHA
+#ifndef OXEN_ALPHA
             network_set_net(MAINNET);
 #endif
             break;
@@ -463,14 +463,14 @@ void ui_menu_truncate_addrs_display() {
 
 const char* const confirm_fee_values[] = {
     "Always",
-    "Above 0.05 LOKI",
-    "Above 0.2 LOKI",
-    "Above 1.0 LOKI"};
+    "Above 0.05 OXEN",
+    "Above 0.2 OXEN",
+    "Above 1.0 OXEN"};
 const char* const confirm_fee_values_selected[] = {
     "Always*",
-    "Above 0.05 LOKI*",
-    "Above 0.2 LOKI*",
-    "Above 1.0 LOKI*"};
+    "Above 0.05 OXEN*",
+    "Above 0.2 OXEN*",
+    "Above 1.0 OXEN*"};
 
 const char* confirm_fee_submenu_getter(unsigned int idx) {
     if (idx >= ARRAYLEN(confirm_fee_values))
@@ -669,7 +669,7 @@ UX_STEP_CB(
     ui_menu_pubaddr_display(),
     {
         &C_icon_oxen,
-        "LOKI wallet",
+        "OXEN wallet",
         G_oxen_state.ux_wallet_public_short_address
     });
 
@@ -683,7 +683,7 @@ UX_STEP_CB(
 UX_STEP_NOCB(
     ux_menu_main_version_step,
     bn,
-    {"Version", LOKI_VERSION_STRING}
+    {"Version", OXEN_VERSION_STRING}
 );
 
 UX_STEP_CB(

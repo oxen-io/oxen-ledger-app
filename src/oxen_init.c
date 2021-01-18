@@ -43,7 +43,7 @@ void monero_init(void) {
 
     // first init ?
     if (os_memcmp((void*)N_oxen_state->magic, (void*)C_MAGIC, sizeof(C_MAGIC)) != 0) {
-#if defined(LOKI_ALPHA) || defined(LOKI_BETA)
+#if defined(OXEN_ALPHA) || defined(OXEN_BETA)
         oxen_install(TESTNET);
 #else
         oxen_install(MAINNET);
@@ -161,7 +161,7 @@ void oxen_install(unsigned char netId) {
 const char* const oxen_supported_client[] = {
     "8.",
 };
-#define LOKI_SUPPORTED_CLIENT_SIZE (sizeof(oxen_supported_client) / sizeof(char*))
+#define OXEN_SUPPORTED_CLIENT_SIZE (sizeof(oxen_supported_client) / sizeof(char*))
 
 int monero_apdu_reset(void) {
     unsigned short client_version_len;
@@ -174,22 +174,22 @@ int monero_apdu_reset(void) {
     client_version[client_version_len++] = '.';
     client_version[client_version_len] = 0;
     uint8_t i;
-    for (i = 0; i < LOKI_SUPPORTED_CLIENT_SIZE; i++) {
+    for (i = 0; i < OXEN_SUPPORTED_CLIENT_SIZE; i++) {
         size_t len = strlen((char*)PIC(oxen_supported_client[i]));
         if (len <= client_version_len &&
                 os_memcmp((char*)PIC(oxen_supported_client[i]), client_version, len) == 0) {
             break;
         }
     }
-    if (i == LOKI_SUPPORTED_CLIENT_SIZE) {
+    if (i == OXEN_SUPPORTED_CLIENT_SIZE) {
         THROW(SW_CLIENT_NOT_SUPPORTED);
     }
 
     monero_io_discard(0);
     monero_init();
-    monero_io_insert_u8(LOKI_VERSION_MAJOR);
-    monero_io_insert_u8(LOKI_VERSION_MINOR);
-    monero_io_insert_u8(LOKI_VERSION_MICRO);
+    monero_io_insert_u8(OXEN_VERSION_MAJOR);
+    monero_io_insert_u8(OXEN_VERSION_MINOR);
+    monero_io_insert_u8(OXEN_VERSION_MICRO);
     return SW_OK;
 }
 

@@ -128,7 +128,7 @@ int monero_apdu_put_key(void) {
 }
 
 int monero_apdu_get_network(void) {
-    // We sent back "LOKI" followed by the network type byte
+    // We sent back "OXEN" followed by the network type byte
     monero_io_discard(1);
     uint8_t nettype;
     switch (N_oxen_state->network_id) {
@@ -138,7 +138,7 @@ int monero_apdu_get_network(void) {
         case FAKECHAIN: nettype = 3; break;
         default: nettype = 255;
     }
-    monero_io_insert((const unsigned char*) "LOKI", 4);
+    monero_io_insert((const unsigned char*) "OXEN", 4);
     monero_io_insert(&nettype, 1);
     return SW_OK;
 }
