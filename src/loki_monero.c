@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
  *****************************************************************************/
 
 #include "os.h"
-#include "loki_types.h"
-#include "loki_api.h"
-#include "loki_vars.h"
+#include "oxen_types.h"
+#include "oxen_api.h"
+#include "oxen_vars.h"
 
 #ifndef LOKI_ALPHA
 const unsigned char C_MAINNET_NETWORK_ID[] = {0x46 ,0x61, 0x72, 0x62 ,0x61, 0x75, 0x74, 0x69,
@@ -111,14 +111,14 @@ static void encode_block(const unsigned char* block, unsigned int size, char* re
 #define ADDR_PUBKEY_SIZE 32
 #define ADDR_PAYMENTID_SIZE 8
 #define ADDR_CHECKSUM_SIZE 4
-unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned char* spend,
+unsigned char oxen_wallet_address(char* str_b58, unsigned char* view, unsigned char* spend,
                                   unsigned char is_subbadress, unsigned char* paymentID) {
     unsigned char data[ADDR_NETTYPE_MAX_SIZE + 2*ADDR_PUBKEY_SIZE + ADDR_PAYMENTID_SIZE + ADDR_CHECKSUM_SIZE];
     unsigned char offset;
     unsigned short prefix;
 
-    // data[0] = N_loki_state->network_id;
-    switch (N_loki_state->network_id) {
+    // data[0] = N_oxen_state->network_id;
+    switch (N_oxen_state->network_id) {
         case TESTNET:
             if (paymentID)          prefix = TESTNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
             else if (is_subbadress) prefix = TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
@@ -146,8 +146,8 @@ unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned c
         os_memmove(data + offset, paymentID, 8);
         offset += ADDR_PAYMENTID_SIZE;
     }
-    loki_keccak_256(&G_loki_state.keccak, data, offset, G_loki_state.addr_checksum_hash);
-    os_memmove(data + offset, G_loki_state.addr_checksum_hash, ADDR_CHECKSUM_SIZE);
+    oxen_keccak_256(&G_oxen_state.keccak, data, offset, G_oxen_state.addr_checksum_hash);
+    os_memmove(data + offset, G_oxen_state.addr_checksum_hash, ADDR_CHECKSUM_SIZE);
     offset += ADDR_CHECKSUM_SIZE;
 
     unsigned char full_block_count = offset / FULL_BLOCK_SIZE;
@@ -169,13 +169,13 @@ unsigned char loki_wallet_address(char* str_b58, unsigned char* view, unsigned c
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 // str must be length >= 22
-void loki_currency_str(uint64_t atomic_loki, char *str) {
+void oxen_currency_str(uint64_t atomic_oxen, char *str) {
     // max uint64 is 18446744073709551616, aka 20 char, plus dot
     unsigned char len, i, j;
     char tmp;
 
     // Special case short circuit for 0 LOKI
-    if (atomic_loki == 0) {
+    if (atomic_oxen == 0) {
         str[0] = '0';
         str[1] = '.';
         str[2] = '0';
@@ -184,11 +184,11 @@ void loki_currency_str(uint64_t atomic_loki, char *str) {
     }
 
     // Write the value out in reverse; this is a bit easier since we don't know the length yet
-    for (len = 0; atomic_loki; ++len) {
+    for (len = 0; atomic_oxen; ++len) {
         if (len == COIN_DECIMAL)
             str[len++] = '.';
-        str[len] = '0' + atomic_loki % 10;
-        atomic_loki /= 10;
+        str[len] = '0' + atomic_oxen % 10;
+        atomic_oxen /= 10;
     }
     if (len <= COIN_DECIMAL) {
         // The value is less than 1 LOKI so add any needed significant 0's and add the '.0'
@@ -198,7 +198,7 @@ void loki_currency_str(uint64_t atomic_loki, char *str) {
         str[len++] = '0';
     }
 
-    // We've now converted an atomic loki value such as:
+    // We've now converted an atomic oxen value such as:
     //     12345678 to "876543210.0"
     //     1234567890 to "098765432.1"
     //     12345000000000 to "000000000.54321"

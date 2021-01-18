@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
 
 #include "os.h"
 #include "cx.h"
-#include "loki_types.h"
-#include "loki_api.h"
-#include "loki_vars.h"
+#include "oxen_types.h"
+#include "oxen_api.h"
+#include "oxen_vars.h"
 
 /* ----------------------*/
 /* -- A Kind of Magic -- */
@@ -39,35 +39,35 @@ const unsigned char C_FAKE_SEC_SPEND_KEY[32] = {
 /* --- Boot                                                            --- */
 /* ----------------------------------------------------------------------- */
 void monero_init(void) {
-    os_memset(&G_loki_state, 0, sizeof(loki_v_state_t));
+    os_memset(&G_oxen_state, 0, sizeof(oxen_v_state_t));
 
     // first init ?
-    if (os_memcmp((void*)N_loki_state->magic, (void*)C_MAGIC, sizeof(C_MAGIC)) != 0) {
+    if (os_memcmp((void*)N_oxen_state->magic, (void*)C_MAGIC, sizeof(C_MAGIC)) != 0) {
 #if defined(LOKI_ALPHA) || defined(LOKI_BETA)
-        loki_install(TESTNET);
+        oxen_install(TESTNET);
 #else
-        loki_install(MAINNET);
+        oxen_install(MAINNET);
 #endif
     }
 
-    G_loki_state.protocol = 0xff;
-    G_loki_state.protocol_barrier = PROTOCOL_UNLOCKED;
+    G_oxen_state.protocol = 0xff;
+    G_oxen_state.protocol_barrier = PROTOCOL_UNLOCKED;
 
     // load key
     monero_init_private_key();
     // ux conf
     monero_init_ux();
     // Let's go!
-    G_loki_state.state = STATE_IDLE;
+    G_oxen_state.state = STATE_IDLE;
 }
 
 /* ----------------------------------------------------------------------- */
 /* --- init private keys                                               --- */
 /* ----------------------------------------------------------------------- */
 void monero_wipe_private_key(void) {
-    os_memset(G_loki_state.keys, 0, sizeof(G_loki_state.keys));
-    os_memset(&G_loki_state.spk, 0, sizeof(G_loki_state.spk));
-    G_loki_state.key_set = 0;
+    os_memset(G_oxen_state.keys, 0, sizeof(G_oxen_state.keys));
+    os_memset(&G_oxen_state.spk, 0, sizeof(G_oxen_state.spk));
+    G_oxen_state.key_set = 0;
 }
 
 void monero_init_private_key(void) {
@@ -86,87 +86,87 @@ void monero_init_private_key(void) {
     path[4] = 0x00000000;
     os_perso_derive_node_bip32(CX_CURVE_SECP256K1, path, 5, seed, chain);
 
-    switch (N_loki_state->key_mode) {
+    switch (N_oxen_state->key_mode) {
         case KEY_MODE_SEED:
 
-            loki_keccak_256(&G_loki_state.keccak, seed, 32, G_loki_state.spend_priv);
-            monero_reduce(G_loki_state.spend_priv);
-            loki_keccak_256(&G_loki_state.keccak, G_loki_state.spend_priv, 32, G_loki_state.view_priv);
-            monero_reduce(G_loki_state.view_priv);
+            oxen_keccak_256(&G_oxen_state.keccak, seed, 32, G_oxen_state.spend_priv);
+            monero_reduce(G_oxen_state.spend_priv);
+            oxen_keccak_256(&G_oxen_state.keccak, G_oxen_state.spend_priv, 32, G_oxen_state.view_priv);
+            monero_reduce(G_oxen_state.view_priv);
             break;
 
         case KEY_MODE_EXTERNAL:
-            os_memmove(G_loki_state.view_priv, (void*)N_loki_state->view_priv, 32);
-            os_memmove(G_loki_state.spend_priv, (void*)N_loki_state->spend_priv, 32);
+            os_memmove(G_oxen_state.view_priv, (void*)N_oxen_state->view_priv, 32);
+            os_memmove(G_oxen_state.spend_priv, (void*)N_oxen_state->spend_priv, 32);
             break;
 
         default:
             THROW(SW_SECURITY_LOAD_KEY);
             return;
     }
-    monero_ecmul_G(G_loki_state.view_pub, G_loki_state.view_priv);
-    monero_ecmul_G(G_loki_state.spend_pub, G_loki_state.spend_priv);
+    monero_ecmul_G(G_oxen_state.view_pub, G_oxen_state.view_priv);
+    monero_ecmul_G(G_oxen_state.spend_pub, G_oxen_state.spend_priv);
 
     // generate key protection
-    monero_aes_derive(&G_loki_state.spk, chain, G_loki_state.view_priv, G_loki_state.spend_priv);
+    monero_aes_derive(&G_oxen_state.spk, chain, G_oxen_state.view_priv, G_oxen_state.spend_priv);
 
-    G_loki_state.key_set = 1;
+    G_oxen_state.key_set = 1;
 }
 
 /* ----------------------------------------------------------------------- */
 /* ---  Set up ui/ux                                                   --- */
 /* ----------------------------------------------------------------------- */
 void monero_init_ux(void) {
-    unsigned char wallet_len = loki_wallet_address(
-            G_loki_state.ux_address, G_loki_state.view_pub, G_loki_state.spend_pub, 0, NULL);
+    unsigned char wallet_len = oxen_wallet_address(
+            G_oxen_state.ux_address, G_oxen_state.view_pub, G_oxen_state.spend_pub, 0, NULL);
 
-    os_memmove(G_loki_state.ux_wallet_public_short_address, G_loki_state.ux_address, 7);
-    G_loki_state.ux_wallet_public_short_address[7] = '.';
-    G_loki_state.ux_wallet_public_short_address[8] = '.';
-    os_memmove(G_loki_state.ux_wallet_public_short_address + 9,
-               G_loki_state.ux_address + wallet_len - 3, 3);
-    G_loki_state.ux_wallet_public_short_address[12] = 0;
+    os_memmove(G_oxen_state.ux_wallet_public_short_address, G_oxen_state.ux_address, 7);
+    G_oxen_state.ux_wallet_public_short_address[7] = '.';
+    G_oxen_state.ux_wallet_public_short_address[8] = '.';
+    os_memmove(G_oxen_state.ux_wallet_public_short_address + 9,
+               G_oxen_state.ux_address + wallet_len - 3, 3);
+    G_oxen_state.ux_wallet_public_short_address[12] = 0;
 }
 
 /* ----------------------------------------------------------------------- */
-/* ---  Install/ReInstall Loki app                                   --- */
+/* ---  Install/ReInstall Oxen app                                   --- */
 /* ----------------------------------------------------------------------- */
-void loki_install(unsigned char netId) {
+void oxen_install(unsigned char netId) {
     unsigned char c;
 
     // full reset data
-    nvm_write(N_loki_state, NULL, sizeof(loki_nv_state_t));
+    nvm_write(N_oxen_state, NULL, sizeof(oxen_nv_state_t));
 
     // set mode key
     c = KEY_MODE_SEED;
-    nvm_write(&N_loki_state->key_mode, &c, 1);
+    nvm_write(&N_oxen_state->key_mode, &c, 1);
 
     // set net id
-    nvm_write(&N_loki_state->network_id, &netId, 1);
+    nvm_write(&N_oxen_state->network_id, &netId, 1);
 
     // write magic
-    nvm_write(N_loki_state->magic, (void *)C_MAGIC, sizeof(C_MAGIC));
+    nvm_write(N_oxen_state->magic, (void *)C_MAGIC, sizeof(C_MAGIC));
 
 #if DEBUG_HWDEVICE
     // Default into always-export-view-key mode when doing a debug build because it's annoying to
     // have to confirm the view key export every time when doing dev/debugging work.
     unsigned char always_export = VIEWKEY_EXPORT_ALWAYS_ALLOW;
-    nvm_write(&N_loki_state->viewkey_export_mode, &always_export, 1);
+    nvm_write(&N_oxen_state->viewkey_export_mode, &always_export, 1);
 #endif
 }
 
 /* ----------------------------------------------------------------------- */
 /* --- Reset                                                           --- */
 /* ----------------------------------------------------------------------- */
-const char* const loki_supported_client[] = {
+const char* const oxen_supported_client[] = {
     "8.",
 };
-#define LOKI_SUPPORTED_CLIENT_SIZE (sizeof(loki_supported_client) / sizeof(char*))
+#define LOKI_SUPPORTED_CLIENT_SIZE (sizeof(oxen_supported_client) / sizeof(char*))
 
 int monero_apdu_reset(void) {
     unsigned short client_version_len;
     char client_version[16];
-    client_version_len = G_loki_state.io_length - G_loki_state.io_offset;
+    client_version_len = G_oxen_state.io_length - G_oxen_state.io_offset;
     if (client_version_len > 14) {
         THROW(SW_CLIENT_NOT_SUPPORTED + 1);
     }
@@ -175,9 +175,9 @@ int monero_apdu_reset(void) {
     client_version[client_version_len] = 0;
     uint8_t i;
     for (i = 0; i < LOKI_SUPPORTED_CLIENT_SIZE; i++) {
-        size_t len = strlen((char*)PIC(loki_supported_client[i]));
+        size_t len = strlen((char*)PIC(oxen_supported_client[i]));
         if (len <= client_version_len &&
-                os_memcmp((char*)PIC(loki_supported_client[i]), client_version, len) == 0) {
+                os_memcmp((char*)PIC(oxen_supported_client[i]), client_version, len) == 0) {
             break;
         }
     }
@@ -203,9 +203,9 @@ int monero_apdu_lock(void) {
 }
 
 void monero_lock_and_throw(int sw) {
-    G_loki_state.protocol_barrier = PROTOCOL_LOCKED;
-    snprintf(G_loki_state.ux_info1, sizeof(G_loki_state.ux_info1), "Security Err");
-    snprintf(G_loki_state.ux_info2, sizeof(G_loki_state.ux_info2), "%x", sw);
+    G_oxen_state.protocol_barrier = PROTOCOL_LOCKED;
+    snprintf(G_oxen_state.ux_info1, sizeof(G_oxen_state.ux_info1), "Security Err");
+    snprintf(G_oxen_state.ux_info2, sizeof(G_oxen_state.ux_info2), "%x", sw);
     ui_menu_info_display();
     THROW(sw);
 }

@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ int monero_apdu_reset(void);
 int monero_apdu_lock(void);
 void monero_lock_and_throw(int sw);
 
-void loki_install(unsigned char netId);
+void oxen_install(unsigned char netId);
 void monero_init(void);
 void monero_init_private_key(void);
 void monero_wipe_private_key(void);
@@ -50,12 +50,12 @@ int monero_apdu_generate_key_derivation(void);
 int monero_apdu_derivation_to_scalar(void);
 int monero_apdu_derive_public_key(void);
 int monero_apdu_derive_secret_key(void);
-int loki_apdu_get_tx_secret_key(void);
+int oxen_apdu_get_tx_secret_key(void);
 int monero_apdu_generate_key_image(void);
-int loki_apdu_generate_key_image_signature(void);
-int loki_apdu_generate_unlock_signature(void);
-int loki_apdu_generate_lns_hash(void);
-int loki_apdu_generate_lns_signature(void);
+int oxen_apdu_generate_key_image_signature(void);
+int oxen_apdu_generate_unlock_signature(void);
+int oxen_apdu_generate_lns_hash(void);
+int oxen_apdu_generate_lns_signature(void);
 int monero_apdu_derive_subaddress_public_key(void);
 int monero_apdu_get_subaddress(void);
 int monero_apdu_get_subaddress_spend_public_key(void);
@@ -106,7 +106,7 @@ void ui_menu_pubaddr_display(void);
 // Obtains the monero-base58-encoded wallet address from the view and spend keys, subaddress flag,
 // and payment id (for integrated address).  Returns the number of chars written to str_b58.
 // Note: does *not* null-terminate the string.
-unsigned char loki_wallet_address(char *str_b58, unsigned char *view, unsigned char *spend,
+unsigned char oxen_wallet_address(char *str_b58, unsigned char *view, unsigned char *spend,
                                   unsigned char is_subbadress, unsigned char *paymentID);
 
 /** binary little endian unsigned int amount to uint64 */
@@ -114,7 +114,7 @@ uint64_t monero_bamount2uint64(unsigned char *binary);
 
 /** uint64 atomic currency amount to human-readable currency amount string. `str` must be at least
  * 22 chars long. */
-void loki_currency_str(uint64_t atomic_loki, char *str);
+void oxen_currency_str(uint64_t atomic_oxen, char *str);
 
 int monero_abort_tx(void);
 int monero_unblind(unsigned char *v, unsigned char *k, unsigned char *AKout,
@@ -174,8 +174,8 @@ void monero_derive_public_key(unsigned char *x, const unsigned char *drv_data, u
                               const unsigned char *ec_pub);
 void monero_secret_key_to_public_key(unsigned char *ec_pub, const unsigned char *ec_priv);
 void monero_generate_key_image(unsigned char *img, const unsigned char *P, const unsigned char *x);
-void loki_generate_key_image_signature(unsigned char *sig, const unsigned char *img, const unsigned char *P, const unsigned char *x);
-void loki_generate_signature(unsigned char *sig, const unsigned char *hash, const unsigned char *A, const unsigned char *a);
+void oxen_generate_key_image_signature(unsigned char *sig, const unsigned char *img, const unsigned char *P, const unsigned char *x);
+void oxen_generate_signature(unsigned char *sig, const unsigned char *hash, const unsigned char *A, const unsigned char *a);
 
 void monero_derive_subaddress_public_key(unsigned char *x, const unsigned char *pub,
                                          const unsigned char *drv_data, unsigned int index);
@@ -191,12 +191,12 @@ extern const unsigned char C_ED25519_ORDER[];
 void monero_aes_derive(cx_aes_key_t *sk, const unsigned char *seed32, const unsigned char *a, const unsigned char *b);
 void monero_aes_generate(cx_aes_key_t *sk);
 
-int loki_keccak_256(cx_sha3_t *hasher, const unsigned char *buf, unsigned int len, unsigned char *out);
+int oxen_keccak_256(cx_sha3_t *hasher, const unsigned char *buf, unsigned int len, unsigned char *out);
 
-#define loki_hash_update(hasher, buf, len) \
+#define oxen_hash_update(hasher, buf, len) \
     cx_hash((cx_hash_t *)hasher, 0, buf, len, NULL, 0);
 // Finalizes a 32-byte hash and copies it to `out`
-#define loki_hash_final(hasher, out) \
+#define oxen_hash_final(hasher, out) \
     cx_hash((cx_hash_t *)hasher, CX_LAST, NULL, 0, out, 32);
 
 /*

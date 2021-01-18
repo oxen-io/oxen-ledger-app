@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@
 
 #include "os.h"
 #include "cx.h"
-#include "loki_types.h"
-#include "loki_api.h"
-#include "loki_vars.h"
+#include "oxen_types.h"
+#include "oxen_api.h"
+#include "oxen_vars.h"
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
@@ -60,15 +60,15 @@ static void monero_uint642str(uint64_t val, char *str) {
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_init(void) {
-    cx_keccak_init(&G_loki_state.keccak_alt, 256);
-    if (G_loki_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
+    cx_keccak_init(&G_oxen_state.keccak_alt, 256);
+    if (G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         if (monero_io_fetch_varint16() != 4) // tx version; we only support v4 txes
             THROW(SW_WRONG_DATA_RANGE);
 
         uint16_t txtype = monero_io_fetch_varint16();
         uint64_t timelock = monero_io_fetch_varint();
 
-        if (G_loki_state.tx_type != txtype)
+        if (G_oxen_state.tx_type != txtype)
             THROW(SW_WRONG_DATA_RANGE);
 
         if (timelock != 0 && txtype != TXTYPE_STANDARD)
@@ -82,7 +82,7 @@ int monero_apdu_prefix_hash_init(void) {
         // At this stage we only want to check for a timelock and prompt if necessary (to prevent
         // accidental timelocked transactions).
         if (timelock != 0) {
-            monero_uint642str(timelock, G_loki_state.ux_amount);
+            monero_uint642str(timelock, G_oxen_state.ux_amount);
             ui_menu_timelock_validation_display();
             return 0;
         } else {
@@ -98,12 +98,12 @@ int monero_apdu_prefix_hash_init(void) {
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_update(void) {
-    loki_hash_update(&G_loki_state.keccak_alt, G_loki_state.io_buffer + G_loki_state.io_offset,
-                           G_loki_state.io_length - G_loki_state.io_offset);
+    oxen_hash_update(&G_oxen_state.keccak_alt, G_oxen_state.io_buffer + G_oxen_state.io_offset,
+                           G_oxen_state.io_length - G_oxen_state.io_offset);
     monero_io_discard(0);
-    if (G_loki_state.io_p2 == 0) {
-        loki_hash_final(&G_loki_state.keccak_alt, G_loki_state.prefixH);
-        monero_io_insert(G_loki_state.prefixH, 32);
+    if (G_oxen_state.io_p2 == 0) {
+        oxen_hash_final(&G_oxen_state.keccak_alt, G_oxen_state.prefixH);
+        monero_io_insert(G_oxen_state.prefixH, 32);
     }
 
     return SW_OK;

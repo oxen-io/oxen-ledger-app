@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
 
 #include "os.h"
 #include "cx.h"
-#include "loki_types.h"
-#include "loki_api.h"
-#include "loki_vars.h"
+#include "oxen_types.h"
+#include "oxen_api.h"
+#include "oxen_vars.h"
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
@@ -36,7 +36,7 @@ int monero_apdu_blind() {
     monero_io_fetch(v, 32);
     monero_io_discard(1);
 
-    if ((G_loki_state.options & 0x03) == 2) {
+    if ((G_oxen_state.options & 0x03) == 2) {
         os_memset(k, 0, 32);
         monero_ecdhHash(AKout, AKout);
         for (int i = 0; i < 8; i++) {
@@ -93,7 +93,7 @@ int monero_apdu_unblind() {
 
     monero_io_discard(1);
 
-    monero_unblind(v, k, AKout, G_loki_state.options & 0x03);
+    monero_unblind(v, k, AKout, G_oxen_state.options & 0x03);
 
     // ret all
     monero_io_insert(v, 32);

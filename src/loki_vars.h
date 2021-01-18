@@ -1,8 +1,8 @@
 /*****************************************************************************
- *   Ledger Loki App.
+ *   Ledger Oxen App.
  *   (c) 2017-2020 Cedric Mesnil <cslashm@gmail.com>, Ledger SAS.
  *   (c) 2020 Ledger SAS.
- *   (c) 2020 Loki Project
+ *   (c) 2020 Oxen Project
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,19 +23,19 @@
 #include "os.h"
 #include "cx.h"
 #include "os_io_seproxyhal.h"
-#include "loki_types.h"
-#include "loki_api.h"
+#include "oxen_types.h"
+#include "oxen_api.h"
 
-extern loki_v_state_t G_loki_state;
+extern oxen_v_state_t G_oxen_state;
 
-#define LOKI_IO_P_EQUALS(p1, p2) (G_loki_state.io_p1 == (p1) && G_loki_state.io_p2 == (p2))
-#define LOKI_TX_STATE_P_EQUALS(p1, p2) (G_loki_state.tx_state_p1 == (p1) && G_loki_state.tx_state_p2 == (p2))
+#define LOKI_IO_P_EQUALS(p1, p2) (G_oxen_state.io_p1 == (p1) && G_oxen_state.io_p2 == (p2))
+#define LOKI_TX_STATE_P_EQUALS(p1, p2) (G_oxen_state.tx_state_p1 == (p1) && G_oxen_state.tx_state_p2 == (p2))
 
-#define LOKI_IO_INS_P_EQUALS(ins, p1, p2) (G_loki_state.io_ins == (ins) && LOKI_IO_P_EQUALS(p1, p2))
-#define LOKI_TX_STATE_INS_P_EQUALS(ins, p1, p2) (G_loki_state.tx_state_ins == (ins) && LOKI_TX_STATE_P_EQUALS(p1, p2))
+#define LOKI_IO_INS_P_EQUALS(ins, p1, p2) (G_oxen_state.io_ins == (ins) && LOKI_IO_P_EQUALS(p1, p2))
+#define LOKI_TX_STATE_INS_P_EQUALS(ins, p1, p2) (G_oxen_state.tx_state_ins == (ins) && LOKI_TX_STATE_P_EQUALS(p1, p2))
 
-extern loki_nv_state_t N_state_pic;
-#define N_loki_state ((WIDE loki_nv_state_t *)PIC(&N_state_pic))
+extern oxen_nv_state_t N_state_pic;
+#define N_oxen_state ((WIDE oxen_nv_state_t *)PIC(&N_state_pic))
 
 extern ux_state_t ux;
 #endif
