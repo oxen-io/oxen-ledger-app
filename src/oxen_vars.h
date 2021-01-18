@@ -17,8 +17,8 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#ifndef LOKI_VARS_H
-#define LOKI_VARS_H
+#ifndef OXEN_VARS_H
+#define OXEN_VARS_H
 
 #include "os.h"
 #include "cx.h"
@@ -28,11 +28,11 @@
 
 extern oxen_v_state_t G_oxen_state;
 
-#define LOKI_IO_P_EQUALS(p1, p2) (G_oxen_state.io_p1 == (p1) && G_oxen_state.io_p2 == (p2))
-#define LOKI_TX_STATE_P_EQUALS(p1, p2) (G_oxen_state.tx_state_p1 == (p1) && G_oxen_state.tx_state_p2 == (p2))
+#define OXEN_IO_P_EQUALS(p1, p2) (G_oxen_state.io_p1 == (p1) && G_oxen_state.io_p2 == (p2))
+#define OXEN_TX_STATE_P_EQUALS(p1, p2) (G_oxen_state.tx_state_p1 == (p1) && G_oxen_state.tx_state_p2 == (p2))
 
-#define LOKI_IO_INS_P_EQUALS(ins, p1, p2) (G_oxen_state.io_ins == (ins) && LOKI_IO_P_EQUALS(p1, p2))
-#define LOKI_TX_STATE_INS_P_EQUALS(ins, p1, p2) (G_oxen_state.tx_state_ins == (ins) && LOKI_TX_STATE_P_EQUALS(p1, p2))
+#define OXEN_IO_INS_P_EQUALS(ins, p1, p2) (G_oxen_state.io_ins == (ins) && OXEN_IO_P_EQUALS(p1, p2))
+#define OXEN_TX_STATE_INS_P_EQUALS(ins, p1, p2) (G_oxen_state.tx_state_ins == (ins) && OXEN_TX_STATE_P_EQUALS(p1, p2))
 
 extern oxen_nv_state_t N_state_pic;
 #define N_oxen_state ((WIDE oxen_nv_state_t *)PIC(&N_state_pic))

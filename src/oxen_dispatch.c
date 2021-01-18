@@ -273,7 +273,7 @@ int monero_dispatch(void) {
                     (G_oxen_state.tx_state_ins != INS_ENCRYPT_PAYMENT_ID)) {
                     THROW(SW_COMMAND_NOT_ALLOWED);
                 }
-                if (!LOKI_IO_P_EQUALS(0, 0))
+                if (!OXEN_IO_P_EQUALS(0, 0))
                     THROW(SW_WRONG_P1P2);
             }
             // 2. command process
@@ -291,7 +291,7 @@ int monero_dispatch(void) {
                 (G_oxen_state.tx_state_ins != INS_ENCRYPT_PAYMENT_ID)) {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
-            if (!LOKI_IO_P_EQUALS(0, 0))
+            if (!OXEN_IO_P_EQUALS(0, 0))
                 THROW(SW_WRONG_P1P2);
 
             // 2. command process
@@ -340,7 +340,7 @@ int monero_dispatch(void) {
 
             /*--- COMMITMENT MASK --- */
         case INS_GEN_COMMITMENT_MASK:
-            if (!LOKI_IO_P_EQUALS(0, 0))
+            if (!OXEN_IO_P_EQUALS(0, 0))
                 THROW(SW_WRONG_P1P2);
 
             // 2. command process
@@ -412,8 +412,8 @@ int monero_dispatch(void) {
         /* --- CLSAG --- */
         case INS_CLSAG:
             // If we are going to [CLSAG, 1, 0] then we must be coming from either [VALIDATE, 3] or [CLSAG, 3, 0]
-            if (LOKI_IO_P_EQUALS(1, 0)) {
-                if ((G_oxen_state.tx_state_ins == INS_VALIDATE && G_oxen_state.tx_state_p1 == 3) || LOKI_TX_STATE_INS_P_EQUALS(INS_CLSAG, 3, 0))
+            if (OXEN_IO_P_EQUALS(1, 0)) {
+                if ((G_oxen_state.tx_state_ins == INS_VALIDATE && G_oxen_state.tx_state_p1 == 3) || OXEN_TX_STATE_INS_P_EQUALS(INS_CLSAG, 3, 0))
                     sw = monero_apdu_clsag_prepare();
                 else
                     THROW(SW_SUBCOMMAND_NOT_ALLOWED);
@@ -421,11 +421,11 @@ int monero_dispatch(void) {
                 // Transitioning between CLSAG states
 
                 // [1,0]->[2,x] or [2,x]->[2,y] (oxen_clsag.c does x/y validation)
-                if ((LOKI_TX_STATE_P_EQUALS(1, 0) || G_oxen_state.tx_state_p1 == 2) && G_oxen_state.io_p1 == 2)
+                if ((OXEN_TX_STATE_P_EQUALS(1, 0) || G_oxen_state.tx_state_p1 == 2) && G_oxen_state.io_p1 == 2)
                     sw = monero_apdu_clsag_hash();
 
                 // [2,0]->[3,0] - sign
-                else if (LOKI_TX_STATE_P_EQUALS(2, 0) && LOKI_IO_P_EQUALS(3, 0))
+                else if (OXEN_TX_STATE_P_EQUALS(2, 0) && OXEN_IO_P_EQUALS(3, 0))
                     sw = monero_apdu_clsag_sign();
 
                 else
@@ -442,9 +442,9 @@ int monero_dispatch(void) {
             if (G_oxen_state.tx_in_progress)
                 THROW(SW_COMMAND_NOT_ALLOWED);
             // Initialization: must not be in the middle of something else
-            if (LOKI_IO_P_EQUALS(0, 0) && G_oxen_state.tx_state_ins == 0)
+            if (OXEN_IO_P_EQUALS(0, 0) && G_oxen_state.tx_state_ins == 0)
                 sw = oxen_apdu_generate_unlock_signature();
-            else if (LOKI_IO_P_EQUALS(1, 0) && LOKI_TX_STATE_INS_P_EQUALS(INS_GEN_UNLOCK_SIGNATURE, 0, 0))
+            else if (OXEN_IO_P_EQUALS(1, 0) && OXEN_TX_STATE_INS_P_EQUALS(INS_GEN_UNLOCK_SIGNATURE, 0, 0))
                 // [UNLOCK,1,0] is the post-confirmation step and must follow immediately the
                 // [UNLOCK,0,0] (which is where we ask for confirmation).
                 sw = oxen_apdu_generate_unlock_signature();
@@ -459,14 +459,14 @@ int monero_dispatch(void) {
             if (G_oxen_state.tx_in_progress)
                 THROW(SW_COMMAND_NOT_ALLOWED);
             // Initialization: must not be in the middle of something else
-            if (LOKI_IO_P_EQUALS(0, 0) && G_oxen_state.tx_state_ins == 0)
+            if (OXEN_IO_P_EQUALS(0, 0) && G_oxen_state.tx_state_ins == 0)
                 sw = oxen_apdu_generate_lns_hash();
             // [0,0]->[1,x] or [1,x]->[1,y] -- we receive data to hash in multiple parts
             else if (G_oxen_state.tx_state_ins == INS_GEN_LNS_SIGNATURE &&
-                        (LOKI_TX_STATE_P_EQUALS(0, 0) || G_oxen_state.tx_state_p1 == 1) && G_oxen_state.io_p1 == 1)
+                        (OXEN_TX_STATE_P_EQUALS(0, 0) || G_oxen_state.tx_state_p1 == 1) && G_oxen_state.io_p1 == 1)
                 sw = oxen_apdu_generate_lns_hash();
             // [1,0] -> [2,0] gives the account indices and uses the hash built in the [1,x] steps to make the signature
-            else if (LOKI_TX_STATE_INS_P_EQUALS(INS_GEN_LNS_SIGNATURE, 1, 0) && LOKI_IO_P_EQUALS(2, 0))
+            else if (OXEN_TX_STATE_INS_P_EQUALS(INS_GEN_LNS_SIGNATURE, 1, 0) && OXEN_IO_P_EQUALS(2, 0))
                 sw = oxen_apdu_generate_lns_signature();
             else
                 THROW(SW_COMMAND_NOT_ALLOWED);

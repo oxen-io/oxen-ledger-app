@@ -17,8 +17,8 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#ifndef LOKI_TYPES_H
-#define LOKI_TYPES_H
+#ifndef OXEN_TYPES_H
+#define OXEN_TYPES_H
 
 #include "os_io_seproxyhal.h"
 
@@ -49,10 +49,10 @@
 #define TESTNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX 157
 #define TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX         158
 
-#define COIN_DECIMAL 9 // 1 LOKI = 1'000'000'000 atomic LOKI
+#define COIN_DECIMAL 9 // 1 OXEN = 1'000'000'000 atomic OXEN
 
 enum network_type {
-#ifndef LOKI_ALPHA
+#ifndef OXEN_ALPHA
     MAINNET = 0,
 #endif
     TESTNET = 1,
@@ -238,7 +238,7 @@ typedef struct oxen_v_state_t {
                     unsigned int disp_addr_m;
                 };
             };
-            // LOKI to display: max pow(2,64) uint, aka 20-chars + dot + null (there can also be a
+            // OXEN to display: max pow(2,64) uint, aka 20-chars + dot + null (there can also be a
             // 0, but won't be if the value is greater than 9 digits).
             char ux_amount[22];
         };
