@@ -26,7 +26,7 @@
 /* ----------------------*/
 /* -- A Kind of Magic -- */
 /* ----------------------*/
-const unsigned char C_MAGIC[8] = {'L', 'O', 'K', 'I', '0', '0', '0', '0'};
+const unsigned char C_MAGIC[8] = {'O', 'X', 'E', 'N', '0', '0', '0', '0'};
 
 const unsigned char C_FAKE_SEC_VIEW_KEY[32] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -159,7 +159,7 @@ void oxen_install(unsigned char netId) {
 /* --- Reset                                                           --- */
 /* ----------------------------------------------------------------------- */
 const char* const oxen_supported_client[] = {
-    "8.",
+    "9.",
 };
 #define OXEN_SUPPORTED_CLIENT_SIZE (sizeof(oxen_supported_client) / sizeof(char*))
 
