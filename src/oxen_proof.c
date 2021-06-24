@@ -55,9 +55,9 @@ int monero_apdu_get_tx_proof(void) {
     // Generate random k
     monero_rng_mod_order(k);
     // tmp = msg
-    os_memmove(G_oxen_state.tmp + 32 * 0, msg, 32);
+    memmove(G_oxen_state.tmp + 32 * 0, msg, 32);
     // tmp = msg || D
-    os_memmove(G_oxen_state.tmp + 32 * 1, D, 32);
+    memmove(G_oxen_state.tmp + 32 * 1, D, 32);
 
     if (G_oxen_state.options & 1) {
         // X = kB
@@ -67,12 +67,12 @@ int monero_apdu_get_tx_proof(void) {
         monero_ecmul_G(XY, k);
     }
     // tmp = msg || D || X
-    os_memmove(G_oxen_state.tmp + 32 * 2, XY, 32);
+    memmove(G_oxen_state.tmp + 32 * 2, XY, 32);
 
     // Y = kA
     monero_ecmul_k(XY, A, k);
     // tmp = msg || D || X || Y
-    os_memmove(G_oxen_state.tmp + 32 * 3, XY, 32);
+    memmove(G_oxen_state.tmp + 32 * 3, XY, 32);
 
 /* Monero V2 proofs (not currently present in Oxen).
  *
@@ -80,13 +80,13 @@ int monero_apdu_get_tx_proof(void) {
 
     oxen_keccak_256(&G_oxen_state.keccak_alt, (unsigned char *)"TXPROOF_V2", 10, sep);
     // tmp = msg || D || X || Y || sep
-    os_memmove(G_oxen_state.tmp + 32 * 4, sep, 32);
+    memmove(G_oxen_state.tmp + 32 * 4, sep, 32);
     // tmp = msg || D || X || Y || sep || R
-    os_memmove(G_oxen_state.tmp + 32 * 5, R, 32);
+    memmove(G_oxen_state.tmp + 32 * 5, R, 32);
     // tmp = msg || D || X || Y || sep || R || A
-    os_memmove(G_oxen_state.tmp + 32 * 6, A, 32);
+    memmove(G_oxen_state.tmp + 32 * 6, A, 32);
     // tmp = msg || D || X || Y || sep || R || B or [0]
-    os_memmove(G_oxen_state.tmp + 32 * 7, B, 32);
+    memmove(G_oxen_state.tmp + 32 * 7, B, 32);
 
     monero_hash_to_scalar(sig_c, &G_oxen_state.tmp[0], 32 * 8);
 */

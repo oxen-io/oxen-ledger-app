@@ -21,6 +21,7 @@
 #define OXEN_VARS_H
 
 #include "os.h"
+#include "ux.h"
 #include "cx.h"
 #include "os_io_seproxyhal.h"
 #include "oxen_types.h"

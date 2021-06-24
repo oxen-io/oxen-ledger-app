@@ -304,7 +304,7 @@ void monero_ge_fromfe_frombytes(unsigned char *ge, const unsigned char *bytes) {
     cx_math_multm(v, u, u, MOD); /* 2 * u^2 */
     cx_math_addm(v, v, v, MOD);
 
-    os_memset(w, 0, 32);
+    memset(w, 0, 32);
     w[31] = 1;                                           /* w = 1 */
     cx_math_addm(w, v, w, MOD);                          /* w = 2 * u^2 + 1 */
     cx_math_multm(x, w, w, MOD);                         /* w^2 */
@@ -328,7 +328,7 @@ void monero_ge_fromfe_frombytes(unsigned char *ge, const unsigned char *bytes) {
     cx_math_multm(y, rX, rX, MOD);
     cx_math_multm(x, y, x, MOD);
     cx_math_subm(y, w, x, MOD);
-    os_memmove(z, C_fe_ma, 32);
+    memmove(z, C_fe_ma, 32);
 
     if (!cx_math_is_zero(y, 32)) {
         cx_math_addm(y, w, x, MOD);
@@ -373,8 +373,8 @@ setsign:
     Pxy[0] = 0x04;
     cx_math_multm(&Pxy[1], rX, u, MOD);
     cx_math_multm(&Pxy[1 + 32], rY, u, MOD);
-    cx_edward_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
-    os_memmove(ge, &Pxy[1], 32);
+    cx_edwards_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    memmove(ge, &Pxy[1], 32);
 
 #undef u
 #undef v
@@ -620,10 +620,10 @@ void monero_ecmul_G(unsigned char *W, const unsigned char *scalar32) {
     unsigned char Pxy[65];
     unsigned char s[32];
     monero_reverse32(s, scalar32);
-    os_memmove(Pxy, C_ED25519_G, 65);
+    memmove(Pxy, C_ED25519_G, 65);
     cx_ecfp_scalar_mult(CX_CURVE_Ed25519, Pxy, sizeof(Pxy), s, 32);
-    cx_edward_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
-    os_memmove(W, &Pxy[1], 32);
+    cx_edwards_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    memmove(W, &Pxy[1], 32);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -636,13 +636,13 @@ void monero_ecmul_H(unsigned char *W, const unsigned char *scalar32) {
     monero_reverse32(s, scalar32);
 
     Pxy[0] = 0x02;
-    os_memmove(&Pxy[1], C_ED25519_Hy, 32);
-    cx_edward_decompress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    memmove(&Pxy[1], C_ED25519_Hy, 32);
+    cx_edwards_decompress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
 
     cx_ecfp_scalar_mult(CX_CURVE_Ed25519, Pxy, sizeof(Pxy), s, 32);
-    cx_edward_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    cx_edwards_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
 
-    os_memmove(W, &Pxy[1], 32);
+    memmove(W, &Pxy[1], 32);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -655,13 +655,13 @@ void monero_ecmul_k(unsigned char *W, const unsigned char *P, const unsigned cha
     monero_reverse32(s, scalar32);
 
     Pxy[0] = 0x02;
-    os_memmove(&Pxy[1], P, 32);
-    cx_edward_decompress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    memmove(&Pxy[1], P, 32);
+    cx_edwards_decompress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
 
     cx_ecfp_scalar_mult(CX_CURVE_Ed25519, Pxy, sizeof(Pxy), s, 32);
-    cx_edward_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    cx_edwards_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
 
-    os_memmove(W, &Pxy[1], 32);
+    memmove(W, &Pxy[1], 32);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -671,13 +671,13 @@ void monero_ecmul_8(unsigned char *W, const unsigned char *P) {
     unsigned char Pxy[65];
 
     Pxy[0] = 0x02;
-    os_memmove(&Pxy[1], P, 32);
-    cx_edward_decompress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    memmove(&Pxy[1], P, 32);
+    cx_edwards_decompress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
     cx_ecfp_add_point(CX_CURVE_Ed25519, Pxy, Pxy, Pxy, sizeof(Pxy));
     cx_ecfp_add_point(CX_CURVE_Ed25519, Pxy, Pxy, Pxy, sizeof(Pxy));
     cx_ecfp_add_point(CX_CURVE_Ed25519, Pxy, Pxy, Pxy, sizeof(Pxy));
-    cx_edward_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
-    os_memmove(W, &Pxy[1], 32);
+    cx_edwards_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    memmove(W, &Pxy[1], 32);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -688,17 +688,17 @@ void monero_ecadd(unsigned char *W, const unsigned char *P, const unsigned char 
     unsigned char Qxy[65];
 
     Pxy[0] = 0x02;
-    os_memmove(&Pxy[1], P, 32);
-    cx_edward_decompress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    memmove(&Pxy[1], P, 32);
+    cx_edwards_decompress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
 
     Qxy[0] = 0x02;
-    os_memmove(&Qxy[1], Q, 32);
-    cx_edward_decompress_point(CX_CURVE_Ed25519, Qxy, sizeof(Qxy));
+    memmove(&Qxy[1], Q, 32);
+    cx_edwards_decompress_point(CX_CURVE_Ed25519, Qxy, sizeof(Qxy));
 
     cx_ecfp_add_point(CX_CURVE_Ed25519, Pxy, Pxy, Qxy, sizeof(Pxy));
 
-    cx_edward_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
-    os_memmove(W, &Pxy[1], 32);
+    cx_edwards_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    memmove(W, &Pxy[1], 32);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -709,18 +709,18 @@ void monero_ecsub(unsigned char *W, const unsigned char *P, const unsigned char 
     unsigned char Qxy[65];
 
     Pxy[0] = 0x02;
-    os_memmove(&Pxy[1], P, 32);
-    cx_edward_decompress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    memmove(&Pxy[1], P, 32);
+    cx_edwards_decompress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
 
     Qxy[0] = 0x02;
-    os_memmove(&Qxy[1], Q, 32);
-    cx_edward_decompress_point(CX_CURVE_Ed25519, Qxy, sizeof(Qxy));
+    memmove(&Qxy[1], Q, 32);
+    cx_edwards_decompress_point(CX_CURVE_Ed25519, Qxy, sizeof(Qxy));
 
     cx_math_sub(Qxy + 1, (unsigned char *)C_ED25519_FIELD, Qxy + 1, 32);
     cx_ecfp_add_point(CX_CURVE_Ed25519, Pxy, Pxy, Qxy, sizeof(Pxy));
 
-    cx_edward_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
-    os_memmove(W, &Pxy[1], 32);
+    cx_edwards_compress_point(CX_CURVE_Ed25519, Pxy, sizeof(Pxy));
+    memmove(W, &Pxy[1], 32);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -807,6 +807,6 @@ void monero_rng_mod_order(unsigned char *r) {
 uint64_t monero_bamount2uint64(unsigned char *binary) {
     // Value is already little endian, so just copy it directly from the bytes:
     uint64_t xmr;
-    os_memmove(&xmr, binary, 8);
+    memmove(&xmr, binary, 8);
     return xmr;
 }

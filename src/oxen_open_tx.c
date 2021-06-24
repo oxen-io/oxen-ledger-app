@@ -27,8 +27,8 @@
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 void monero_reset_tx(int reset_tx_cnt) {
-    os_memset(G_oxen_state.r, 0, 32);
-    os_memset(G_oxen_state.R, 0, 32);
+    memset(G_oxen_state.r, 0, 32);
+    memset(G_oxen_state.R, 0, 32);
     cx_rng(G_oxen_state.hmac_key, 32);
 
     cx_keccak_init(&G_oxen_state.keccak_alt, 256);
@@ -71,7 +71,7 @@ int monero_apdu_open_tx_cont(void) {
     G_oxen_state.tx_in_progress = 1;
 
 #ifdef DEBUG_HWDEVICE
-    os_memset(G_oxen_state.hmac_key, 0xab, 32);
+    memset(G_oxen_state.hmac_key, 0xab, 32);
 #else
     cx_rng(G_oxen_state.hmac_key, 32);
 #endif
