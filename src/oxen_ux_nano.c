@@ -97,8 +97,8 @@ unsigned int ui_menu_info_action(void) {
 }
 
 void ui_menu_info_display2(const char* line1, const char* line2) {
-    os_memmove(G_oxen_state.ux_info1, line1, sizeof(G_oxen_state.ux_info1)-1);
-    os_memmove(G_oxen_state.ux_info2, line2, sizeof(G_oxen_state.ux_info2)-1);
+    memmove(G_oxen_state.ux_info1, line1, sizeof(G_oxen_state.ux_info1)-1);
+    memmove(G_oxen_state.ux_info2, line2, sizeof(G_oxen_state.ux_info2)-1);
     G_oxen_state.ux_info1[sizeof(G_oxen_state.ux_info1)-1] = 0;
     G_oxen_state.ux_info2[sizeof(G_oxen_state.ux_info2)-1] = 0;
     ux_flow_init(0, ux_flow_info, NULL);
@@ -117,7 +117,7 @@ static const char* processing_tx(void) {
 
 void ui_menu_opentx_display(unsigned char final_step) {
     unsigned char page;
-    os_memmove(G_oxen_state.ux_info1, processing_tx(), sizeof(G_oxen_state.ux_info1)-1);
+    memmove(G_oxen_state.ux_info1, processing_tx(), sizeof(G_oxen_state.ux_info1)-1);
     G_oxen_state.ux_info1[sizeof(G_oxen_state.ux_info1)-1] = 0;
 
     page = G_oxen_state.tx_cnt % 3;
@@ -293,7 +293,7 @@ unsigned int ui_menu_export_viewkey_action(unsigned int value) {
     unsigned char x[32];
 
     monero_io_discard(0);
-    os_memset(x, 0, 32);
+    memset(x, 0, 32);
     sw = SW_OK;
     if (value & 0x10000) { // remember
         value &= ~0x10000;
@@ -617,24 +617,24 @@ void ui_menu_pubaddr_action(void) {
  */
 void ui_menu_any_pubaddr_display(unsigned char* pub_view, unsigned char* pub_spend,
                                  unsigned char is_subbadress, unsigned char* paymentID) {
-    os_memset(G_oxen_state.ux_address, 0, sizeof(G_oxen_state.ux_address));
-    os_memset(G_oxen_state.ux_addr_type, 0, sizeof(G_oxen_state.ux_addr_type));
-    os_memset(G_oxen_state.ux_addr_info, 0, sizeof(G_oxen_state.ux_addr_info));
+    memset(G_oxen_state.ux_address, 0, sizeof(G_oxen_state.ux_address));
+    memset(G_oxen_state.ux_addr_type, 0, sizeof(G_oxen_state.ux_addr_type));
+    memset(G_oxen_state.ux_addr_info, 0, sizeof(G_oxen_state.ux_addr_info));
 
     switch (G_oxen_state.disp_addr_mode) {
         case 0:
         case DISP_MAIN:
-            os_memmove(G_oxen_state.ux_addr_type, "Regular address", 15);
+            memmove(G_oxen_state.ux_addr_type, "Regular address", 15);
             if (N_oxen_state->network_id == MAINNET)
-                os_memmove(G_oxen_state.ux_addr_info, "(mainnet)", 9);
+                memmove(G_oxen_state.ux_addr_info, "(mainnet)", 9);
             else if (N_oxen_state->network_id == TESTNET)
-                os_memmove(G_oxen_state.ux_addr_info, "(testnet)", 9);
+                memmove(G_oxen_state.ux_addr_info, "(testnet)", 9);
             else if (N_oxen_state->network_id == DEVNET)
-                os_memmove(G_oxen_state.ux_addr_info, "(devnet)", 8);
+                memmove(G_oxen_state.ux_addr_info, "(devnet)", 8);
             break;
 
         case DISP_SUB:
-            os_memmove(G_oxen_state.ux_addr_type, "Subaddress", 10);
+            memmove(G_oxen_state.ux_addr_type, "Subaddress", 10);
             // Copy these out because they are in a union with the ux_addr_info string
             unsigned int M = G_oxen_state.disp_addr_M;
             unsigned int m = G_oxen_state.disp_addr_m;
@@ -642,10 +642,10 @@ void ui_menu_any_pubaddr_display(unsigned char* pub_view, unsigned char* pub_spe
             break;
 
         case DISP_INTEGRATED:
-            os_memmove(G_oxen_state.ux_addr_type, "Integr. address", 15);
+            memmove(G_oxen_state.ux_addr_type, "Integr. address", 15);
             // Copy the payment id into place *first*, before the label, because it overlaps with ux_addr_info
-            os_memmove(G_oxen_state.ux_addr_info + 9, G_oxen_state.payment_id, 16);
-            os_memmove(G_oxen_state.ux_addr_info, "Pay. ID: ", 9);
+            memmove(G_oxen_state.ux_addr_info + 9, G_oxen_state.payment_id, 16);
+            memmove(G_oxen_state.ux_addr_info, "Pay. ID: ", 9);
             break;
     }
 

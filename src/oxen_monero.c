@@ -139,15 +139,15 @@ unsigned char oxen_wallet_address(char* str_b58, unsigned char* view, unsigned c
     }
     offset = monero_encode_varint(data, ADDR_NETTYPE_MAX_SIZE, prefix);
 
-    os_memmove(data + offset, spend, ADDR_PUBKEY_SIZE);
-    os_memmove(data + offset + ADDR_PUBKEY_SIZE, view, ADDR_PUBKEY_SIZE);
+    memmove(data + offset, spend, ADDR_PUBKEY_SIZE);
+    memmove(data + offset + ADDR_PUBKEY_SIZE, view, ADDR_PUBKEY_SIZE);
     offset += 2*ADDR_PUBKEY_SIZE;
     if (paymentID) {
-        os_memmove(data + offset, paymentID, 8);
+        memmove(data + offset, paymentID, 8);
         offset += ADDR_PAYMENTID_SIZE;
     }
     oxen_keccak_256(&G_oxen_state.keccak, data, offset, G_oxen_state.addr_checksum_hash);
-    os_memmove(data + offset, G_oxen_state.addr_checksum_hash, ADDR_CHECKSUM_SIZE);
+    memmove(data + offset, G_oxen_state.addr_checksum_hash, ADDR_CHECKSUM_SIZE);
     offset += ADDR_CHECKSUM_SIZE;
 
     unsigned char full_block_count = offset / FULL_BLOCK_SIZE;

@@ -123,13 +123,13 @@ int monero_apdu_clsag_prehash_update(void) {
                 // First 23, "..", last 23 (so total is 48 = 3 pages on Nano S)
                 G_oxen_state.ux_address[23] = '.';
                 G_oxen_state.ux_address[24] = '.';
-                os_memmove(&G_oxen_state.ux_address[25], &G_oxen_state.ux_address[pos-23], 23);
+                memmove(&G_oxen_state.ux_address[25], &G_oxen_state.ux_address[pos-23], 23);
                 pos = 48;
             } else if (N_oxen_state->truncate_addrs_mode == CONFIRM_ADDRESS_SHORTER) {
                 // 16..14 so that first page gets first [16], last page gets last [..14]
                 G_oxen_state.ux_address[16] = '.';
                 G_oxen_state.ux_address[17] = '.';
-                os_memmove(&G_oxen_state.ux_address[18], &G_oxen_state.ux_address[pos-14], 14);
+                memmove(&G_oxen_state.ux_address[18], &G_oxen_state.ux_address[pos-14], 14);
                 pos = 32;
             }
             G_oxen_state.ux_address[pos] = 0; // null terminate
@@ -147,9 +147,9 @@ int monero_apdu_clsag_prehash_update(void) {
             monero_ecmul_H(aH, v);
             monero_ecadd(aH, kG, aH);
         } else {
-            os_memmove(aH, kG, 32);
+            memmove(aH, kG, 32);
         }
-        if (os_memcmp(C, aH, 32)) {
+        if (memcmp(C, aH, 32)) {
             monero_lock_and_throw(SW_SECURITY_COMMITMENT_CONTROL);
         }
         // update commitment hash control
@@ -158,7 +158,7 @@ int monero_apdu_clsag_prehash_update(void) {
         if ((G_oxen_state.options & IN_OPTION_MORE_COMMAND) == 0) {
             // finalize and check destination hash_control
             oxen_hash_final(&G_oxen_state.sha256, k);
-            if (os_memcmp(k, G_oxen_state.OUTK, 32)) {
+            if (memcmp(k, G_oxen_state.OUTK, 32)) {
                 monero_lock_and_throw(SW_SECURITY_OUTKEYS_CHAIN_CONTROL);
             }
             // finalize commitment hash control
@@ -174,7 +174,7 @@ int monero_apdu_clsag_prehash_update(void) {
             if (!is_change) {
                 if (G_oxen_state.tx_type == TXTYPE_STAKE || G_oxen_state.tx_type == TXTYPE_LNS) {
                     // If this is a stake or LNS tx then the non-change recipient must be ourself.
-                    if (os_memcmp(Aout, G_oxen_state.view_pub, 32) || os_memcmp(Bout, G_oxen_state.spend_pub, 32))
+                    if (memcmp(Aout, G_oxen_state.view_pub, 32) || memcmp(Bout, G_oxen_state.spend_pub, 32))
                         monero_lock_and_throw(SW_SECURITY_INTERNAL);
 
                     ui_menu_stake_validation_display();
@@ -210,7 +210,7 @@ int monero_apdu_clsag_prehash_finalize(void) {
         // Finalize and check commitment hash control
         if (G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
             oxen_hash_final(&G_oxen_state.sha256_alt, H);
-            if (os_memcmp(H, G_oxen_state.commitment_hash, 32)) {
+            if (memcmp(H, G_oxen_state.commitment_hash, 32)) {
                 monero_lock_and_throw(SW_SECURITY_COMMITMENT_CHAIN_CONTROL);
             }
         }
@@ -221,7 +221,7 @@ int monero_apdu_clsag_prehash_finalize(void) {
         monero_io_fetch(proof, 32);
         monero_io_discard(1);
         cx_keccak_init(&G_oxen_state.keccak_alt, 256);
-        if (os_memcmp(message, G_oxen_state.prefixH, 32) != 0) {
+        if (memcmp(message, G_oxen_state.prefixH, 32) != 0) {
             monero_lock_and_throw(SW_SECURITY_PREFIX_HASH);
         }
         oxen_hash_update(&G_oxen_state.keccak_alt, message, 32);

@@ -111,7 +111,7 @@ int monero_apdu_clsag_hash() {
         oxen_hash_final(&G_oxen_state.keccak_alt, c);
         monero_reduce(c);
         monero_io_insert(c, 32);
-        os_memmove(G_oxen_state.clsag_c, c, 32);
+        memmove(G_oxen_state.clsag_c, c, 32);
     }
     return SW_OK;
 }

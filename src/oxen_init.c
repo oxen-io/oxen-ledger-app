@@ -39,10 +39,10 @@ const unsigned char C_FAKE_SEC_SPEND_KEY[32] = {
 /* --- Boot                                                            --- */
 /* ----------------------------------------------------------------------- */
 void monero_init(void) {
-    os_memset(&G_oxen_state, 0, sizeof(oxen_v_state_t));
+    memset(&G_oxen_state, 0, sizeof(oxen_v_state_t));
 
     // first init ?
-    if (os_memcmp((void*)N_oxen_state->magic, (void*)C_MAGIC, sizeof(C_MAGIC)) != 0) {
+    if (memcmp((void*)N_oxen_state->magic, (void*)C_MAGIC, sizeof(C_MAGIC)) != 0) {
 #if defined(OXEN_ALPHA) || defined(OXEN_BETA)
         oxen_install(TESTNET);
 #else
@@ -65,8 +65,8 @@ void monero_init(void) {
 /* --- init private keys                                               --- */
 /* ----------------------------------------------------------------------- */
 void monero_wipe_private_key(void) {
-    os_memset(G_oxen_state.keys, 0, sizeof(G_oxen_state.keys));
-    os_memset(&G_oxen_state.spk, 0, sizeof(G_oxen_state.spk));
+    memset(G_oxen_state.keys, 0, sizeof(G_oxen_state.keys));
+    memset(&G_oxen_state.spk, 0, sizeof(G_oxen_state.spk));
     G_oxen_state.key_set = 0;
 }
 
@@ -96,8 +96,8 @@ void monero_init_private_key(void) {
             break;
 
         case KEY_MODE_EXTERNAL:
-            os_memmove(G_oxen_state.view_priv, (void*)N_oxen_state->view_priv, 32);
-            os_memmove(G_oxen_state.spend_priv, (void*)N_oxen_state->spend_priv, 32);
+            memmove(G_oxen_state.view_priv, (void*)N_oxen_state->view_priv, 32);
+            memmove(G_oxen_state.spend_priv, (void*)N_oxen_state->spend_priv, 32);
             break;
 
         default:
@@ -120,10 +120,10 @@ void monero_init_ux(void) {
     unsigned char wallet_len = oxen_wallet_address(
             G_oxen_state.ux_address, G_oxen_state.view_pub, G_oxen_state.spend_pub, 0, NULL);
 
-    os_memmove(G_oxen_state.ux_wallet_public_short_address, G_oxen_state.ux_address, 7);
+    memmove(G_oxen_state.ux_wallet_public_short_address, G_oxen_state.ux_address, 7);
     G_oxen_state.ux_wallet_public_short_address[7] = '.';
     G_oxen_state.ux_wallet_public_short_address[8] = '.';
-    os_memmove(G_oxen_state.ux_wallet_public_short_address + 9,
+    memmove(G_oxen_state.ux_wallet_public_short_address + 9,
                G_oxen_state.ux_address + wallet_len - 3, 3);
     G_oxen_state.ux_wallet_public_short_address[12] = 0;
 }
@@ -178,7 +178,7 @@ int monero_apdu_reset(void) {
     for (i = 0; i < OXEN_SUPPORTED_CLIENT_SIZE; i++) {
         size_t len = strlen((char*)PIC(oxen_supported_client[i]));
         if (len <= client_version_len &&
-                os_memcmp((char*)PIC(oxen_supported_client[i]), client_version, len) == 0) {
+                memcmp((char*)PIC(oxen_supported_client[i]), client_version, len) == 0) {
             break;
         }
     }
