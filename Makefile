@@ -17,12 +17,15 @@ all: nanox
 
 endif
 
-.PHONY: nanos load_nanos
+.PHONY: nanos load_nanos delete_nanos
 nanos:
 	$(MAKE) -C nanos
 
 load_nanos: nanos
 	$(MAKE) -C nanos load
+
+delete_nanos: nanos
+	$(MAKE) -C nanos delete
 
 .PHONY: nanox
 nanox:

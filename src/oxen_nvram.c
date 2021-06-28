@@ -23,4 +23,8 @@
 #include "oxen_api.h"
 #include "oxen_vars.h"
 
+#ifdef TARGET_NANOX
+const oxen_nv_state_t N_state_pic;
+#else
 oxen_nv_state_t N_state_pic;
+#endif

@@ -21,10 +21,16 @@
 #define OXEN_TYPES_H
 
 #include "os_io_seproxyhal.h"
-#include "lcx_blake2.h"
-#include "lcx_sha3.h"
-#include "lcx_sha256.h"
-#include "lcx_aes.h"
+#ifdef TARGET_NANOS
+#  include "lcx_blake2.h"
+#  include "lcx_sha3.h"
+#  include "lcx_sha256.h"
+#  include "lcx_aes.h"
+#elif defined(TARGET_NANOX)
+#  include "cx.h"
+#else
+#  error "Error: neither TARGET_NANOS neither TARGET_NANOX is defined, don't know what to include!"
+#endif
 
 #if CX_APILEVEL == 8
 #define PIN_VERIFIED (!0)
