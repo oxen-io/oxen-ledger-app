@@ -180,7 +180,7 @@ void ui_menu_validation_action(unsigned int value);
 
 UX_STEP_NOCB(ux_menu_validation_amount_step, bn, {"Confirm Amount", G_oxen_state.ux_amount});
 
-UX_STEP_NOCB(ux_menu_validation_recipient_step, paging,
+UX_STEP_NOCB(ux_menu_validation_recipient_step, bnnn_paging,
              {"Recipient", G_oxen_state.ux_address});
 
 OXEN_UX_ACCEPT_REJECT(ux_menu_validation, ui_menu_validation_action);
@@ -235,7 +235,7 @@ void ui_menu_special_validation_action(unsigned int value) {
 OXEN_UX_ACCEPT_REJECT(ux_menu_special_validation, ui_menu_special_validation_action);
 
 /* Sign unlock output */
-UX_STEP_NOCB(ux_menu_unlock_validation_step, bb, {"Confirm Service", "Node Unlock"});
+UX_STEP_NOCB(ux_menu_unlock_validation_step, nn, {"Confirm Service", "Node Unlock"});
 UX_FLOW(ux_flow_unlock_validation,
         &ux_menu_unlock_validation_step,
         &ux_menu_special_validation_accept_step,
@@ -243,7 +243,7 @@ UX_FLOW(ux_flow_unlock_validation,
 void ui_menu_unlock_validation_display(void) { ux_flow_init(0, ux_flow_unlock_validation, NULL); }
 
 /* LNS */
-UX_STEP_NOCB(ux_menu_lns_validation_step, bb, {"Confirm Oxen", "Name Service TX"});
+UX_STEP_NOCB(ux_menu_lns_validation_step, nn, {"Confirm Oxen", "Name Service TX"});
 UX_FLOW(ux_flow_lns_validation,
         &ux_menu_lns_validation_step,
         &ux_menu_special_validation_accept_step,
@@ -584,7 +584,7 @@ UX_STEP_NOCB(ux_menu_pubaddr_meta_step, nn,
              .line2 = G_oxen_state.ux_addr_info
          });
 
-UX_STEP_NOCB(ux_menu_pubaddr_address_step, paging,
+UX_STEP_NOCB(ux_menu_pubaddr_address_step, bnnn_paging,
         {
             .title = "Address",
             .text = G_oxen_state.ux_address
@@ -650,7 +650,6 @@ void ui_menu_any_pubaddr_display(unsigned char* pub_view, unsigned char* pub_spe
     }
 
     oxen_wallet_address(G_oxen_state.ux_address, pub_view, pub_spend, is_subbadress, paymentID);
-    ux_layout_paging_reset();
     ux_flow_init(0, ux_flow_pubaddr, NULL);
 }
 
