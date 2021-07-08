@@ -40,10 +40,8 @@ The build requires clang and arm cross-compiling tools and headers.  On recent D
 
     sudo apt install clang gcc-arm-none-eabi libnewlib-arm-none-eabi
 
-> Note that this must install clang 7 or higher.  If you are installing on an older distribution,
-> such as Ubuntu 18.04, you can instead install one of the newer clang packages such as `clang-10`,
-> and then run `export CC=clang-10` before you compile, below.  If you are compiling on something
-> much older or not debian based see [Getting
+> Note that this must install clang 7 or higher, and that clang-10 and higher appear to segfault
+> with the Ledger SDK code.  See also [Getting
 > Started](https://ledger.readthedocs.io/en/latest/userspace/getting_started.html) from the Ledger
 > documentation.
 
@@ -79,10 +77,10 @@ should see (back in the terminal):
 If you get an error instead then check the above ledgerblue link for details on getting the Python
 module properly set up.
 
-### Ledger Nano S SDK
+### Ledger Nano S and Nano X SDKs
 
-The Ledger Nano SDK is included in this repository as a submodule; make sure you have it cloned and
-updated using:
+The Ledger Nano S/X SDKs are included in this repository as submodules; make sure you have it cloned
+and updated using:
 
     git submodule update --init --recursive
 
@@ -95,7 +93,19 @@ the `BOLOS_SDK` environment variable to the path to the SDK:
 
 Compile the code using:
 
-    make
+    make -j8 all
+
+which will build both nanox and nanos binaries.  If you only want one or the other:
+
+    make -j8 nanos
+    make -j8 nanox
+
+It may also be necessary to tell the build about your clang path using something like:
+
+    make CLANGPATH=/usr/lib/llvm-9/bin/ -j8 all
+
+especially if the `clang` binary in your path isn't the version you want.  (Alternatively you can
+fiddle with your path to appease the fairly fragile Ledger SDK Makefiles).
 
 ## Loading the app onto your Ledger Nano S
 
@@ -103,9 +113,11 @@ Assuming the compilation above finished without error, you can now install onto 
 that installing this way is obviously not signed by Ledger, and so will be considered "not
 genuine".  It still works, but presents a nag screen when you start it.
 
+(This is unlike the Nano X, which cannot have sideloaded apps at all).
+
 First make sure your Nano S is unlocked and at the main menu (where apps are listed).  Now run:
 
-    make load
+    make load_nanos
 
 The Ledger will prompt you about this "unsafe manager" trying to load an app, since this is not an
 officially Ledger-signed app or manager.  Select "Allow" and let it continue.
@@ -118,7 +130,7 @@ code.  Once this completes you have the custom built Oxen wallet app installed!
 
 To remove the app from your Ledger:
 
-    make delete
+    make delete_nanos
 
 ## Useful links
 
