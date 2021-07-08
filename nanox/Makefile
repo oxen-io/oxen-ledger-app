@@ -32,8 +32,6 @@ else ifneq ("","$(wildcard /usr/lib/arm-none-eabi)")
 endif
 $(info SYSROOT=$(SYSROOT))
 
-SCRIPT_LD := script.ld
-
 include $(BOLOS_SDK)/Makefile.defines
 
 include ../Makefile.oxen
