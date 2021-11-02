@@ -3,6 +3,10 @@ APPNAME = Oxen
 #Oxen /44'/240'
 APP_LOAD_PARAMS=  --path "44'/240'" --curve secp256k1 $(COMMON_LOAD_PARAMS) --appFlags 0x40
 
+# Pending review parameters
+APP_LOAD_PARAMS += --tlvraw 9F:01
+DEFINES += HAVE_PENDING_REVIEW_SCREEN
+
 ICONNAME = glyphs/icon_oxen.gif
 
 APPVERSION_M=0
