@@ -118,11 +118,11 @@ Compile the app in the container with
 ```
 sudo docker run --rm -ti -v "$(realpath .):/app" ledger-app-builder:latest
 
-make CLANGPATH=/usr/lib/llvm-10/bin/ DEBUG=1 clean nanos
-make CLANGPATH=/usr/lib/llvm-10/bin/ DEBUG=1 clean nanox
+make CLANGPATH=/usr/lib/llvm-12/bin/ DEBUG=1 clean nanos
+make CLANGPATH=/usr/lib/llvm-12/bin/ DEBUG=1 clean nanox
 ```
 
-Then the binary will be available in the host system under `nanos/bin` or `nanox/bin
+Then the binary will be available in the host system under `nanos/bin` or `nanox/bin`
 
 ## Loading the app onto your Ledger Nano S
 

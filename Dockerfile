@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get upgrade -qy && \
     apt-get install -qy \
-        clang \
+        clang-12 \
         gcc-arm-none-eabi \
         gcc-multilib \
         libnewlib-arm-none-eabi \
@@ -18,7 +18,7 @@ RUN apt-get update && apt-get upgrade -qy && \
         libbsd-dev \
         libcmocka0 \
         libcmocka-dev \
-        lld \
+        lld-12 \
         make \
         protobuf-compiler \
         python-is-python3 \
