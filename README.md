@@ -107,6 +107,23 @@ It may also be necessary to tell the build about your clang path using something
 especially if the `clang` binary in your path isn't the version you want.  (Alternatively you can
 fiddle with your path to appease the fairly fragile Ledger SDK Makefiles).
 
+## Compilation with docker
+
+Build the image with
+```
+sudo docker build -t ledger-app-builder:latest .
+```
+
+Compile the app in the container with
+```
+sudo docker run --rm -ti -v "$(realpath .):/app" ledger-app-builder:latest
+
+make CLANGPATH=/usr/lib/llvm-10/bin/ DEBUG=1 clean nanos
+make CLANGPATH=/usr/lib/llvm-10/bin/ DEBUG=1 clean nanox
+```
+
+Then the binary will be available in the host system under `nanos/bin` or `nanox/bin
+
 ## Loading the app onto your Ledger Nano S
 
 Assuming the compilation above finished without error, you can now install onto your Ledger.  Note
