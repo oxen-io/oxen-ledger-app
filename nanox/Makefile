@@ -36,7 +36,7 @@ include $(BOLOS_SDK)/Makefile.defines
 
 include ../Makefile.oxen
 
-CFLAGS += -Oz
+CFLAGS += -Oz -I$(shell pwd)/src
 LDFLAGS += -Oz
 
 ################
