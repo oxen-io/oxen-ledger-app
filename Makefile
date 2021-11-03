@@ -17,7 +17,7 @@ all: nanox
 
 endif
 
-.PHONY: nanos load_nanos delete_nanos
+.PHONY: nanos load_nanos delete_nanos docker-build docker-start
 nanos:
 	$(MAKE) -C nanos
 
@@ -38,3 +38,9 @@ clean:
 
 listvariants:
 	@echo VARIANTS COIN oxen
+
+docker-build:
+	sudo docker build -t ledger-app-builder:latest .
+
+docker-run:
+	sudo docker run --rm -ti -v "$(realpath .):/app" ledger-app-builder:latest
