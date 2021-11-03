@@ -18,7 +18,14 @@
 -include ../Makefile.env
 -include Makefile.env
 
+ifneq ($(NANOX_SDK),)
+BOLOS_SDK := $(NANOX_SDK)
+endif
+
+ifeq ($(BOLOS_SDK),)
 BOLOS_SDK := $(shell pwd)/nanox-secure-sdk
+endif
+
 ifeq ($(BOLOS_SDK),)
 $(error Environment variable BOLOS_SDK is not set)
 endif
