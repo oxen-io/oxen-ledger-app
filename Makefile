@@ -20,6 +20,8 @@ endif
 .PHONY: nanos load_nanos delete_nanos docker-build docker-start
 nanos:
 	$(MAKE) -C nanos
+	rm -rf bin
+	cp -r nanos/bin .
 
 load_nanos: nanos
 	$(MAKE) -C nanos load
@@ -30,11 +32,14 @@ delete_nanos: nanos
 .PHONY: nanox
 nanox:
 	$(MAKE) -C nanox
+	rm -rf bin
+	cp -r nanox/bin .
 
 .PHONY: clean
 clean:
 	$(MAKE) -C nanos clean
 	$(MAKE) -C nanox clean
+	rm -rf bin
 
 listvariants:
 	@echo VARIANTS COIN oxen
@@ -42,5 +47,5 @@ listvariants:
 docker-build:
 	sudo docker build -t ledger-app-builder:latest .
 
-docker-run:
+docker-start:
 	sudo docker run --rm -ti -v "$(realpath .):/app" ledger-app-builder:latest
