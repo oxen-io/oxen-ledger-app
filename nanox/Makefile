@@ -30,21 +30,15 @@ ifeq ($(BOLOS_SDK),)
 $(error Environment variable BOLOS_SDK is not set)
 endif
 
-# Respect a user-provided SYSROOT, but don't respect the SDK Makefile.defines one which does the
-# wrong thing with the debian package arm-none-eabi compiler (appending -I/usr/include, which is
-# completely wrong)
-ifneq ($(SYSROOT),)
-else ifneq ("","$(wildcard /usr/lib/arm-none-eabi)")
-	override SYSROOT := /usr/lib/arm-none-eabi
-endif
-$(info SYSROOT=$(SYSROOT))
-
 include $(BOLOS_SDK)/Makefile.defines
 
 include ../Makefile.oxen
 
 CFLAGS += -Oz -I$(shell pwd)/src
 LDFLAGS += -Oz
+
+# Work around buggy Makefile.defines not setting this:
+AFLAGS += --target=armv6m-none-eabi
 
 ################
 # Default rule #

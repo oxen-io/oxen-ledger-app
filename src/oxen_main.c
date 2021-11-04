@@ -28,9 +28,6 @@
 #include "glyphs.h"
 
 #include "ux.h"
-#ifdef TARGET_NANOX
-#include "balenos_ble.h"
-#endif
 
 /* ----------------------------------------------------------------------- */
 /* ---                            Application Entry                    --- */

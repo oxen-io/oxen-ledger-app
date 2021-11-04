@@ -24,19 +24,6 @@
 #include "oxen_api.h"
 #include "oxen_vars.h"
 
-#if defined(TARGET_NANOX)
-// The nanos SDK-2.0 deprecated these (because they were misnamed), but as of this writing NANOX
-// only has the old names.  That will probably change at some point but for now provide an alias
-__attribute__((always_inline))
-void cx_edwards_compress_point(cx_curve_t curve, unsigned char *P PLENGTH(P_len), unsigned int P_len) {
-    cx_edward_compress_point(curve, P, P_len);
-}
-__attribute__((always_inline))
-void cx_edwards_decompress_point(cx_curve_t curve, unsigned char *P PLENGTH(P_len), unsigned int P_len) {
-    cx_edward_decompress_point(curve, P, P_len);
-}
-#endif
-
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
