@@ -70,6 +70,8 @@ ENV NANOX_SDK=/opt/nanox-secure-sdk
 # Default SDK
 ENV BOLOS_SDK=${NANOS_SDK}
 
+ENV CLANGPATH=/usr/lib/llvm-12/bin/
+
 WORKDIR /app
 
 CMD ["/bin/bash"]
