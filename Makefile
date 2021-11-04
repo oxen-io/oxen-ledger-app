@@ -9,17 +9,19 @@ all: nanox nanos
 
 else ifneq ($(shell grep "TARGET_NANOS" "$(BOLOS_SDK)/include/bolos_target.h"),)
 
-all: nanos
+all: nanos_bin
 
 else ifneq ($(shell grep "TARGET_NANOX" "$(BOLOS_SDK)/include/bolos_target.h"),)
 
-all: nanox
+all: nanox_bin
 
 endif
 
-.PHONY: nanos load_nanos delete_nanos docker-build docker-start
+.PHONY: nanos nanos_bin load_nanos delete_nanos docker-build docker-start
 nanos:
 	$(MAKE) -C nanos
+
+nanos_bin: nanos
 	rm -rf bin
 	cp -r nanos/bin .
 
@@ -29,9 +31,11 @@ load_nanos: nanos
 delete_nanos: nanos
 	$(MAKE) -C nanos delete
 
-.PHONY: nanox
+.PHONY: nanox nanox_bin
 nanox:
 	$(MAKE) -C nanox
+
+nanox_bin:
 	rm -rf bin
 	cp -r nanox/bin .
 
