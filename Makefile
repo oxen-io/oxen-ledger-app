@@ -35,7 +35,7 @@ delete_nanos: nanos
 nanox:
 	$(MAKE) -C nanox
 
-nanox_bin:
+nanox_bin: nanox
 	rm -rf bin
 	cp -r nanox/bin .
 
