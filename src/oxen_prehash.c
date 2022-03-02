@@ -40,15 +40,14 @@ int monero_apdu_clsag_prehash_init(void) {
         }
     }
     // We always confirm fees for LNS because often this is the *only* confirmation for an LNS tx
-    unsigned char confirm_fee_mode = G_oxen_state.tx_type == TXTYPE_LNS
-        ? CONFIRM_FEE_ALWAYS
-        : N_oxen_state->confirm_fee_mode;
+    unsigned char confirm_fee_mode =
+        G_oxen_state.tx_type == TXTYPE_LNS ? CONFIRM_FEE_ALWAYS : N_oxen_state->confirm_fee_mode;
 
-    oxen_hash_update(&G_oxen_state.keccak_alt, G_oxen_state.io_buffer + G_oxen_state.io_offset,
-                           G_oxen_state.io_length - G_oxen_state.io_offset);
-    if ((G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL) && (G_oxen_state.io_p2 == 1)
-            && confirm_fee_mode != CONFIRM_FEE_NEVER) {
-
+    oxen_hash_update(&G_oxen_state.keccak_alt,
+                     G_oxen_state.io_buffer + G_oxen_state.io_offset,
+                     G_oxen_state.io_length - G_oxen_state.io_offset);
+    if ((G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL) && (G_oxen_state.io_p2 == 1) &&
+        confirm_fee_mode != CONFIRM_FEE_NEVER) {
         // skip type
         monero_io_fetch_u8();
         // fee str
@@ -57,10 +56,17 @@ int monero_apdu_clsag_prehash_init(void) {
         monero_io_discard(1);
 
         switch (confirm_fee_mode) {
-            case CONFIRM_FEE_ABOVE_0_05: if (amount <   50000000) amount = 0; break;
-            case CONFIRM_FEE_ABOVE_0_2:  if (amount <  200000000) amount = 0; break;
-            case CONFIRM_FEE_ABOVE_1:    if (amount < 1000000000) amount = 0; break;
-            default: break;
+            case CONFIRM_FEE_ABOVE_0_05:
+                if (amount < 50000000) amount = 0;
+                break;
+            case CONFIRM_FEE_ABOVE_0_2:
+                if (amount < 200000000) amount = 0;
+                break;
+            case CONFIRM_FEE_ABOVE_1:
+                if (amount < 1000000000) amount = 0;
+                break;
+            default:
+                break;
         }
         if (amount > 0) {
             // ask user
@@ -116,23 +122,25 @@ int monero_apdu_clsag_prehash_update(void) {
     }
 
     if (G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-        if (!is_change && G_oxen_state.tx_type != TXTYPE_STAKE && G_oxen_state.tx_type != TXTYPE_LNS) {
+        if (!is_change && G_oxen_state.tx_type != TXTYPE_STAKE &&
+            G_oxen_state.tx_type != TXTYPE_LNS) {
             // encode dest adress
-            unsigned char pos = oxen_wallet_address(G_oxen_state.ux_address, Aout, Bout, is_subaddress, NULL);
+            unsigned char pos =
+                oxen_wallet_address(G_oxen_state.ux_address, Aout, Bout, is_subaddress, NULL);
             if (N_oxen_state->truncate_addrs_mode == CONFIRM_ADDRESS_SHORT) {
                 // First 23, "..", last 23 (so total is 48 = 3 pages on Nano S)
                 G_oxen_state.ux_address[23] = '.';
                 G_oxen_state.ux_address[24] = '.';
-                memmove(&G_oxen_state.ux_address[25], &G_oxen_state.ux_address[pos-23], 23);
+                memmove(&G_oxen_state.ux_address[25], &G_oxen_state.ux_address[pos - 23], 23);
                 pos = 48;
             } else if (N_oxen_state->truncate_addrs_mode == CONFIRM_ADDRESS_SHORTER) {
                 // 16..14 so that first page gets first [16], last page gets last [..14]
                 G_oxen_state.ux_address[16] = '.';
                 G_oxen_state.ux_address[17] = '.';
-                memmove(&G_oxen_state.ux_address[18], &G_oxen_state.ux_address[pos-14], 14);
+                memmove(&G_oxen_state.ux_address[18], &G_oxen_state.ux_address[pos - 14], 14);
                 pos = 32;
             }
-            G_oxen_state.ux_address[pos] = 0; // null terminate
+            G_oxen_state.ux_address[pos] = 0;  // null terminate
         }
         // update destination hash control
         oxen_hash_update(&G_oxen_state.sha256, Aout, 32);
@@ -174,15 +182,14 @@ int monero_apdu_clsag_prehash_update(void) {
             if (!is_change) {
                 if (G_oxen_state.tx_type == TXTYPE_STAKE || G_oxen_state.tx_type == TXTYPE_LNS) {
                     // If this is a stake or LNS tx then the non-change recipient must be ourself.
-                    if (memcmp(Aout, G_oxen_state.view_pub, 32) || memcmp(Bout, G_oxen_state.spend_pub, 32))
+                    if (memcmp(Aout, G_oxen_state.view_pub, 32) ||
+                        memcmp(Bout, G_oxen_state.spend_pub, 32))
                         monero_lock_and_throw(SW_SECURITY_INTERNAL);
 
                     ui_menu_stake_validation_display();
-                }
-                else
+                } else
                     ui_menu_validation_display();
-            }
-            else if (N_oxen_state->confirm_change_mode == CONFIRM_CHANGE_DISABLED)
+            } else if (N_oxen_state->confirm_change_mode == CONFIRM_CHANGE_DISABLED)
                 return SW_OK;
             else
                 ui_menu_change_validation_display();

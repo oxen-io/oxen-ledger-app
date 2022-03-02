@@ -50,9 +50,9 @@ int monero_apdu_open_tx(void) {
     txversion = monero_io_fetch_u16();
     txtype = monero_io_fetch_u16();
 
-    if (txversion != 4)
-        THROW(SW_WRONG_DATA_RANGE);
-    if (!(txtype == TXTYPE_STANDARD || txtype == TXTYPE_UNLOCK || txtype == TXTYPE_STAKE || txtype == TXTYPE_LNS))
+    if (txversion != 4) THROW(SW_WRONG_DATA_RANGE);
+    if (!(txtype == TXTYPE_STANDARD || txtype == TXTYPE_UNLOCK || txtype == TXTYPE_STAKE ||
+          txtype == TXTYPE_LNS))
         THROW(SW_WRONG_DATA_RANGE);
 
     monero_io_discard(1);
@@ -82,9 +82,9 @@ int monero_apdu_open_tx_cont(void) {
     monero_io_insert(G_oxen_state.R, 32);
     monero_io_insert_encrypt(G_oxen_state.r, 32, TYPE_SCALAR);
     monero_io_insert(C_FAKE_SEC_VIEW_KEY, 32);
-    monero_io_insert_hmac_for((void*)C_FAKE_SEC_VIEW_KEY, 32, TYPE_SCALAR);
+    monero_io_insert_hmac_for((void*) C_FAKE_SEC_VIEW_KEY, 32, TYPE_SCALAR);
     monero_io_insert(C_FAKE_SEC_SPEND_KEY, 32);
-    monero_io_insert_hmac_for((void*)C_FAKE_SEC_SPEND_KEY, 32, TYPE_SCALAR);
+    monero_io_insert_hmac_for((void*) C_FAKE_SEC_SPEND_KEY, 32, TYPE_SCALAR);
     return SW_OK;
 }
 

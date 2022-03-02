@@ -232,7 +232,6 @@ int monero_dispatch(void) {
             sw = oxen_apdu_get_tx_secret_key();
             break;
 
-
             /* =======================================================================
              *  Following command are only allowed during transaction and their
              *  sequence shall be enforced
@@ -241,7 +240,8 @@ int monero_dispatch(void) {
             /* --- START TX --- */
         case INS_OPEN_TX:
             // state machine check
-            if (!(G_oxen_state.tx_state_ins == 0 || G_oxen_state.tx_state_ins == INS_GEN_LNS_SIGNATURE)) {
+            if (!(G_oxen_state.tx_state_ins == 0 ||
+                  G_oxen_state.tx_state_ins == INS_GEN_LNS_SIGNATURE)) {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
             // 2. command process
@@ -273,8 +273,7 @@ int monero_dispatch(void) {
                     (G_oxen_state.tx_state_ins != INS_ENCRYPT_PAYMENT_ID)) {
                     THROW(SW_COMMAND_NOT_ALLOWED);
                 }
-                if (!OXEN_IO_P_EQUALS(0, 0))
-                    THROW(SW_WRONG_P1P2);
+                if (!OXEN_IO_P_EQUALS(0, 0)) THROW(SW_WRONG_P1P2);
             }
             // 2. command process
             sw = monero_apdu_encrypt_payment_id();
@@ -291,8 +290,7 @@ int monero_dispatch(void) {
                 (G_oxen_state.tx_state_ins != INS_ENCRYPT_PAYMENT_ID)) {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
-            if (!OXEN_IO_P_EQUALS(0, 0))
-                THROW(SW_WRONG_P1P2);
+            if (!OXEN_IO_P_EQUALS(0, 0)) THROW(SW_WRONG_P1P2);
 
             // 2. command process
             sw = monero_apu_generate_txout_keys();
@@ -315,21 +313,21 @@ int monero_dispatch(void) {
                 // We're going from initialization to our first subcommand, where we get basic tx
                 // parameters (version, type, locktime).
                 sw = monero_apdu_prefix_hash_init();
-            } else if (G_oxen_state.io_p1 == 2 && (
-                    // We've moving from first subcommand to phase 2 where we start receiving the
-                    // full prefix; either [2,1] for the first piece of a multi-piece prefix, or
-                    // [2,0] for a single-piece prefix:
-                    (G_oxen_state.tx_state_p1 == 1 && G_oxen_state.io_p2 <= 1)
-                ||
-                    // We're already in phase 2, and moving on to the next piece.  We require that
-                    // the next piece index (p2) equals 0 (meaning this is the last piece), or the
-                    // old one plus 1.  If we hit 255 then we wrap around to 1, not 0 (unless the
-                    // next one just happens to be the last piece).
-                    (G_oxen_state.tx_state_p1 == 2 && G_oxen_state.io_p1 == 2 && (
-                        G_oxen_state.io_p2 == 0 ||
-                        G_oxen_state.io_p2 == (G_oxen_state.tx_state_p2 < 255 ? G_oxen_state.tx_state_p2 + 1 : 1))
-                    )
-            )) {
+            } else if (G_oxen_state.io_p1 == 2 &&
+                       (
+                           // We've moving from first subcommand to phase 2 where we start receiving
+                           // the full prefix; either [2,1] for the first piece of a multi-piece
+                           // prefix, or [2,0] for a single-piece prefix:
+                           (G_oxen_state.tx_state_p1 == 1 && G_oxen_state.io_p2 <= 1) ||
+                           // We're already in phase 2, and moving on to the next piece.  We require
+                           // that the next piece index (p2) equals 0 (meaning this is the last
+                           // piece), or the old one plus 1.  If we hit 255 then we wrap around to
+                           // 1, not 0 (unless the next one just happens to be the last piece).
+                           (G_oxen_state.tx_state_p1 == 2 && G_oxen_state.io_p1 == 2 &&
+                            (G_oxen_state.io_p2 == 0 ||
+                             G_oxen_state.io_p2 == (G_oxen_state.tx_state_p2 < 255
+                                                        ? G_oxen_state.tx_state_p2 + 1
+                                                        : 1))))) {
                 sw = monero_apdu_prefix_hash_update();
             } else {
                 // Some invalid subcommand or state transition
@@ -340,8 +338,7 @@ int monero_dispatch(void) {
 
             /*--- COMMITMENT MASK --- */
         case INS_GEN_COMMITMENT_MASK:
-            if (!OXEN_IO_P_EQUALS(0, 0))
-                THROW(SW_WRONG_P1P2);
+            if (!OXEN_IO_P_EQUALS(0, 0)) THROW(SW_WRONG_P1P2);
 
             // 2. command process
             sw = monero_apdu_gen_commitment_mask();
@@ -411,9 +408,11 @@ int monero_dispatch(void) {
 
         /* --- CLSAG --- */
         case INS_CLSAG:
-            // If we are going to [CLSAG, 1, 0] then we must be coming from either [VALIDATE, 3] or [CLSAG, 3, 0]
+            // If we are going to [CLSAG, 1, 0] then we must be coming from either [VALIDATE, 3] or
+            // [CLSAG, 3, 0]
             if (OXEN_IO_P_EQUALS(1, 0)) {
-                if ((G_oxen_state.tx_state_ins == INS_VALIDATE && G_oxen_state.tx_state_p1 == 3) || OXEN_TX_STATE_INS_P_EQUALS(INS_CLSAG, 3, 0))
+                if ((G_oxen_state.tx_state_ins == INS_VALIDATE && G_oxen_state.tx_state_p1 == 3) ||
+                    OXEN_TX_STATE_INS_P_EQUALS(INS_CLSAG, 3, 0))
                     sw = monero_apdu_clsag_prepare();
                 else
                     THROW(SW_SUBCOMMAND_NOT_ALLOWED);
@@ -421,7 +420,8 @@ int monero_dispatch(void) {
                 // Transitioning between CLSAG states
 
                 // [1,0]->[2,x] or [2,x]->[2,y] (oxen_clsag.c does x/y validation)
-                if ((OXEN_TX_STATE_P_EQUALS(1, 0) || G_oxen_state.tx_state_p1 == 2) && G_oxen_state.io_p1 == 2)
+                if ((OXEN_TX_STATE_P_EQUALS(1, 0) || G_oxen_state.tx_state_p1 == 2) &&
+                    G_oxen_state.io_p1 == 2)
                     sw = monero_apdu_clsag_hash();
 
                 // [2,0]->[3,0] - sign
@@ -439,12 +439,12 @@ int monero_dispatch(void) {
 
         /* --- Unlock --- */
         case INS_GEN_UNLOCK_SIGNATURE:
-            if (G_oxen_state.tx_in_progress)
-                THROW(SW_COMMAND_NOT_ALLOWED);
+            if (G_oxen_state.tx_in_progress) THROW(SW_COMMAND_NOT_ALLOWED);
             // Initialization: must not be in the middle of something else
             if (OXEN_IO_P_EQUALS(0, 0) && G_oxen_state.tx_state_ins == 0)
                 sw = oxen_apdu_generate_unlock_signature();
-            else if (OXEN_IO_P_EQUALS(1, 0) && OXEN_TX_STATE_INS_P_EQUALS(INS_GEN_UNLOCK_SIGNATURE, 0, 0))
+            else if (OXEN_IO_P_EQUALS(1, 0) &&
+                     OXEN_TX_STATE_INS_P_EQUALS(INS_GEN_UNLOCK_SIGNATURE, 0, 0))
                 // [UNLOCK,1,0] is the post-confirmation step and must follow immediately the
                 // [UNLOCK,0,0] (which is where we ask for confirmation).
                 sw = oxen_apdu_generate_unlock_signature();
@@ -456,17 +456,19 @@ int monero_dispatch(void) {
 
         /* --- LNS --- */
         case INS_GEN_LNS_SIGNATURE:
-            if (G_oxen_state.tx_in_progress)
-                THROW(SW_COMMAND_NOT_ALLOWED);
+            if (G_oxen_state.tx_in_progress) THROW(SW_COMMAND_NOT_ALLOWED);
             // Initialization: must not be in the middle of something else
             if (OXEN_IO_P_EQUALS(0, 0) && G_oxen_state.tx_state_ins == 0)
                 sw = oxen_apdu_generate_lns_hash();
             // [0,0]->[1,x] or [1,x]->[1,y] -- we receive data to hash in multiple parts
             else if (G_oxen_state.tx_state_ins == INS_GEN_LNS_SIGNATURE &&
-                        (OXEN_TX_STATE_P_EQUALS(0, 0) || G_oxen_state.tx_state_p1 == 1) && G_oxen_state.io_p1 == 1)
+                     (OXEN_TX_STATE_P_EQUALS(0, 0) || G_oxen_state.tx_state_p1 == 1) &&
+                     G_oxen_state.io_p1 == 1)
                 sw = oxen_apdu_generate_lns_hash();
-            // [1,0] -> [2,0] gives the account indices and uses the hash built in the [1,x] steps to make the signature
-            else if (OXEN_TX_STATE_INS_P_EQUALS(INS_GEN_LNS_SIGNATURE, 1, 0) && OXEN_IO_P_EQUALS(2, 0))
+            // [1,0] -> [2,0] gives the account indices and uses the hash built in the [1,x] steps
+            // to make the signature
+            else if (OXEN_TX_STATE_INS_P_EQUALS(INS_GEN_LNS_SIGNATURE, 1, 0) &&
+                     OXEN_IO_P_EQUALS(2, 0))
                 sw = oxen_apdu_generate_lns_signature();
             else
                 THROW(SW_COMMAND_NOT_ALLOWED);

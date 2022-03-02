@@ -27,8 +27,7 @@
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 static void monero_payment_id_to_str(const unsigned char *payment_id, char *str) {
-    for (int i = 0; i < 8; i++)
-        snprintf(str + i * 2, 3, "%02x", payment_id[i]);
+    for (int i = 0; i < 8; i++) snprintf(str + i * 2, 3, "%02x", payment_id[i]);
 }
 
 int monero_apdu_display_address(void) {
@@ -72,7 +71,9 @@ int monero_apdu_display_address(void) {
         }
     }
 
-    ui_menu_any_pubaddr_display(C, D, (minor | major) ? 1 : 0,
+    ui_menu_any_pubaddr_display(C,
+                                D,
+                                (minor | major) ? 1 : 0,
                                 (G_oxen_state.io_p1 == 1) ? payment_id : NULL);
     return 0;
 }
@@ -80,9 +81,13 @@ int monero_apdu_display_address(void) {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int is_fake_view_key(const unsigned char *s) { return memcmp(s, C_FAKE_SEC_VIEW_KEY, 32) == 0; }
+int is_fake_view_key(const unsigned char *s) {
+    return memcmp(s, C_FAKE_SEC_VIEW_KEY, 32) == 0;
+}
 
-int is_fake_spend_key(const unsigned char *s) { return memcmp(s, C_FAKE_SEC_SPEND_KEY, 32) == 0; }
+int is_fake_spend_key(const unsigned char *s) {
+    return memcmp(s, C_FAKE_SEC_SPEND_KEY, 32) == 0;
+}
 
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
@@ -106,7 +111,7 @@ int monero_apdu_put_key(void) {
         THROW(SW_WRONG_DATA);
         return SW_WRONG_DATA;
     }
-    nvm_write((void *)N_oxen_state->view_priv, sec, 32);
+    nvm_write((void *) N_oxen_state->view_priv, sec, 32);
 
     // spend key
     monero_io_fetch(sec, 32);
@@ -116,11 +121,11 @@ int monero_apdu_put_key(void) {
         THROW(SW_WRONG_DATA);
         return SW_WRONG_DATA;
     }
-    nvm_write((void *)N_oxen_state->spend_priv, sec, 32);
+    nvm_write((void *) N_oxen_state->spend_priv, sec, 32);
 
     // change mode
     unsigned char key_mode = KEY_MODE_EXTERNAL;
-    nvm_write((void *)&N_oxen_state->key_mode, &key_mode, 1);
+    nvm_write((void *) &N_oxen_state->key_mode, &key_mode, 1);
 
     monero_io_discard(1);
 
@@ -132,13 +137,22 @@ int monero_apdu_get_network(void) {
     monero_io_discard(1);
     uint8_t nettype;
     switch (N_oxen_state->network_id) {
-        case MAINNET: nettype = 0; break;
-        case TESTNET: nettype = 1; break;
-        case DEVNET: nettype = 2; break;
-        case FAKECHAIN: nettype = 3; break;
-        default: nettype = 255;
+        case MAINNET:
+            nettype = 0;
+            break;
+        case TESTNET:
+            nettype = 1;
+            break;
+        case DEVNET:
+            nettype = 2;
+            break;
+        case FAKECHAIN:
+            nettype = 3;
+            break;
+        default:
+            nettype = 255;
     }
-    monero_io_insert((const unsigned char*) "OXEN", 4);
+    monero_io_insert((const unsigned char *) "OXEN", 4);
     monero_io_insert(&nettype, 1);
     return SW_OK;
 }
@@ -154,9 +168,12 @@ int monero_apdu_get_key(void) {
             monero_io_insert(G_oxen_state.view_pub, 32);
             monero_io_insert(G_oxen_state.spend_pub, 32);
             // public base address
-            unsigned char wallet_len = oxen_wallet_address(
-                    (char *)G_oxen_state.io_buffer + G_oxen_state.io_offset,
-                    G_oxen_state.view_pub, G_oxen_state.spend_pub, 0, NULL);
+            unsigned char wallet_len =
+                oxen_wallet_address((char *) G_oxen_state.io_buffer + G_oxen_state.io_offset,
+                                    G_oxen_state.view_pub,
+                                    G_oxen_state.spend_pub,
+                                    0,
+                                    NULL);
             monero_io_inserted(wallet_len);
             break;
 
@@ -252,7 +269,7 @@ int monero_apdu_get_chacha8_prekey(/*char  *prekey*/) {
     memmove(abt + 32, G_oxen_state.spend_priv, 32);
     abt[64] = CHACHA8_KEY_TAIL;
     oxen_keccak_256(&G_oxen_state.keccak, abt, 65, pre);
-    monero_io_insert((unsigned char *)G_oxen_state.keccak.acc, 200);
+    monero_io_insert((unsigned char *) G_oxen_state.keccak.acc, 200);
     return SW_OK;
 }
 #undef CHACHA8_KEY_TAIL
@@ -498,8 +515,8 @@ int oxen_apdu_generate_key_image_signature(
 }
 
 static const unsigned char STAKE_UNLOCK_HASH[32] = {
-    'U','N','L','K','U','N','L','K','U','N','L','K','U','N','L','K',
-    'U','N','L','K','U','N','L','K','U','N','L','K','U','N','L','K'};
+    'U', 'N', 'L', 'K', 'U', 'N', 'L', 'K', 'U', 'N', 'L', 'K', 'U', 'N', 'L', 'K',
+    'U', 'N', 'L', 'K', 'U', 'N', 'L', 'K', 'U', 'N', 'L', 'K', 'U', 'N', 'L', 'K'};
 
 // Generate an unlock signature.  There are two steps here: the first (p1=0) asks for confirmation,
 // and if given, we store that and then allow the second (p1=1) to produce the signature.  We
@@ -525,7 +542,7 @@ int oxen_apdu_generate_unlock_signature(void) {
     monero_io_discard(0);
 
     // sign
-    oxen_generate_signature(signature, (unsigned char*) STAKE_UNLOCK_HASH, pub, sec);
+    oxen_generate_signature(signature, (unsigned char *) STAKE_UNLOCK_HASH, pub, sec);
 
     // return
     monero_io_insert(signature, 64);
@@ -534,7 +551,6 @@ int oxen_apdu_generate_unlock_signature(void) {
 
 // Generates an LNS hash
 int oxen_apdu_generate_lns_hash(void) {
-
     if (G_oxen_state.io_p1 == 0) {
         // Confirm the LNS initialization with the user
         monero_io_discard(1);
@@ -547,23 +563,24 @@ int oxen_apdu_generate_lns_hash(void) {
     // We init hash if we just came off [0] (in which case current cmd must be [1,1] or [1,0], i.e.
     // the first of multipart, or single-part.
     if (G_oxen_state.tx_state_p1 == 0) {
-        if (G_oxen_state.io_p2 > 1)
-            THROW(SW_SUBCOMMAND_NOT_ALLOWED);
+        if (G_oxen_state.io_p2 > 1) THROW(SW_SUBCOMMAND_NOT_ALLOWED);
         cx_blake2b_init(&G_oxen_state.blake2b, 256);
-    // Otherwise we are in the hashing step so make sure the piece we receive properly follows
-    } else if (!(
-                G_oxen_state.io_p2 == 0 || // this chunk is last, *or*:
-                G_oxen_state.io_p2 == (G_oxen_state.tx_state_p2 == 255 ? 1 : G_oxen_state.tx_state_p2 + 1) // this chunk properly follows the previous
-                )) {
+        // Otherwise we are in the hashing step so make sure the piece we receive properly follows
+    } else if (!(G_oxen_state.io_p2 == 0 ||  // this chunk is last, *or*:
+                 G_oxen_state.io_p2 == (G_oxen_state.tx_state_p2 == 255
+                                            ? 1
+                                            : G_oxen_state.tx_state_p2 +
+                                                  1)  // this chunk properly follows the previous
+                 )) {
         THROW(SW_SUBCOMMAND_NOT_ALLOWED);
     }
 
     oxen_hash_update(&G_oxen_state.blake2b,
-            G_oxen_state.io_buffer + G_oxen_state.io_offset,
-            G_oxen_state.io_length - G_oxen_state.io_offset);
+                     G_oxen_state.io_buffer + G_oxen_state.io_offset,
+                     G_oxen_state.io_length - G_oxen_state.io_offset);
     monero_io_discard(1);
 
-    if (G_oxen_state.io_p2 == 0) // This was the last data piece
+    if (G_oxen_state.io_p2 == 0)  // This was the last data piece
         oxen_hash_final(&G_oxen_state.blake2b, G_oxen_state.lns_hash);
 
     return SW_OK;
@@ -571,9 +588,9 @@ int oxen_apdu_generate_lns_hash(void) {
 
 int oxen_apdu_generate_lns_signature(void) {
     unsigned char subaddr_index[8];
-#define SKEY &G_oxen_state.tmp[0]
-#define PKEY &G_oxen_state.tmp[32]
-#define STMP &G_oxen_state.tmp[64]
+#define SKEY      &G_oxen_state.tmp[0]
+#define PKEY      &G_oxen_state.tmp[32]
+#define STMP      &G_oxen_state.tmp[64]
 #define SIGNATURE &G_oxen_state.tmp[64]
 
     monero_io_fetch(subaddr_index, 8);
@@ -742,7 +759,8 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
         monero_generate_key_derivation(derivation, txkey_pub, G_oxen_state.view_priv);
     } else {
         monero_generate_key_derivation(
-            derivation, Aout,
+            derivation,
+            Aout,
             (is_subaddress && need_additional_txkeys) ? additional_txkey_sec : tx_key);
     }
 
