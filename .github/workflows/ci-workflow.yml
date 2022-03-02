@@ -24,6 +24,12 @@ jobs:
       - name: Build
         run: |
           make DEBUG=1
+      - name: Upload app binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: oxen-app-nanoS-debug
+          path: bin
+          if-no-files-found: error
 
   job_nanoX_build_debug:
     name: Build debug app for NanoX
@@ -38,6 +44,12 @@ jobs:
       - name: Build
         run: |
           make DEBUG=1 BOLOS_SDK=$NANOX_SDK
+      - name: Upload app binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: oxen-app-nanoX-debug
+          path: bin
+          if-no-files-found: error
 
   job_scan_build:
     name: Clang Static Analyzer
