@@ -60,6 +60,7 @@ DEFINES += HAVE_BLE_APDU # basic ledger apdu transport over BLE
 DEFINES += UNUSED\(x\)=\(void\)x
 
 # import rules to compile glyphs(/pone)
+GLYPH_SRC_DIR=../src
 include $(BOLOS_SDK)/Makefile.glyphs
 
 ### variables processed by the common makefile.rules of the SDK to grab source files and include dirs

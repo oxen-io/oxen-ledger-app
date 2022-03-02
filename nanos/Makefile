@@ -62,6 +62,7 @@ all: default
 DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
 
 # import rules to compile glyphs(/pone)
+GLYPH_SRC_DIR=../src
 include $(BOLOS_SDK)/Makefile.glyphs
 
 ### variables processed by the common makefile.rules of the SDK to grab source files and include dirs
