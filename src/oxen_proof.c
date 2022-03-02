@@ -90,6 +90,7 @@ int monero_apdu_get_tx_proof(void) {
 
         monero_hash_to_scalar(sig_c, &G_oxen_state.tmp[0], 32 * 8);
     */
+    (void) R;
 
     // sig_c = H_n(tmp)
     monero_hash_to_scalar(sig_c, &G_oxen_state.tmp[0], 32 * 4);

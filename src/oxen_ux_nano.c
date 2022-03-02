@@ -130,11 +130,9 @@ static const char* processing_tx(void) {
 }
 
 void ui_menu_opentx_display(unsigned char final_step) {
-    unsigned char page;
     memmove(G_oxen_state.ux_info1, processing_tx(), sizeof(G_oxen_state.ux_info1) - 1);
     G_oxen_state.ux_info1[sizeof(G_oxen_state.ux_info1) - 1] = 0;
 
-    page = G_oxen_state.tx_cnt % 3;
     if (final_step)
         ux_flow_init(0, ux_flow_info_icon4, NULL);
     else if (G_oxen_state.tx_cnt % 3 == 1)

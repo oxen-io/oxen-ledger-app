@@ -721,6 +721,9 @@ int monero_apu_generate_txout_keys(/*size_t tx_version, crypto::secret_key tx_se
     unsigned char derivation[32];
 
     tx_version = monero_io_fetch_u32();
+    if (tx_version != 4) {
+        THROW(SW_WRONG_DATA);
+    }
     monero_io_fetch_decrypt_key(tx_key);
     txkey_pub = G_oxen_state.io_buffer + G_oxen_state.io_offset;
     monero_io_fetch(NULL, 32);

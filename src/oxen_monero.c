@@ -165,14 +165,6 @@ unsigned char oxen_wallet_address(char* str_b58,
 
     // data[0] = N_oxen_state->network_id;
     switch (N_oxen_state->network_id) {
-        case TESTNET:
-            if (paymentID)
-                prefix = TESTNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
-            else if (is_subbadress)
-                prefix = TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
-            else
-                prefix = TESTNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
-            break;
         case DEVNET:
             if (paymentID)
                 prefix = DEVNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
@@ -191,6 +183,15 @@ unsigned char oxen_wallet_address(char* str_b58,
                 prefix = MAINNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
             break;
 #endif
+        case TESTNET:
+        default:
+            if (paymentID)
+                prefix = TESTNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
+            else if (is_subbadress)
+                prefix = TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
+            else
+                prefix = TESTNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
+            break;
     }
     offset = monero_encode_varint(data, ADDR_NETTYPE_MAX_SIZE, prefix);
 
