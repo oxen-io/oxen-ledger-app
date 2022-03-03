@@ -18,26 +18,27 @@
 -include ../Makefile.env
 -include Makefile.env
 
+ifneq ($(NANOX_SDK),)
+BOLOS_SDK := $(NANOX_SDK)
+endif
+
+ifeq ($(BOLOS_SDK),)
 BOLOS_SDK := $(shell pwd)/nanox-secure-sdk
+endif
+
 ifeq ($(BOLOS_SDK),)
 $(error Environment variable BOLOS_SDK is not set)
 endif
-
-# Respect a user-provided SYSROOT, but don't respect the SDK Makefile.defines one which does the
-# wrong thing with the debian package arm-none-eabi compiler (appending -I/usr/include, which is
-# completely wrong)
-ifneq ($(SYSROOT),)
-else ifneq ("","$(wildcard /usr/lib/arm-none-eabi)")
-	override SYSROOT := /usr/lib/arm-none-eabi
-endif
-$(info SYSROOT=$(SYSROOT))
 
 include $(BOLOS_SDK)/Makefile.defines
 
 include ../Makefile.oxen
 
-CFLAGS += -Oz
+CFLAGS += -Oz -I$(shell pwd)/src
 LDFLAGS += -Oz
+
+# Work around buggy Makefile.defines not setting this:
+AFLAGS += --target=armv6m-none-eabi
 
 ################
 # Default rule #
@@ -59,6 +60,7 @@ DEFINES += HAVE_BLE_APDU # basic ledger apdu transport over BLE
 DEFINES += UNUSED\(x\)=\(void\)x
 
 # import rules to compile glyphs(/pone)
+GLYPH_SRC_DIR=../src
 include $(BOLOS_SDK)/Makefile.glyphs
 
 ### variables processed by the common makefile.rules of the SDK to grab source files and include dirs

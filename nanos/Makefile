@@ -18,7 +18,15 @@
 -include ../Makefile.env
 -include Makefile.env
 
+
+ifneq ($(NANOS_SDK),)
+BOLOS_SDK := $(NANOS_SDK)
+endif
+
+ifeq ($(BOLOS_SDK),)
 BOLOS_SDK := $(shell pwd)/nanos-secure-sdk
+endif
+
 ifeq ($(BOLOS_SDK),)
 $(error Environment variable BOLOS_SDK is not set)
 endif
@@ -38,7 +46,7 @@ include $(BOLOS_SDK)/Makefile.defines
 
 include ../Makefile.oxen
 
-CFLAGS += -Oz
+CFLAGS += -Oz -I$(shell pwd)/src
 LDFLAGS += -Oz
 
 ################
@@ -54,6 +62,7 @@ all: default
 DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
 
 # import rules to compile glyphs(/pone)
+GLYPH_SRC_DIR=../src
 include $(BOLOS_SDK)/Makefile.glyphs
 
 ### variables processed by the common makefile.rules of the SDK to grab source files and include dirs

@@ -36,7 +36,7 @@ int monero_apdu_get_tx_proof(void) {
     unsigned char XY[32];
     unsigned char sig_c[32];
     unsigned char sig_r[32];
-#define k (G_oxen_state.tmp + 128) // We go 32 bytes into this
+#define k (G_oxen_state.tmp + 128)  // We go 32 bytes into this
 
     msg = G_oxen_state.io_buffer + G_oxen_state.io_offset;
     monero_io_fetch(NULL, 32);
@@ -74,27 +74,28 @@ int monero_apdu_get_tx_proof(void) {
     // tmp = msg || D || X || Y
     memmove(G_oxen_state.tmp + 32 * 3, XY, 32);
 
-/* Monero V2 proofs (not currently present in Oxen).
- *
- * Note that changing this will require enlarging tmp!
+    /* Monero V2 proofs (not currently present in Oxen).
+     *
+     * Note that changing this will require enlarging tmp!
 
-    oxen_keccak_256(&G_oxen_state.keccak_alt, (unsigned char *)"TXPROOF_V2", 10, sep);
-    // tmp = msg || D || X || Y || sep
-    memmove(G_oxen_state.tmp + 32 * 4, sep, 32);
-    // tmp = msg || D || X || Y || sep || R
-    memmove(G_oxen_state.tmp + 32 * 5, R, 32);
-    // tmp = msg || D || X || Y || sep || R || A
-    memmove(G_oxen_state.tmp + 32 * 6, A, 32);
-    // tmp = msg || D || X || Y || sep || R || B or [0]
-    memmove(G_oxen_state.tmp + 32 * 7, B, 32);
+        oxen_keccak_256(&G_oxen_state.keccak_alt, (unsigned char *)"TXPROOF_V2", 10, sep);
+        // tmp = msg || D || X || Y || sep
+        memmove(G_oxen_state.tmp + 32 * 4, sep, 32);
+        // tmp = msg || D || X || Y || sep || R
+        memmove(G_oxen_state.tmp + 32 * 5, R, 32);
+        // tmp = msg || D || X || Y || sep || R || A
+        memmove(G_oxen_state.tmp + 32 * 6, A, 32);
+        // tmp = msg || D || X || Y || sep || R || B or [0]
+        memmove(G_oxen_state.tmp + 32 * 7, B, 32);
 
-    monero_hash_to_scalar(sig_c, &G_oxen_state.tmp[0], 32 * 8);
-*/
+        monero_hash_to_scalar(sig_c, &G_oxen_state.tmp[0], 32 * 8);
+    */
+    (void) R;
 
     // sig_c = H_n(tmp)
     monero_hash_to_scalar(sig_c, &G_oxen_state.tmp[0], 32 * 4);
     // Monero V2 proof version:
-    //monero_hash_to_scalar(sig_c, &G_oxen_state.tmp[0], 32 * 8);
+    // monero_hash_to_scalar(sig_c, &G_oxen_state.tmp[0], 32 * 8);
 
     // sig_c*r
     monero_multm(XY, sig_c, r);

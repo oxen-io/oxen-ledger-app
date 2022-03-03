@@ -42,7 +42,7 @@ void monero_init(void) {
     memset(&G_oxen_state, 0, sizeof(oxen_v_state_t));
 
     // first init ?
-    if (memcmp((void*)N_oxen_state->magic, (void*)C_MAGIC, sizeof(C_MAGIC)) != 0) {
+    if (memcmp((void*) N_oxen_state->magic, (void*) C_MAGIC, sizeof(C_MAGIC)) != 0) {
 #if defined(OXEN_ALPHA) || defined(OXEN_BETA)
         oxen_install(TESTNET);
 #else
@@ -91,13 +91,16 @@ void monero_init_private_key(void) {
 
             oxen_keccak_256(&G_oxen_state.keccak, seed, 32, G_oxen_state.spend_priv);
             monero_reduce(G_oxen_state.spend_priv);
-            oxen_keccak_256(&G_oxen_state.keccak, G_oxen_state.spend_priv, 32, G_oxen_state.view_priv);
+            oxen_keccak_256(&G_oxen_state.keccak,
+                            G_oxen_state.spend_priv,
+                            32,
+                            G_oxen_state.view_priv);
             monero_reduce(G_oxen_state.view_priv);
             break;
 
         case KEY_MODE_EXTERNAL:
-            memmove(G_oxen_state.view_priv, (void*)N_oxen_state->view_priv, 32);
-            memmove(G_oxen_state.spend_priv, (void*)N_oxen_state->spend_priv, 32);
+            memmove(G_oxen_state.view_priv, (void*) N_oxen_state->view_priv, 32);
+            memmove(G_oxen_state.spend_priv, (void*) N_oxen_state->spend_priv, 32);
             break;
 
         default:
@@ -117,14 +120,18 @@ void monero_init_private_key(void) {
 /* ---  Set up ui/ux                                                   --- */
 /* ----------------------------------------------------------------------- */
 void monero_init_ux(void) {
-    unsigned char wallet_len = oxen_wallet_address(
-            G_oxen_state.ux_address, G_oxen_state.view_pub, G_oxen_state.spend_pub, 0, NULL);
+    unsigned char wallet_len = oxen_wallet_address(G_oxen_state.ux_address,
+                                                   G_oxen_state.view_pub,
+                                                   G_oxen_state.spend_pub,
+                                                   0,
+                                                   NULL);
 
     memmove(G_oxen_state.ux_wallet_public_short_address, G_oxen_state.ux_address, 7);
     G_oxen_state.ux_wallet_public_short_address[7] = '.';
     G_oxen_state.ux_wallet_public_short_address[8] = '.';
     memmove(G_oxen_state.ux_wallet_public_short_address + 9,
-               G_oxen_state.ux_address + wallet_len - 3, 3);
+            G_oxen_state.ux_address + wallet_len - 3,
+            3);
     G_oxen_state.ux_wallet_public_short_address[12] = 0;
 }
 
@@ -145,7 +152,7 @@ void oxen_install(unsigned char netId) {
     nvm_write(&N_oxen_state->network_id, &netId, 1);
 
     // write magic
-    nvm_write(N_oxen_state->magic, (void *)C_MAGIC, sizeof(C_MAGIC));
+    nvm_write(N_oxen_state->magic, (void*) C_MAGIC, sizeof(C_MAGIC));
 
 #if DEBUG_HWDEVICE
     // Default into always-export-view-key mode when doing a debug build because it's annoying to
@@ -171,14 +178,14 @@ int monero_apdu_reset(void) {
     if (client_version_len > 14) {
         THROW(SW_CLIENT_NOT_SUPPORTED + 1);
     }
-    monero_io_fetch((unsigned char*)&client_version[0], client_version_len);
+    monero_io_fetch((unsigned char*) &client_version[0], client_version_len);
     client_version[client_version_len++] = '.';
     client_version[client_version_len] = 0;
     uint8_t i;
     for (i = 0; i < OXEN_SUPPORTED_CLIENT_SIZE; i++) {
-        size_t len = strlen((char*)PIC(oxen_supported_client[i]));
+        size_t len = strlen((char*) PIC(oxen_supported_client[i]));
         if (len <= client_version_len &&
-                memcmp((char*)PIC(oxen_supported_client[i]), client_version, len) == 0) {
+            memcmp((char*) PIC(oxen_supported_client[i]), client_version, len) == 0) {
             break;
         }
     }

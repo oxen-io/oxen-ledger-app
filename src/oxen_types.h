@@ -22,14 +22,14 @@
 
 #include "os_io_seproxyhal.h"
 #ifdef TARGET_NANOS
-#  include "lcx_blake2.h"
-#  include "lcx_sha3.h"
-#  include "lcx_sha256.h"
-#  include "lcx_aes.h"
+#include "lcx_blake2.h"
+#include "lcx_sha3.h"
+#include "lcx_sha256.h"
+#include "lcx_aes.h"
 #elif defined(TARGET_NANOX)
-#  include "cx.h"
+#include "cx.h"
 #else
-#  error "Error: neither TARGET_NANOS neither TARGET_NANOX is defined, don't know what to include!"
+#error "Error: neither TARGET_NANOS neither TARGET_NANOX is defined, don't know what to include!"
 #endif
 
 #if CX_APILEVEL == 8
@@ -59,7 +59,7 @@
 #define TESTNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX 157
 #define TESTNET_CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX         158
 
-#define COIN_DECIMAL 9 // 1 OXEN = 1'000'000'000 atomic OXEN
+#define COIN_DECIMAL 9  // 1 OXEN = 1'000'000'000 atomic OXEN
 
 enum network_type {
 #ifndef OXEN_ALPHA
@@ -83,27 +83,27 @@ typedef struct oxen_nv_state_t {
     unsigned char key_mode;
 
 #define VIEWKEY_EXPORT_ALWAYS_PROMPT 0
-#define VIEWKEY_EXPORT_ALWAYS_ALLOW 1
-#define VIEWKEY_EXPORT_ALWAYS_DENY 2
+#define VIEWKEY_EXPORT_ALWAYS_ALLOW  1
+#define VIEWKEY_EXPORT_ALWAYS_DENY   2
     /* view key export mode */
     unsigned char viewkey_export_mode;
 
-#define CONFIRM_ADDRESS_FULL 0   // Full addr (takes 6-7 pages)
-#define CONFIRM_ADDRESS_SHORT 1 // [first 23..last 23] (so fits on 3 pages)
+#define CONFIRM_ADDRESS_FULL    0  // Full addr (takes 6-7 pages)
+#define CONFIRM_ADDRESS_SHORT   1  // [first 23..last 23] (so fits on 3 pages)
 #define CONFIRM_ADDRESS_SHORTER 2  // [first 16..last 14] (so fits on 2 pages)
     /* address confirm truncatation mode */
     unsigned char truncate_addrs_mode;
 
-#define CONFIRM_FEE_ALWAYS 0
+#define CONFIRM_FEE_ALWAYS     0
 #define CONFIRM_FEE_ABOVE_0_05 1
-#define CONFIRM_FEE_ABOVE_0_2 2
-#define CONFIRM_FEE_ABOVE_1 3
-#define CONFIRM_FEE_NEVER 4
+#define CONFIRM_FEE_ABOVE_0_2  2
+#define CONFIRM_FEE_ABOVE_1    3
+#define CONFIRM_FEE_NEVER      4
     /* fee confirmation mode */
     unsigned char confirm_fee_mode;
 
 #define CONFIRM_CHANGE_DISABLED 0
-#define CONFIRM_CHANGE_ENABLED 1
+#define CONFIRM_CHANGE_ENABLED  1
     /* confirm confirmation mode */
     unsigned char confirm_change_mode;
 
@@ -223,7 +223,7 @@ typedef struct oxen_v_state_t {
     /* ------------------------------------------ */
     /* ---               UI/UX                --- */
     /* ------------------------------------------ */
-    char ux_wallet_public_short_address[7 + 2 + 3 + 1]; // first 7, two dots, last 3, null
+    char ux_wallet_public_short_address[7 + 2 + 3 + 1];  // first 7, two dots, last 3, null
 
     union {
         struct {
@@ -243,7 +243,8 @@ typedef struct oxen_v_state_t {
                 // Payment ID, which gets copied into the above for display
                 char payment_id[16];
                 struct {
-                    // Major/minor addr indicies for subaddresses (copied into ux_addr_info for display)
+                    // Major/minor addr indicies for subaddresses (copied into ux_addr_info for
+                    // display)
                     unsigned int disp_addr_M;
                     unsigned int disp_addr_m;
                 };
@@ -252,7 +253,7 @@ typedef struct oxen_v_state_t {
             // 0, but won't be if the value is greater than 9 digits).
             char ux_amount[22];
         };
-        unsigned char tmp[160]; // Used as extra temp storage in oxen_proof, oxen_clsag
+        unsigned char tmp[160];  // Used as extra temp storage in oxen_proof, oxen_clsag
     };
 } oxen_v_state_t;
 
@@ -265,7 +266,7 @@ typedef struct oxen_v_state_t {
 #define TYPE_ALPHA      4
 
 /* ---  ...  --- */
-#define IO_OFFSET_END  (unsigned int)-1
+#define IO_OFFSET_END (unsigned int) -1
 
 #define ENCRYPTED_PAYMENT_ID_TAIL 0x8d
 
@@ -280,7 +281,7 @@ typedef struct oxen_v_state_t {
 #define INS_RESET        0x02
 #define INS_LOCK_DISPLAY 0x04
 
-#define INS_GET_NETWORK        0x10
+#define INS_GET_NETWORK 0x10
 
 #define INS_GET_KEY            0x20
 #define INS_DISPLAY_ADDRESS    0x21
@@ -318,10 +319,10 @@ typedef struct oxen_v_state_t {
 #define INS_CLSAG               0x7F
 #define INS_CLOSE_TX            0x80
 
-#define INS_GET_TX_PROOF             0xA0
-#define INS_GEN_UNLOCK_SIGNATURE     0xA2
-#define INS_GEN_LNS_SIGNATURE        0xA3
-#define INS_GEN_KEY_IMAGE_SIGNATURE  0xA4
+#define INS_GET_TX_PROOF            0xA0
+#define INS_GEN_UNLOCK_SIGNATURE    0xA2
+#define INS_GEN_LNS_SIGNATURE       0xA3
+#define INS_GEN_KEY_IMAGE_SIGNATURE 0xA4
 
 #define INS_GET_RESPONSE 0xc0
 

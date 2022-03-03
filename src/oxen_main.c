@@ -28,9 +28,6 @@
 #include "glyphs.h"
 
 #include "ux.h"
-#ifdef TARGET_NANOX
-#include "balenos_ble.h"
-#endif
 
 /* ----------------------------------------------------------------------- */
 /* ---                            Application Entry                    --- */
@@ -83,6 +80,8 @@ void monero_main(void) {
 unsigned char io_event(unsigned char channel) {
     unsigned int s_before;
     unsigned int s_after;
+
+    (void) channel;
 
     s_before = os_global_pin_is_validated();
 
@@ -164,8 +163,11 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
 
 void app_exit(void) {
     BEGIN_TRY_L(exit) {
-        TRY_L(exit) { os_sched_exit(-1); }
-        FINALLY_L(exit) {}
+        TRY_L(exit) {
+            os_sched_exit(-1);
+        }
+        FINALLY_L(exit) {
+        }
     }
     END_TRY_L(exit);
 }
@@ -216,8 +218,11 @@ __attribute__((section(".boot"))) int main(void) {
                 // reset IO and UX
                 ;
             }
-            CATCH_OTHER(e) { cont = 0; }
-            FINALLY {}
+            CATCH_OTHER(e) {
+                cont = 0;
+            }
+            FINALLY {
+            }
         }
         END_TRY;
     }

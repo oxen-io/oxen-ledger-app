@@ -53,7 +53,7 @@ void ui_menu_pinlock_display(void) {
     ux_params.ux_id = BOLOS_UX_VALIDATE_PIN;
     ux_params.len = sizeof(ux_params.u.validate_pin);
     ux_params.u.validate_pin.cancellable = 0;
-    os_ux((bolos_ux_params_t*)&ux_params);
+    os_ux((bolos_ux_params_t*) &ux_params);
     ui_menu_main_display();
 }
 
@@ -71,18 +71,31 @@ void ui_menu_pinlock_display(void) {
 void ui_menu_settings_display(void);
 void ui_menu_settings_display_select(unsigned int idx);
 
-
 /* -------------------------------- INFO UX --------------------------------- */
 unsigned int ui_menu_info_action(void);
 
-UX_STEP_CB(ux_menu_info_show_step, nn, ui_menu_info_action(), {G_oxen_state.ux_info1, G_oxen_state.ux_info2});
+UX_STEP_CB(ux_menu_info_show_step,
+           nn,
+           ui_menu_info_action(),
+           {G_oxen_state.ux_info1, G_oxen_state.ux_info2});
 UX_FLOW(ux_flow_info, &ux_menu_info_show_step);
 
-
-UX_STEP_CB(ux_menu_info_icon1_step, pb, ui_menu_info_action(), {&C_icon_tx1, G_oxen_state.ux_info1});
-UX_STEP_CB(ux_menu_info_icon2_step, pb, ui_menu_info_action(), {&C_icon_tx2, G_oxen_state.ux_info1});
-UX_STEP_CB(ux_menu_info_icon3_step, pb, ui_menu_info_action(), {&C_icon_tx3, G_oxen_state.ux_info1});
-UX_STEP_CB(ux_menu_info_icon4_step, pb, ui_menu_info_action(), {&C_icon_tx4, G_oxen_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon1_step,
+           pb,
+           ui_menu_info_action(),
+           {&C_icon_tx1, G_oxen_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon2_step,
+           pb,
+           ui_menu_info_action(),
+           {&C_icon_tx2, G_oxen_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon3_step,
+           pb,
+           ui_menu_info_action(),
+           {&C_icon_tx3, G_oxen_state.ux_info1});
+UX_STEP_CB(ux_menu_info_icon4_step,
+           pb,
+           ui_menu_info_action(),
+           {&C_icon_tx4, G_oxen_state.ux_info1});
 UX_FLOW(ux_flow_info_icon1, &ux_menu_info_icon1_step);
 UX_FLOW(ux_flow_info_icon2, &ux_menu_info_icon2_step);
 UX_FLOW(ux_flow_info_icon3, &ux_menu_info_icon3_step);
@@ -97,34 +110,37 @@ unsigned int ui_menu_info_action(void) {
 }
 
 void ui_menu_info_display2(const char* line1, const char* line2) {
-    memmove(G_oxen_state.ux_info1, line1, sizeof(G_oxen_state.ux_info1)-1);
-    memmove(G_oxen_state.ux_info2, line2, sizeof(G_oxen_state.ux_info2)-1);
-    G_oxen_state.ux_info1[sizeof(G_oxen_state.ux_info1)-1] = 0;
-    G_oxen_state.ux_info2[sizeof(G_oxen_state.ux_info2)-1] = 0;
+    memmove(G_oxen_state.ux_info1, line1, sizeof(G_oxen_state.ux_info1) - 1);
+    memmove(G_oxen_state.ux_info2, line2, sizeof(G_oxen_state.ux_info2) - 1);
+    G_oxen_state.ux_info1[sizeof(G_oxen_state.ux_info1) - 1] = 0;
+    G_oxen_state.ux_info2[sizeof(G_oxen_state.ux_info2) - 1] = 0;
     ux_flow_init(0, ux_flow_info, NULL);
 }
 
-void ui_menu_info_display(void) { ux_flow_init(0, ux_flow_info, NULL); }
+void ui_menu_info_display(void) {
+    ux_flow_init(0, ux_flow_info, NULL);
+}
 
 /* -------------------------------- OPEN TX UX --------------------------------- */
 static const char* processing_tx(void) {
-    return
-        G_oxen_state.tx_type == TXTYPE_STAKE ? "Processing Stake" :
-        G_oxen_state.tx_type == TXTYPE_LNS ? "Processing LNS" :
-        G_oxen_state.tx_type == TXTYPE_UNLOCK ? "Processing Unlck" :
-        "Processing TX";
+    return G_oxen_state.tx_type == TXTYPE_STAKE    ? "Processing Stake"
+           : G_oxen_state.tx_type == TXTYPE_LNS    ? "Processing LNS"
+           : G_oxen_state.tx_type == TXTYPE_UNLOCK ? "Processing Unlck"
+                                                   : "Processing TX";
 }
 
 void ui_menu_opentx_display(unsigned char final_step) {
-    unsigned char page;
-    memmove(G_oxen_state.ux_info1, processing_tx(), sizeof(G_oxen_state.ux_info1)-1);
-    G_oxen_state.ux_info1[sizeof(G_oxen_state.ux_info1)-1] = 0;
+    memmove(G_oxen_state.ux_info1, processing_tx(), sizeof(G_oxen_state.ux_info1) - 1);
+    G_oxen_state.ux_info1[sizeof(G_oxen_state.ux_info1) - 1] = 0;
 
-    page = G_oxen_state.tx_cnt % 3;
-    if (final_step)                        ux_flow_init(0, ux_flow_info_icon4, NULL);
-    else if (G_oxen_state.tx_cnt % 3 == 1) ux_flow_init(0, ux_flow_info_icon1, NULL);
-    else if (G_oxen_state.tx_cnt % 3 == 2) ux_flow_init(0, ux_flow_info_icon2, NULL);
-    else                                   ux_flow_init(0, ux_flow_info_icon3, NULL);
+    if (final_step)
+        ux_flow_init(0, ux_flow_info_icon4, NULL);
+    else if (G_oxen_state.tx_cnt % 3 == 1)
+        ux_flow_init(0, ux_flow_info_icon1, NULL);
+    else if (G_oxen_state.tx_cnt % 3 == 2)
+        ux_flow_init(0, ux_flow_info_icon2, NULL);
+    else
+        ux_flow_init(0, ux_flow_info_icon3, NULL);
 }
 
 /* ----------------- FEE/CHANGE/TIMELOCK VALIDATION ----------------- */
@@ -139,22 +155,30 @@ OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_lns_fee_step, "Confirm LNS Fee");
 OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_change_step, "Amount (change)");
 OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_timelock_step, "Timelock");
 
-#define OXEN_UX_ACCEPT_REJECT(basename, callback) \
+#define OXEN_UX_ACCEPT_REJECT(basename, callback)                                              \
     UX_STEP_CB(basename##_accept_step, pb, callback(ACCEPT), {&C_icon_validate_14, "Accept"}); \
     UX_STEP_CB(basename##_reject_step, pb, callback(REJECT), {&C_icon_crossmark, "Reject"})
 
 OXEN_UX_ACCEPT_REJECT(ux_menu_validation_cf, ui_menu_amount_validation_action);
 
-UX_FLOW(ux_flow_fee, &ux_menu_validation_fee_step, &ux_menu_validation_cf_accept_step,
+UX_FLOW(ux_flow_fee,
+        &ux_menu_validation_fee_step,
+        &ux_menu_validation_cf_accept_step,
         &ux_menu_validation_cf_reject_step);
 
-UX_FLOW(ux_flow_lns_fee, &ux_menu_validation_lns_fee_step, &ux_menu_validation_cf_accept_step,
+UX_FLOW(ux_flow_lns_fee,
+        &ux_menu_validation_lns_fee_step,
+        &ux_menu_validation_cf_accept_step,
         &ux_menu_validation_cf_reject_step);
 
-UX_FLOW(ux_flow_change, &ux_menu_validation_change_step, &ux_menu_validation_cf_accept_step,
+UX_FLOW(ux_flow_change,
+        &ux_menu_validation_change_step,
+        &ux_menu_validation_cf_accept_step,
         &ux_menu_validation_cf_reject_step);
 
-UX_FLOW(ux_flow_timelock, &ux_menu_validation_timelock_step, &ux_menu_validation_cf_accept_step,
+UX_FLOW(ux_flow_timelock,
+        &ux_menu_validation_timelock_step,
+        &ux_menu_validation_cf_accept_step,
         &ux_menu_validation_cf_reject_step);
 
 void ui_menu_amount_validation_action(unsigned int value) {
@@ -170,17 +194,26 @@ void ui_menu_amount_validation_action(unsigned int value) {
     ui_menu_opentx_display(1);
 }
 
-void ui_menu_fee_validation_display(void) { ux_flow_init(0, ux_flow_fee, NULL); }
-void ui_menu_lns_fee_validation_display(void) { ux_flow_init(0, ux_flow_lns_fee, NULL); }
-void ui_menu_change_validation_display(void) { ux_flow_init(0, ux_flow_change, NULL); }
-void ui_menu_timelock_validation_display(void) { ux_flow_init(0, ux_flow_timelock, NULL); }
+void ui_menu_fee_validation_display(void) {
+    ux_flow_init(0, ux_flow_fee, NULL);
+}
+void ui_menu_lns_fee_validation_display(void) {
+    ux_flow_init(0, ux_flow_lns_fee, NULL);
+}
+void ui_menu_change_validation_display(void) {
+    ux_flow_init(0, ux_flow_change, NULL);
+}
+void ui_menu_timelock_validation_display(void) {
+    ux_flow_init(0, ux_flow_timelock, NULL);
+}
 
 /* ----------------------------- USER DEST/AMOUNT VALIDATION ----------------------------- */
 void ui_menu_validation_action(unsigned int value);
 
 UX_STEP_NOCB(ux_menu_validation_amount_step, bn, {"Confirm Amount", G_oxen_state.ux_amount});
 
-UX_STEP_NOCB(ux_menu_validation_recipient_step, bnnn_paging,
+UX_STEP_NOCB(ux_menu_validation_recipient_step,
+             bnnn_paging,
              {"Recipient", G_oxen_state.ux_address});
 
 OXEN_UX_ACCEPT_REJECT(ux_menu_validation, ui_menu_validation_action);
@@ -192,7 +225,9 @@ UX_FLOW(ux_flow_validation,
         &ux_menu_validation_reject_step,
         FLOW_LOOP);
 
-void ui_menu_validation_display(void) { ux_flow_init(0, ux_flow_validation, NULL); }
+void ui_menu_validation_display(void) {
+    ux_flow_init(0, ux_flow_validation, NULL);
+}
 
 void ui_menu_validation_action(unsigned int value) {
     unsigned short sw;
@@ -216,7 +251,9 @@ UX_FLOW(ux_flow_stake_validation,
         &ux_menu_validation_accept_step,
         &ux_menu_validation_reject_step);
 
-void ui_menu_stake_validation_display(void) { ux_flow_init(0, ux_flow_stake_validation, NULL); }
+void ui_menu_stake_validation_display(void) {
+    ux_flow_init(0, ux_flow_stake_validation, NULL);
+}
 
 /** Common menu items for special transaction (i.e. unlocks and LNS) */
 void ui_menu_special_validation_action(unsigned int value) {
@@ -240,7 +277,9 @@ UX_FLOW(ux_flow_unlock_validation,
         &ux_menu_unlock_validation_step,
         &ux_menu_special_validation_accept_step,
         &ux_menu_special_validation_reject_step);
-void ui_menu_unlock_validation_display(void) { ux_flow_init(0, ux_flow_unlock_validation, NULL); }
+void ui_menu_unlock_validation_display(void) {
+    ux_flow_init(0, ux_flow_unlock_validation, NULL);
+}
 
 /* LNS */
 UX_STEP_NOCB(ux_menu_lns_validation_step, nn, {"Confirm Oxen", "Name Service TX"});
@@ -249,21 +288,31 @@ UX_FLOW(ux_flow_lns_validation,
         &ux_menu_special_validation_accept_step,
         &ux_menu_special_validation_reject_step);
 
-void ui_menu_lns_validation_display(void) { ux_flow_init(0, ux_flow_lns_validation, NULL); }
+void ui_menu_lns_validation_display(void) {
+    ux_flow_init(0, ux_flow_lns_validation, NULL);
+}
 
 /* -------------------------------- EXPORT VIEW KEY UX --------------------------------- */
 unsigned int ui_menu_export_viewkey_action(unsigned int value);
 
-UX_STEP_CB(ux_menu_export_viewkey_export_step, pb, ui_menu_export_viewkey_action(ACCEPT),
+UX_STEP_CB(ux_menu_export_viewkey_export_step,
+           pb,
+           ui_menu_export_viewkey_action(ACCEPT),
            {&C_icon_validate_14, "Export view key?"});
 
-UX_STEP_CB(ux_menu_export_viewkey_export_always_step, pb, ui_menu_export_viewkey_action(ACCEPT | 0x10000),
+UX_STEP_CB(ux_menu_export_viewkey_export_always_step,
+           pb,
+           ui_menu_export_viewkey_action(ACCEPT | 0x10000),
            {&C_icon_validate_14, "Always export"});
 
-UX_STEP_CB(ux_menu_export_viewkey_reject_step, pb, ui_menu_export_viewkey_action(REJECT),
+UX_STEP_CB(ux_menu_export_viewkey_reject_step,
+           pb,
+           ui_menu_export_viewkey_action(REJECT),
            {&C_icon_crossmark, "Reject"});
 
-UX_STEP_CB(ux_menu_export_viewkey_reject_always_step, pb, ui_menu_export_viewkey_action(REJECT | 0x10000),
+UX_STEP_CB(ux_menu_export_viewkey_reject_always_step,
+           pb,
+           ui_menu_export_viewkey_action(REJECT | 0x10000),
            {&C_icon_crossmark, "Always reject"});
 
 UX_FLOW(ux_flow_export_viewkey,
@@ -271,8 +320,7 @@ UX_FLOW(ux_flow_export_viewkey,
         &ux_menu_export_viewkey_export_always_step,
         &ux_menu_export_viewkey_reject_step,
         &ux_menu_export_viewkey_reject_always_step,
-        FLOW_LOOP
-        );
+        FLOW_LOOP);
 
 void ui_export_viewkey_display(void) {
     switch (N_oxen_state->viewkey_export_mode) {
@@ -295,10 +343,11 @@ unsigned int ui_menu_export_viewkey_action(unsigned int value) {
     monero_io_discard(0);
     memset(x, 0, 32);
     sw = SW_OK;
-    if (value & 0x10000) { // remember
+    if (value & 0x10000) {  // remember
         value &= ~0x10000;
-        unsigned char val = value == ACCEPT ? VIEWKEY_EXPORT_ALWAYS_ALLOW : VIEWKEY_EXPORT_ALWAYS_DENY;
-        nvm_write((void*)&N_oxen_state->viewkey_export_mode, &val, sizeof(unsigned char));
+        unsigned char val =
+            value == ACCEPT ? VIEWKEY_EXPORT_ALWAYS_ALLOW : VIEWKEY_EXPORT_ALWAYS_DENY;
+        nvm_write((void*) &N_oxen_state->viewkey_export_mode, &val, sizeof(unsigned char));
     }
 
     if (value == ACCEPT) {
@@ -314,20 +363,16 @@ unsigned int ui_menu_export_viewkey_action(unsigned int value) {
     return 0;
 }
 
-
 // NB: indices need to match up with the VIEWKEY_EXPORT_... constants:
-const char* const viewkey_export_submenu_values[] = {
-    "Always prompt",
-    "Always allow",
-    "Always deny"};
-const char* const viewkey_export_submenu_values_selected[] = {
-    "Always prompt *",
-    "Always allow *",
-    "Always deny *"};
+const char* const viewkey_export_submenu_values[] = {"Always prompt",
+                                                     "Always allow",
+                                                     "Always deny"};
+const char* const viewkey_export_submenu_values_selected[] = {"Always prompt *",
+                                                              "Always allow *",
+                                                              "Always deny *"};
 
 const char* viewkey_export_submenu_getter(unsigned int idx) {
-    if (idx >= ARRAYLEN(viewkey_export_submenu_values))
-        return NULL;
+    if (idx >= ARRAYLEN(viewkey_export_submenu_values)) return NULL;
     if (N_oxen_state->viewkey_export_mode == idx)
         return viewkey_export_submenu_values_selected[idx];
     return viewkey_export_submenu_values[idx];
@@ -336,15 +381,17 @@ const char* viewkey_export_submenu_getter(unsigned int idx) {
 void viewkey_export_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(viewkey_export_submenu_values)) {
         unsigned char val = idx;
-        nvm_write((void*)&N_oxen_state->viewkey_export_mode, &val, sizeof(unsigned char));
+        nvm_write((void*) &N_oxen_state->viewkey_export_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_VIEW_KEY_EXPORT);
 }
 
 void ui_menu_viewkey_export_display() {
-    ux_menulist_init_select(G_ux.stack_count - 1, viewkey_export_submenu_getter, viewkey_export_submenu_selector,
-            N_oxen_state->viewkey_export_mode);
+    ux_menulist_init_select(G_ux.stack_count - 1,
+                            viewkey_export_submenu_getter,
+                            viewkey_export_submenu_selector,
+                            N_oxen_state->viewkey_export_mode);
 }
 
 /* -------------------------------- NETWORK UX --------------------------------- */
@@ -428,70 +475,64 @@ void ui_menu_network_display(void) {
 
 /* -------------------------------- TRUNCATE ADDRS UX --------------------------------- */
 
-const char* const truncate_addrs_values[] = {
-    "Full address",
-    "Short address",
-    "Shorter addr"};
-const char* const truncate_addrs_values_selected[] = {
-    "Full address*",
-    "Short address*",
-    "Shorter addr*"};
+const char* const truncate_addrs_values[] = {"Full address", "Short address", "Shorter addr"};
+const char* const truncate_addrs_values_selected[] = {"Full address*",
+                                                      "Short address*",
+                                                      "Shorter addr*"};
 
 const char* truncate_addrs_submenu_getter(unsigned int idx) {
-    if (idx >= ARRAYLEN(truncate_addrs_values))
-        return NULL;
-    if (N_oxen_state->truncate_addrs_mode == idx)
-        return truncate_addrs_values_selected[idx];
+    if (idx >= ARRAYLEN(truncate_addrs_values)) return NULL;
+    if (N_oxen_state->truncate_addrs_mode == idx) return truncate_addrs_values_selected[idx];
     return truncate_addrs_values[idx];
 }
 
 void truncate_addrs_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(truncate_addrs_values)) {
         unsigned char val = idx;
-        nvm_write((void*)&N_oxen_state->truncate_addrs_mode, &val, sizeof(unsigned char));
+        nvm_write((void*) &N_oxen_state->truncate_addrs_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_ADDRESS_CONFIRM);
 }
 
 void ui_menu_truncate_addrs_display() {
-    ux_menulist_init_select(G_ux.stack_count - 1, truncate_addrs_submenu_getter, truncate_addrs_submenu_selector,
-            N_oxen_state->truncate_addrs_mode);
+    ux_menulist_init_select(G_ux.stack_count - 1,
+                            truncate_addrs_submenu_getter,
+                            truncate_addrs_submenu_selector,
+                            N_oxen_state->truncate_addrs_mode);
 }
 
 /* -------------------------------- CONFIRM FEE --------------------------------- */
 
-const char* const confirm_fee_values[] = {
-    "Always",
-    "Above 0.05 OXEN",
-    "Above 0.2 OXEN",
-    "Above 1.0 OXEN"};
-const char* const confirm_fee_values_selected[] = {
-    "Always*",
-    "Above 0.05 OXEN*",
-    "Above 0.2 OXEN*",
-    "Above 1.0 OXEN*"};
+const char* const confirm_fee_values[] = {"Always",
+                                          "Above 0.05 OXEN",
+                                          "Above 0.2 OXEN",
+                                          "Above 1.0 OXEN"};
+const char* const confirm_fee_values_selected[] = {"Always*",
+                                                   "Above 0.05 OXEN*",
+                                                   "Above 0.2 OXEN*",
+                                                   "Above 1.0 OXEN*"};
 
 const char* confirm_fee_submenu_getter(unsigned int idx) {
-    if (idx >= ARRAYLEN(confirm_fee_values))
-        return NULL;
-    if (N_oxen_state->confirm_fee_mode == idx)
-        return confirm_fee_values_selected[idx];
+    if (idx >= ARRAYLEN(confirm_fee_values)) return NULL;
+    if (N_oxen_state->confirm_fee_mode == idx) return confirm_fee_values_selected[idx];
     return confirm_fee_values[idx];
 }
 
 void confirm_fee_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(confirm_fee_values)) {
         unsigned char val = idx;
-        nvm_write((void*)&N_oxen_state->confirm_fee_mode, &val, sizeof(unsigned char));
+        nvm_write((void*) &N_oxen_state->confirm_fee_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_FEE_CONFIRM);
 }
 
 void ui_menu_confirm_fee_display() {
-    ux_menulist_init_select(G_ux.stack_count - 1, confirm_fee_submenu_getter, confirm_fee_submenu_selector,
-            N_oxen_state->confirm_fee_mode);
+    ux_menulist_init_select(G_ux.stack_count - 1,
+                            confirm_fee_submenu_getter,
+                            confirm_fee_submenu_selector,
+                            N_oxen_state->confirm_fee_mode);
 }
 
 /* -------------------------------- CONFIRM CHANGE --------------------------------- */
@@ -500,27 +541,26 @@ const char* const confirm_change_values[] = {"No", "Yes"};
 const char* const confirm_change_values_selected[] = {"No*", "Yes*"};
 
 const char* confirm_change_submenu_getter(unsigned int idx) {
-    if (idx >= ARRAYLEN(confirm_change_values))
-        return NULL;
-    if (N_oxen_state->confirm_change_mode == idx)
-        return confirm_change_values_selected[idx];
+    if (idx >= ARRAYLEN(confirm_change_values)) return NULL;
+    if (N_oxen_state->confirm_change_mode == idx) return confirm_change_values_selected[idx];
     return confirm_change_values[idx];
 }
 
 void confirm_change_submenu_selector(unsigned int idx) {
     if (idx < ARRAYLEN(confirm_change_values)) {
         unsigned char val = idx;
-        nvm_write((void*)&N_oxen_state->confirm_change_mode, &val, sizeof(unsigned char));
+        nvm_write((void*) &N_oxen_state->confirm_change_mode, &val, sizeof(unsigned char));
         monero_init();
     }
     ui_menu_settings_display_select(UI_SETTINGS_CHANGE_CONFIRM);
 }
 
 void ui_menu_confirm_change_display() {
-    ux_menulist_init_select(G_ux.stack_count - 1, confirm_change_submenu_getter, confirm_change_submenu_selector,
-            N_oxen_state->confirm_change_mode);
+    ux_menulist_init_select(G_ux.stack_count - 1,
+                            confirm_change_submenu_getter,
+                            confirm_change_submenu_selector,
+                            N_oxen_state->confirm_change_mode);
 }
-
 
 /* -------------------------------- RESET UX --------------------------------- */
 void ui_menu_reset_display(void);
@@ -532,12 +572,14 @@ UX_STEP_CB(ux_menu_reset_yes_step, pb, ui_menu_reset_action(ACCEPT), {&C_icon_va
 
 UX_FLOW(ux_flow_reset, &ux_menu_reset_really_step, &ux_menu_reset_no_step, &ux_menu_reset_yes_step);
 
-void ui_menu_reset_display(void) { ux_flow_init(0, ux_flow_reset, 0); }
+void ui_menu_reset_display(void) {
+    ux_flow_init(0, ux_flow_reset, 0);
+}
 
 void ui_menu_reset_action(unsigned int value) {
     if (value == ACCEPT) {
         unsigned char magic[4] = {0};
-        nvm_write((void*)N_oxen_state->magic, magic, 4);
+        nvm_write((void*) N_oxen_state->magic, magic, 4);
         monero_init();
     }
     ui_menu_main_display();
@@ -545,7 +587,14 @@ void ui_menu_reset_action(unsigned int value) {
 /* ------------------------------- SETTINGS UX ------------------------------- */
 
 const char* const settings_submenu_getter_values[] = {
-    "<< Main menu", "View key export", "Fee confirm", "Address confirm", "Change confirm", "Select Network", "Reset", "Back",
+    "<< Main menu",
+    "View key export",
+    "Fee confirm",
+    "Address confirm",
+    "Change confirm",
+    "Select Network",
+    "Reset",
+    "Back",
 };
 
 const char* settings_submenu_getter(unsigned int idx) {
@@ -557,51 +606,60 @@ const char* settings_submenu_getter(unsigned int idx) {
 
 void settings_submenu_selector(unsigned int idx) {
     switch (idx) {
-        case UI_SETTINGS_VIEW_KEY_EXPORT: ui_menu_viewkey_export_display(); break;
-        case UI_SETTINGS_FEE_CONFIRM: ui_menu_confirm_fee_display(); break;
-        case UI_SETTINGS_ADDRESS_CONFIRM: ui_menu_truncate_addrs_display(); break;
-        case UI_SETTINGS_CHANGE_CONFIRM: ui_menu_confirm_change_display(); break;
-        case UI_SETTINGS_SELECT_NETWORK: ui_menu_network_display(); break;
-        case UI_SETTINGS_RESET: ui_menu_reset_display(); break;
-        default: ui_menu_main_display(); // UI_SETTINGS_BACK_TO_MAIN, UI_SETTINGS_BACK
+        case UI_SETTINGS_VIEW_KEY_EXPORT:
+            ui_menu_viewkey_export_display();
+            break;
+        case UI_SETTINGS_FEE_CONFIRM:
+            ui_menu_confirm_fee_display();
+            break;
+        case UI_SETTINGS_ADDRESS_CONFIRM:
+            ui_menu_truncate_addrs_display();
+            break;
+        case UI_SETTINGS_CHANGE_CONFIRM:
+            ui_menu_confirm_change_display();
+            break;
+        case UI_SETTINGS_SELECT_NETWORK:
+            ui_menu_network_display();
+            break;
+        case UI_SETTINGS_RESET:
+            ui_menu_reset_display();
+            break;
+        default:
+            ui_menu_main_display();  // UI_SETTINGS_BACK_TO_MAIN, UI_SETTINGS_BACK
     }
 }
 
 void ui_menu_settings_display_select(unsigned int idx) {
-    ux_menulist_init_select(G_ux.stack_count - 1, settings_submenu_getter, settings_submenu_selector, idx);
+    ux_menulist_init_select(G_ux.stack_count - 1,
+                            settings_submenu_getter,
+                            settings_submenu_selector,
+                            idx);
 }
 void ui_menu_settings_display(void) {
     ui_menu_settings_display_select(0);
 }
 
-
 /* ---------------------------- PUBLIC ADDRESS UX ---------------------------- */
 void ui_menu_pubaddr_action(void);
 
-UX_STEP_NOCB(ux_menu_pubaddr_meta_step, nn,
-         {
-             .line1 = G_oxen_state.ux_addr_type,
-             .line2 = G_oxen_state.ux_addr_info
-         });
+UX_STEP_NOCB(ux_menu_pubaddr_meta_step,
+             nn,
+             {.line1 = G_oxen_state.ux_addr_type, .line2 = G_oxen_state.ux_addr_info});
 
-UX_STEP_NOCB(ux_menu_pubaddr_address_step, bnnn_paging,
-        {
-            .title = "Address",
-            .text = G_oxen_state.ux_address
-        });
+UX_STEP_NOCB(ux_menu_pubaddr_address_step,
+             bnnn_paging,
+             {.title = "Address", .text = G_oxen_state.ux_address});
 
-UX_STEP_CB(ux_menu_pubaddr_back_step, pb, ui_menu_pubaddr_action(),
-        {
-            .icon = &C_icon_back,
-            .line1 = "Back"
-        });
+UX_STEP_CB(ux_menu_pubaddr_back_step,
+           pb,
+           ui_menu_pubaddr_action(),
+           {.icon = &C_icon_back, .line1 = "Back"});
 
 UX_FLOW(ux_flow_pubaddr,
         &ux_menu_pubaddr_meta_step,
         &ux_menu_pubaddr_address_step,
         &ux_menu_pubaddr_back_step,
-        FLOW_LOOP
-        );
+        FLOW_LOOP);
 
 void ui_menu_pubaddr_action(void) {
     if (G_oxen_state.disp_addr_mode) {
@@ -615,8 +673,10 @@ void ui_menu_pubaddr_action(void) {
 /**
  *
  */
-void ui_menu_any_pubaddr_display(unsigned char* pub_view, unsigned char* pub_spend,
-                                 unsigned char is_subbadress, unsigned char* paymentID) {
+void ui_menu_any_pubaddr_display(unsigned char* pub_view,
+                                 unsigned char* pub_spend,
+                                 unsigned char is_subbadress,
+                                 unsigned char* paymentID) {
     memset(G_oxen_state.ux_address, 0, sizeof(G_oxen_state.ux_address));
     memset(G_oxen_state.ux_addr_type, 0, sizeof(G_oxen_state.ux_addr_type));
     memset(G_oxen_state.ux_addr_info, 0, sizeof(G_oxen_state.ux_addr_info));
@@ -643,7 +703,8 @@ void ui_menu_any_pubaddr_display(unsigned char* pub_view, unsigned char* pub_spe
 
         case DISP_INTEGRATED:
             memmove(G_oxen_state.ux_addr_type, "Integr. address", 15);
-            // Copy the payment id into place *first*, before the label, because it overlaps with ux_addr_info
+            // Copy the payment id into place *first*, before the label, because it overlaps with
+            // ux_addr_info
             memmove(G_oxen_state.ux_addr_info + 9, G_oxen_state.payment_id, 16);
             memmove(G_oxen_state.ux_addr_info, "Pay. ID: ", 9);
             break;
@@ -662,44 +723,26 @@ void ui_menu_pubaddr_display(void) {
 
 /* --------------------------------- MAIN UX --------------------------------- */
 
-UX_STEP_CB(
-    ux_menu_main_address_step,
-    pnn,
-    ui_menu_pubaddr_display(),
-    {
-        &C_icon_oxen,
-        "OXEN wallet",
-        G_oxen_state.ux_wallet_public_short_address
-    });
+UX_STEP_CB(ux_menu_main_address_step,
+           pnn,
+           ui_menu_pubaddr_display(),
+           {&C_icon_oxen, "OXEN wallet", G_oxen_state.ux_wallet_public_short_address});
 
-UX_STEP_CB(
-    ux_menu_main_settings_step,
-    pb,
-    ui_menu_settings_display(),
-    {&C_icon_coggle, "Settings"}
-);
+UX_STEP_CB(ux_menu_main_settings_step,
+           pb,
+           ui_menu_settings_display(),
+           {&C_icon_coggle, "Settings"});
 
-UX_STEP_NOCB(
-    ux_menu_main_version_step,
-    bn,
-    {"Version", OXEN_VERSION_STRING}
-);
+UX_STEP_NOCB(ux_menu_main_version_step, bn, {"Version", OXEN_VERSION_STRING});
 
-UX_STEP_CB(
-    ux_menu_main_quit_step,
-    pb,
-    os_sched_exit(0),
-    {&C_icon_dashboard_x, "Quit app"}
-);
+UX_STEP_CB(ux_menu_main_quit_step, pb, os_sched_exit(0), {&C_icon_dashboard_x, "Quit app"});
 
-UX_FLOW(
-    ux_flow_main,
-    &ux_menu_main_address_step,
-    &ux_menu_main_settings_step,
-    &ux_menu_main_version_step,
-    &ux_menu_main_quit_step,
-    FLOW_LOOP
-);
+UX_FLOW(ux_flow_main,
+        &ux_menu_main_address_step,
+        &ux_menu_main_settings_step,
+        &ux_menu_main_version_step,
+        &ux_menu_main_quit_step,
+        FLOW_LOOP);
 
 void ui_menu_main_display(void) {
     // reserve a display stack slot if none yet
@@ -711,5 +754,5 @@ void ui_menu_main_display(void) {
 /* --- INIT --- */
 
 void io_seproxyhal_display(const bagl_element_t* element) {
-    io_seproxyhal_display_default((bagl_element_t*)element);
+    io_seproxyhal_display_default((bagl_element_t*) element);
 }

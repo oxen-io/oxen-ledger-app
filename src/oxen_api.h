@@ -94,20 +94,25 @@ void ui_menu_main_display(void);
 void ui_menu_info_display(void);
 void ui_menu_info_display2(const char *line1, const char *line2);
 void ui_export_viewkey_display(void);
-void ui_menu_any_pubaddr_display(unsigned char *pub_view, unsigned char *pub_spend,
-                                 unsigned char is_subbadress, unsigned char *paymentID);
+void ui_menu_any_pubaddr_display(unsigned char *pub_view,
+                                 unsigned char *pub_spend,
+                                 unsigned char is_subbadress,
+                                 unsigned char *paymentID);
 void ui_menu_pubaddr_display(void);
 
 /* ----------------------------------------------------------------------- */
 /* ---                               MISC                             ---- */
 /* ----------------------------------------------------------------------- */
-#define OFFSETOF(type, field) ((unsigned int)&(((type *)NULL)->field))
+#define OFFSETOF(type, field) ((unsigned int) &(((type *) NULL)->field))
 
 // Obtains the monero-base58-encoded wallet address from the view and spend keys, subaddress flag,
 // and payment id (for integrated address).  Returns the number of chars written to str_b58.
 // Note: does *not* null-terminate the string.
-unsigned char oxen_wallet_address(char *str_b58, unsigned char *view, unsigned char *spend,
-                                  unsigned char is_subbadress, unsigned char *paymentID);
+unsigned char oxen_wallet_address(char *str_b58,
+                                  unsigned char *view,
+                                  unsigned char *spend,
+                                  unsigned char is_subbadress,
+                                  unsigned char *paymentID);
 
 /** binary little endian unsigned int amount to uint64 */
 uint64_t monero_bamount2uint64(unsigned char *binary);
@@ -117,7 +122,9 @@ uint64_t monero_bamount2uint64(unsigned char *binary);
 void oxen_currency_str(uint64_t atomic_oxen, char *str);
 
 int monero_abort_tx(void);
-int monero_unblind(unsigned char *v, unsigned char *k, unsigned char *AKout,
+int monero_unblind(unsigned char *v,
+                   unsigned char *k,
+                   unsigned char *AKout,
                    unsigned int short_amount);
 void ui_menu_validation_display(void);
 void ui_menu_stake_validation_display(void);
@@ -150,9 +157,11 @@ void monero_generate_keypair(unsigned char *ec_pub, unsigned char *ec_priv);
  * P [in]  point in 02 y or 04 x y format
  * k [in]  32 bytes scalar
  */
-void monero_generate_key_derivation(unsigned char *drv_data, const unsigned char *P,
+void monero_generate_key_derivation(unsigned char *drv_data,
+                                    const unsigned char *P,
                                     const unsigned char *scalar);
-void monero_derivation_to_scalar(unsigned char *scalar, const unsigned char *drv_data,
+void monero_derivation_to_scalar(unsigned char *scalar,
+                                 const unsigned char *drv_data,
                                  unsigned int out_idx);
 /*
  *  compute x = Hps(drv_data,out_idx) + ec_pv
@@ -161,7 +170,9 @@ void monero_derivation_to_scalar(unsigned char *scalar, const unsigned char *drv
  * drv_data [in]  32 bytes derivation data (point)
  * ec_pv    [in]  32 bytes private key
  */
-void monero_derive_secret_key(unsigned char *x, const unsigned char *drv_data, unsigned int out_idx,
+void monero_derive_secret_key(unsigned char *x,
+                              const unsigned char *drv_data,
+                              unsigned int out_idx,
                               const unsigned char *ec_priv);
 /*
  *  compute x = Hps(drv_data,out_idx)*G + ec_pub
@@ -170,34 +181,50 @@ void monero_derive_secret_key(unsigned char *x, const unsigned char *drv_data, u
  * drv_data [in]  32 bytes derivation data (point)
  * ec_pub   [in]  32 bytes public key
  */
-void monero_derive_public_key(unsigned char *x, const unsigned char *drv_data, unsigned int out_idx,
+void monero_derive_public_key(unsigned char *x,
+                              const unsigned char *drv_data,
+                              unsigned int out_idx,
                               const unsigned char *ec_pub);
 void monero_secret_key_to_public_key(unsigned char *ec_pub, const unsigned char *ec_priv);
 void monero_generate_key_image(unsigned char *img, const unsigned char *P, const unsigned char *x);
-void oxen_generate_key_image_signature(unsigned char *sig, const unsigned char *img, const unsigned char *P, const unsigned char *x);
-void oxen_generate_signature(unsigned char *sig, const unsigned char *hash, const unsigned char *A, const unsigned char *a);
+void oxen_generate_key_image_signature(unsigned char *sig,
+                                       const unsigned char *img,
+                                       const unsigned char *P,
+                                       const unsigned char *x);
+void oxen_generate_signature(unsigned char *sig,
+                             const unsigned char *hash,
+                             const unsigned char *A,
+                             const unsigned char *a);
 
-void monero_derive_subaddress_public_key(unsigned char *x, const unsigned char *pub,
-                                         const unsigned char *drv_data, unsigned int index);
+void monero_derive_subaddress_public_key(unsigned char *x,
+                                         const unsigned char *pub,
+                                         const unsigned char *drv_data,
+                                         unsigned int index);
 void monero_get_subaddress_spend_public_key(unsigned char *x, const unsigned char *index);
 void monero_get_subaddress(unsigned char *C, unsigned char *D, const unsigned char *index);
-void monero_get_subaddress_secret_key(unsigned char *sub_s, const unsigned char *s, const unsigned char *index);
+void monero_get_subaddress_secret_key(unsigned char *sub_s,
+                                      const unsigned char *s,
+                                      const unsigned char *index);
 
 /* ----------------------------------------------------------------------- */
 /* ---                              CRYPTO                            ---- */
 /* ----------------------------------------------------------------------- */
 extern const unsigned char C_ED25519_ORDER[];
 
-void monero_aes_derive(cx_aes_key_t *sk, const unsigned char *seed32, const unsigned char *a, const unsigned char *b);
+void monero_aes_derive(cx_aes_key_t *sk,
+                       const unsigned char *seed32,
+                       const unsigned char *a,
+                       const unsigned char *b);
 void monero_aes_generate(cx_aes_key_t *sk);
 
-int oxen_keccak_256(cx_sha3_t *hasher, const unsigned char *buf, unsigned int len, unsigned char *out);
+int oxen_keccak_256(cx_sha3_t *hasher,
+                    const unsigned char *buf,
+                    unsigned int len,
+                    unsigned char *out);
 
-#define oxen_hash_update(hasher, buf, len) \
-    cx_hash((cx_hash_t *)hasher, 0, buf, len, NULL, 0);
+#define oxen_hash_update(hasher, buf, len) cx_hash((cx_hash_t *) hasher, 0, buf, len, NULL, 0);
 // Finalizes a 32-byte hash and copies it to `out`
-#define oxen_hash_final(hasher, out) \
-    cx_hash((cx_hash_t *)hasher, CX_LAST, NULL, 0, out, 32);
+#define oxen_hash_final(hasher, out) cx_hash((cx_hash_t *) hasher, CX_LAST, NULL, 0, out, 32);
 
 /*
  *  check 1<s<N, else throw
@@ -213,13 +240,17 @@ void monero_check_scalar_not_null(const unsigned char *s);
  * LE-7-bits encoding. High bit set says more bytes to decode.  The maximum varint string length is
  * 10 (for a uint64_t with the MSB set).
  */
-unsigned int monero_encode_varint(unsigned char *varint, const unsigned int max_len, const uint64_t v);
+unsigned int monero_encode_varint(unsigned char *varint,
+                                  const unsigned int max_len,
+                                  const uint64_t v);
 
 /**
  * LE-7-bits decoding. High bit set says more bytes to decode.  The maximum varint string length is
  * 10 (for a uint64_t with the MSB set).
  */
-unsigned int monero_decode_varint(const unsigned char *varint, const unsigned int max_len, uint64_t *v);
+unsigned int monero_decode_varint(const unsigned char *varint,
+                                  const unsigned int max_len,
+                                  uint64_t *v);
 
 /** */
 void monero_reverse32(unsigned char *rscal, const unsigned char *scal);
@@ -227,7 +258,8 @@ void monero_reverse32(unsigned char *rscal, const unsigned char *scal);
 /**
  * Hps: keccak(drv_data|varint(out_idx))
  */
-void monero_derivation_to_scalar(unsigned char *scalar, const unsigned char *drv_data,
+void monero_derivation_to_scalar(unsigned char *scalar,
+                                 const unsigned char *drv_data,
                                  unsigned int out_idx);
 
 /*

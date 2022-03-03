@@ -55,27 +55,23 @@ static void monero_uint642str(uint64_t val, char *str) {
     str[len] = 0;
 }
 
-
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_init(void) {
     cx_keccak_init(&G_oxen_state.keccak_alt, 256);
     if (G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
-        if (monero_io_fetch_varint16() != 4) // tx version; we only support v4 txes
+        if (monero_io_fetch_varint16() != 4)  // tx version; we only support v4 txes
             THROW(SW_WRONG_DATA_RANGE);
 
         uint16_t txtype = monero_io_fetch_varint16();
         uint64_t timelock = monero_io_fetch_varint();
 
-        if (G_oxen_state.tx_type != txtype)
-            THROW(SW_WRONG_DATA_RANGE);
+        if (G_oxen_state.tx_type != txtype) THROW(SW_WRONG_DATA_RANGE);
 
-        if (timelock != 0 && txtype != TXTYPE_STANDARD)
-            THROW(SW_WRONG_DATA_RANGE);
+        if (timelock != 0 && txtype != TXTYPE_STANDARD) THROW(SW_WRONG_DATA_RANGE);
 
-        if (monero_io_fetch_available())
-            THROW(SW_WRONG_DATA);
+        if (monero_io_fetch_available()) THROW(SW_WRONG_DATA);
 
         monero_io_discard(1);
 
@@ -98,8 +94,9 @@ int monero_apdu_prefix_hash_init(void) {
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
 int monero_apdu_prefix_hash_update(void) {
-    oxen_hash_update(&G_oxen_state.keccak_alt, G_oxen_state.io_buffer + G_oxen_state.io_offset,
-                           G_oxen_state.io_length - G_oxen_state.io_offset);
+    oxen_hash_update(&G_oxen_state.keccak_alt,
+                     G_oxen_state.io_buffer + G_oxen_state.io_offset,
+                     G_oxen_state.io_length - G_oxen_state.io_offset);
     monero_io_discard(0);
     if (G_oxen_state.io_p2 == 0) {
         oxen_hash_final(&G_oxen_state.keccak_alt, G_oxen_state.prefixH);

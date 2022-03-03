@@ -60,7 +60,9 @@ int monero_apdu_blind() {
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */
-int monero_unblind(unsigned char *v, unsigned char *k, unsigned char *AKout,
+int monero_unblind(unsigned char *v,
+                   unsigned char *k,
+                   unsigned char *AKout,
                    unsigned int short_amount) {
     if (short_amount == 2) {
         monero_genCommitmentMask(k, AKout);
