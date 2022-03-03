@@ -1,22 +1,8 @@
-
-
 .PHONY: all
-# Set up the 'all' target to build both targets using the submoduled SDKs if not specifying an SDK,
-# otherwise to build S/X based on which SDK was provided.
+
+include Makefile.oxen
+
 ifeq ($(BOLOS_SDK),)
-
-all: nanox nanos
-
-else ifneq ($(shell grep "TARGET_NANOS" "$(BOLOS_SDK)/include/bolos_target.h"),)
-
-all: nanos_bin
-
-else ifneq ($(shell grep "TARGET_NANOX" "$(BOLOS_SDK)/include/bolos_target.h"),)
-
-all: nanox_bin
-
-endif
-
 .PHONY: nanos nanos_bin load_nanos delete_nanos docker-build docker-start
 nanos:
 	$(MAKE) -C nanos
@@ -38,6 +24,23 @@ nanox:
 nanox_bin: nanox
 	rm -rf bin
 	cp -r nanox/bin .
+else
+
+ifneq ($(shell grep "TARGET_NANOS" "$(BOLOS_SDK)/include/bolos_target.h"),)
+TARGET_DIRECTORY:=nanos
+else
+TARGET_DIRECTORY:=nanox
+endif
+
+$(info $(TARGET_DIRECTORY))
+
+default:
+	$(MAKE) -C $(TARGET_DIRECTORY)
+%:
+	$(info "Calling app Makefile for target $@")
+	COIN=$(COIN) $(MAKE) -C $(TARGET_DIRECTORY) $@
+endif
+
 
 .PHONY: clean
 clean:
