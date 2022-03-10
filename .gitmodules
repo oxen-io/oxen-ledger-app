@@ -1,6 +1,0 @@
-[submodule "nanos-secure-sdk"]
-	path = nanos/nanos-secure-sdk
-	url = https://github.com/LedgerHQ/nanos-secure-sdk.git
-[submodule "nanox-secure-sdk"]
-	path = nanox/nanox-secure-sdk
-	url = https://github.com/LedgerHQ/nanox-secure-sdk.git
