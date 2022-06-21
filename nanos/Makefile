@@ -44,6 +44,7 @@ SCRIPT_LD := script.ld
 
 include $(BOLOS_SDK)/Makefile.defines
 
+ICONNAME = glyphs/nanos_app_oxen.gif
 include ../Makefile.oxen
 
 CFLAGS += -Oz -I$(shell pwd)/src
