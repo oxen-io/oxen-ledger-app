@@ -38,7 +38,7 @@ systems).
 
 The build requires clang and arm cross-compiling tools and headers.  On recent Debian/Ubuntu:
 
-    sudo apt install clang gcc-arm-none-eabi libnewlib-arm-none-eabi
+    sudo apt install clang gcc-arm-none-eabi gcc-multilib libnewlib-arm-none-eabi 
 
 > Note that this must install clang 7 or higher, and that clang-10 and higher appear to segfault
 > with the Ledger SDK code.  See also [Getting
