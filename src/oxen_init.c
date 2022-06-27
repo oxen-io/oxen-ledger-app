@@ -168,6 +168,7 @@ void oxen_install(unsigned char netId) {
 const char* const oxen_supported_client[] = {
     "8.",
     "9.",
+    "10.",
 };
 #define OXEN_SUPPORTED_CLIENT_SIZE (sizeof(oxen_supported_client) / sizeof(char*))
 
