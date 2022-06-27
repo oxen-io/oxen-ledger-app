@@ -32,6 +32,7 @@ endif
 
 include $(BOLOS_SDK)/Makefile.defines
 
+ICONNAME = glyphs/nanox_app_oxen.gif
 include ../Makefile.oxen
 
 CFLAGS += -Oz -I$(shell pwd)/src
