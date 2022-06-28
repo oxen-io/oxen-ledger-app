@@ -726,7 +726,7 @@ void ui_menu_pubaddr_display(void) {
 UX_STEP_CB(ux_menu_main_address_step,
            pnn,
            ui_menu_pubaddr_display(),
-#ifdef TARGET_NANOX
+#ifndef TARGET_NANOS
            {&C_nanox_app_oxen, "OXEN wallet", G_oxen_state.ux_wallet_public_short_address});
 #else
            {&C_nanos_app_oxen, "OXEN wallet", G_oxen_state.ux_wallet_public_short_address});
