@@ -26,7 +26,7 @@
 #include "lcx_sha3.h"
 #include "lcx_sha256.h"
 #include "lcx_aes.h"
-#elif defined(TARGET_NANOX)
+#elif defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 #include "cx.h"
 #else
 #error "Error: neither TARGET_NANOS neither TARGET_NANOX is defined, don't know what to include!"
