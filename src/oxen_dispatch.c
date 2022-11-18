@@ -36,6 +36,8 @@ void clear_protocol(void) {
 }
 
 int check_protocol(void) {
+    PRINTF("check_protocol with %02x\n", G_oxen_state.protocol_barrier);
+
     /* if locked and pin is verified, unlock */
     if ((G_oxen_state.protocol_barrier == PROTOCOL_LOCKED_UNLOCKABLE) &&
         (os_global_pin_is_validated() == PIN_VERIFIED)) {

@@ -47,6 +47,7 @@ void ui_menu_pinlock_display(void) {
         } u;
 
     } ux_params;
+    PRINTF("ui_menu_pinlock_display\n");
 
     os_global_pin_invalidate();
     G_oxen_state.protocol_barrier = PROTOCOL_LOCKED_UNLOCKABLE;
@@ -102,6 +103,7 @@ UX_FLOW(ux_flow_info_icon3, &ux_menu_info_icon3_step);
 UX_FLOW(ux_flow_info_icon4, &ux_menu_info_icon4_step);
 
 unsigned int ui_menu_info_action(void) {
+    PRINTF("ui_menu_info_action with %02x\n", G_oxen_state.protocol_barrier);
     if (G_oxen_state.protocol_barrier == PROTOCOL_LOCKED)
         ui_menu_pinlock_display();
     else
@@ -749,11 +751,14 @@ UX_FLOW(ux_flow_main,
         FLOW_LOOP);
 
 void ui_menu_main_display(void) {
+    PRINTF("ui_menu_main_display before\n");
     // reserve a display stack slot if none yet
     if (G_ux.stack_count == 0) {
         ux_stack_push();
     }
+
     ux_flow_init(0, ux_flow_main, NULL);
+    PRINTF("ui_menu_main_display after\n");
 }
 /* --- INIT --- */
 

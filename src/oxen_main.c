@@ -41,6 +41,7 @@ void monero_main(void) {
         volatile unsigned short sw = 0;
         BEGIN_TRY {
             TRY {
+                PRINTF("=== monero_main ===\n");
                 monero_io_do(io_flags);
                 sw = monero_dispatch();
             }
@@ -178,9 +179,13 @@ __attribute__((section(".boot"))) int main(void) {
     // exit critical section
     __asm volatile("cpsie i");
     unsigned int cont = 1;
+    //not sure if that works before
+    PRINTF("before os_boot \n");
 
-    // ensure exception will work as planned
+    // ensure exception will work as planned io_seproxyhal_init
     os_boot();
+    PRINTF("after os_boot \n");
+
     while (cont) {
         UX_INIT();
 
@@ -188,13 +193,16 @@ __attribute__((section(".boot"))) int main(void) {
             TRY {
                 // start communication with MCU
                 io_seproxyhal_init();
+                PRINTF("io_seproxyhal_init done \n");
 
                 USB_power(0);
                 USB_power(1);
+                PRINTF("USB_power \n");
 
 #ifdef HAVE_USB_CLASS_CCID
                 io_usb_ccid_set_card_inserted(1);
 #endif
+
 
 #ifdef TARGET_NANOX
                 G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
@@ -202,7 +210,9 @@ __attribute__((section(".boot"))) int main(void) {
                 BLE_power(1, "Nano X - Oxen");
 #endif
 
+
                 monero_init();
+                PRINTF("monero_init done \n");
 
                 // set up initial screen
                 ui_menu_main_display();
@@ -215,10 +225,14 @@ __attribute__((section(".boot"))) int main(void) {
                 monero_main();
             }
             CATCH(EXCEPTION_IO_RESET) {
+                PRINTF("catch EXCEPTION_IO_RESET \n");
+
                 // reset IO and UX
                 ;
             }
             CATCH_OTHER(e) {
+                PRINTF("catch OTHER \n");
+
                 cont = 0;
             }
             FINALLY {
