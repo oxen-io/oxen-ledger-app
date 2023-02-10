@@ -84,10 +84,9 @@ else
 endif
 
 
-# Enabling debug PRINTF
-DEBUG = 1 # comment this to disable debug flags
+DEBUG := 0
 
-ifneq ($(DEBUG),)
+ifneq ($(DEBUG),0)
 $(info "DEBUG IS set")
     DEFINES 	+= HAVE_PRINTF
 	ifeq ($(TARGET_NAME),TARGET_NANOS)
