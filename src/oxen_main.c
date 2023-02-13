@@ -179,7 +179,7 @@ __attribute__((section(".boot"))) int main(void) {
     // exit critical section
     __asm volatile("cpsie i");
     unsigned int cont = 1;
-    //not sure if that works before
+    // not sure if that works before
     PRINTF("before os_boot \n");
 
     // ensure exception will work as planned io_seproxyhal_init
@@ -203,13 +203,11 @@ __attribute__((section(".boot"))) int main(void) {
                 io_usb_ccid_set_card_inserted(1);
 #endif
 
-
 #ifdef TARGET_NANOX
                 G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
                 BLE_power(0, NULL);
                 BLE_power(1, "Nano X - Oxen");
 #endif
-
 
                 monero_init();
                 PRINTF("monero_init done \n");
