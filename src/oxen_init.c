@@ -66,7 +66,8 @@ void monero_init(void) {
     G_oxen_state.state = STATE_IDLE;
     PRINTF("G_oxen_state.state = STATE_IDLE\n");
 
-    // I guess we currently crash before being here on the nanoX so there is no point if going further for now
+    // I guess we currently crash before being here on the nanoX so there is no point if going
+    // further for now
 }
 
 /* ----------------------------------------------------------------------- */
@@ -183,7 +184,6 @@ void oxen_install(unsigned char netId) {
     nvm_write(&N_oxen_state->viewkey_export_mode, &always_export, 1);
 #endif
     PRINTF("oxen_install on network %d DONE\n", netId);
-
 }
 
 /* ----------------------------------------------------------------------- */
