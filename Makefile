@@ -29,6 +29,10 @@ APPVERSION_N = 10
 APPVERSION_P = 2
 APPVERSION   = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
+# Pending review parameters
+APP_LOAD_PARAMS += --tlvraw 9F:01
+DEFINES += HAVE_PENDING_REVIEW_SCREEN
+
 ifeq ($(TARGET_NAME),TARGET_NANOS)
     ICONNAME = glyphs/nanos_app_oxen.gif
 else
