@@ -52,19 +52,15 @@ void monero_init(void) {
 
     G_oxen_state.protocol = 0xff;
     G_oxen_state.protocol_barrier = PROTOCOL_UNLOCKED;
-    PRINTF("before monero_init_private_key\n");
 
     // load key
     monero_init_private_key();
-    PRINTF("after monero_init_private_key\n");
 
     // ux conf
     monero_init_ux();
-    PRINTF("after monero_init_ux\n");
 
     // Let's go!
     G_oxen_state.state = STATE_IDLE;
-    PRINTF("G_oxen_state.state = STATE_IDLE\n");
 
     // I guess we currently crash before being here on the nanoX so there is no point if going
     // further for now
@@ -93,15 +89,11 @@ void monero_init_private_key(void) {
     path[2] = 0x80000000;
     path[3] = 0x00000000;
     path[4] = 0x00000000;
-    PRINTF("monero_init_private_key\n");
 
     os_perso_derive_node_bip32(CX_CURVE_SECP256K1, path, 5, seed, chain);
 
-    PRINTF("N_oxen_state->key_mode:  %02x \n", N_oxen_state->key_mode);
     switch (N_oxen_state->key_mode) {
         case KEY_MODE_SEED:
-            PRINTF("KEY_MODE_SEED case before\n");
-
             oxen_keccak_256(&G_oxen_state.keccak, seed, 32, G_oxen_state.spend_priv);
             monero_reduce(G_oxen_state.spend_priv);
             oxen_keccak_256(&G_oxen_state.keccak,
@@ -109,30 +101,24 @@ void monero_init_private_key(void) {
                             32,
                             G_oxen_state.view_priv);
             monero_reduce(G_oxen_state.view_priv);
-            PRINTF("KEY_MODE_SEED case after\n");
 
             break;
 
         case KEY_MODE_EXTERNAL:
-            PRINTF("KEY_MODE_EXTERNAL\n");
             memmove(G_oxen_state.view_priv, (void*) N_oxen_state->view_priv, 32);
             memmove(G_oxen_state.spend_priv, (void*) N_oxen_state->spend_priv, 32);
             break;
 
         default:
-            PRINTF("SW_SECURITY_LOAD_KEY throw\n");
             THROW(SW_SECURITY_LOAD_KEY);
             return;
     }
     monero_ecmul_G(G_oxen_state.view_pub, G_oxen_state.view_priv);
-    PRINTF("after monero_ecmul_G1\n");
 
     monero_ecmul_G(G_oxen_state.spend_pub, G_oxen_state.spend_priv);
-    PRINTF("after monero_ecmul_G2\n");
 
     // generate key protection
     monero_aes_derive(&G_oxen_state.spk, chain, G_oxen_state.view_priv, G_oxen_state.spend_priv);
-    PRINTF("after monero_aes_derive\n");
 
     G_oxen_state.key_set = 1;
 }
@@ -162,8 +148,6 @@ void monero_init_ux(void) {
 void oxen_install(unsigned char netId) {
     unsigned char c;
 
-    PRINTF("oxen_install on network %d\n", netId);
-
     // full reset data
     nvm_write(N_oxen_state, NULL, sizeof(oxen_nv_state_t));
 
@@ -183,7 +167,6 @@ void oxen_install(unsigned char netId) {
     unsigned char always_export = VIEWKEY_EXPORT_ALWAYS_ALLOW;
     nvm_write(&N_oxen_state->viewkey_export_mode, &always_export, 1);
 #endif
-    PRINTF("oxen_install on network %d DONE\n", netId);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -236,8 +219,6 @@ int monero_apdu_lock(void) {
 }
 
 void monero_lock_and_throw(int sw) {
-    PRINTF("monero_lock_and_throw\n");
-
     G_oxen_state.protocol_barrier = PROTOCOL_LOCKED;
     snprintf(G_oxen_state.ux_info1, sizeof(G_oxen_state.ux_info1), "Security Err");
     snprintf(G_oxen_state.ux_info2, sizeof(G_oxen_state.ux_info2), "%x", sw);
