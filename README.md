@@ -116,13 +116,20 @@ sudo docker build -t ledger-app-builder:latest .
 
 Compile the app in the container with
 ```
-sudo docker run --rm -ti -v "$(realpath .):/app" ledger-app-builder:latest
+sudo docker run --rm -ti -v "$(realpath .):/app" --privileged ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
-make CLANGPATH=/usr/lib/llvm-12/bin/ DEBUG=1 clean nanos
-make CLANGPATH=/usr/lib/llvm-12/bin/ DEBUG=1 clean nanox
+BOLOS_SDK=$NANOS_SDK make
+
 ```
 
-Then the binary will be available in the host system under `nanos/bin` or `nanox/bin`
+Building for tests also requires DEBUG
+```
+BOLOS_SDK=$NANOS_SDK make DEBUG=1
+```
+
+Specify the SDK desired to change what device its built for
+
+Then the binary will be available in the host system under `bin`
 
 ## Loading the app onto your Ledger Nano S
 
@@ -148,6 +155,23 @@ code.  Once this completes you have the custom built Oxen wallet app installed!
 To remove the app from your Ledger:
 
     make delete_nanos
+
+## Tests
+
+Tests are run using pytest. Install with `pip install -U pytest`
+
+Tests require speculos running the app and it receives messages from the test suite. Assumes speculos is saved at `~/speculos`
+
+```
+nohup bash -c "python3 ~/speculos/speculos.py bin/app.elf --seed \"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about\" --apdu-port 9999 --api-port 5000 --display headless" > speculos.log 2<&1 &
+pytest
+```
+
+to run speculos in a view you can see and in a separate terminal instead run
+
+```
+python3 ~/speculos/speculos.py bin/app.elf --seed "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" --apdu-port 9999 --api-port 5000
+```
 
 ## Useful links
 
