@@ -1,4 +1,4 @@
-import socket
+import requests
 
 
 class FakeButton:
@@ -11,23 +11,27 @@ class FakeButton:
     def both_click(self):
         pass
 
-    def close(self):
-        pass
-
-
 class Button:
     def __init__(self, server: str, port: int) -> None:
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((server, port))
+        self.server = server
+        self.port = port
+        self.button_url = f'http://{self.server}:{self.port}/button/'
+        self.click_data = {"action": "press-and-release"}
 
     def right_click(self):
-        self.socket.sendall(b"Rr")
+        response = requests.post(self.button_url + "right", json=self.click_data)
+
+        if response.status_code != 200:
+            raise Exception(f"Button Request failed with status code {response.status_code}")
 
     def left_click(self):
-        self.socket.sendall(b"Ll")
+        response = requests.post(self.button_url + "left", json=self.click_data)
+
+        if response.status_code != 200:
+            raise Exception(f"Button Request failed with status code {response.status_code}")
 
     def both_click(self):
-        self.socket.sendall(b"LRlr")
+        response = requests.post(self.button_url + "both", json=self.click_data)
 
-    def close(self):
-        self.socket.close()
+        if response.status_code != 200:
+            raise Exception(f"Button Request failed with status code {response.status_code}")

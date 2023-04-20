@@ -21,12 +21,10 @@ def monero():
 
 @pytest.fixture(scope="module")
 def button():
-    button_client = (Button(server="127.0.0.1", port=42000)
+    button_client = (Button(server="127.0.0.1", port=5000)
                      if SPECULOS else FakeButton())
 
     yield button_client
-
-    button_client.close()
 
 
 _test_failed_incremental: Dict[str, Dict[Tuple[int, ...], str]] = {}
