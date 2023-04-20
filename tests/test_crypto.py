@@ -1,22 +1,23 @@
+OXEN_VIEW_PUB_KEY    = "ed26f4f9ed44baccb0aa32bfd91fd546115a60c77e6e8098cd4debf8f33cb9f9"
+OXEN_SPEND_PUB_KEY   = "9834c238ebecb78b1f30115c50b956e9e5e0d86072c61d57e65ee04f9c650b40"
+OXEN_VIEW_PRIV_KEY   = "5f51194e0f839ee32fdd85765be009b1fceb70e78204e4bfa3010e2ade61fc0d"
+OXEN_SPEND_PRIV_KEY  = "0ac3dc5fff3a7a303b893a50119ff2da3125f6a51b980e409d6c8a3a3f7ec80b"
+OXEN_ADDRESS         = "LAiDu7ELmuxQGf3mVdndGRg86zFSUGNa8FhjryejJQDpBrsJB6kXwtMbEkXAa7C2D2CikE9dQL6iTSZNVRgKHrppV9hJvmu"
+OXEN_TESTNET_ADDRESS = "T6TSSrs8R9dXhbssUTkYjaFYAwddJW7Sm5ufhvmHWV1n2tB715p3P2sYFC1bBUWYpecg2HF4MXZ3jNWYx4HFMawV2bcKuAhsP"
+
 def test_public_keys(monero):
     (view_pub_key,
      spend_pub_key,
      address) = monero.get_public_keys()  # type: bytes, bytes, str
 
-    assert view_pub_key == bytes.fromhex("865cbfab852a1d1ccdfc7328e4dac90f"
-                                         "78fc2154257d07522e9b79e637326dfa")
-    assert spend_pub_key == bytes.fromhex("dae41d6b13568fdd71ec3d20c2f614c6"
-                                          "5fe819f36ca5da8d24df3bd89b2bad9d")
-    assert address == ("5A8FgbMkmG2e3J41sBdjvjaBUyz8qHohsQcGtRf63qEUTMBvmA45fp"
-                       "p5pSacMdSg7A3b71RejLzB8EkGbfjp5PELVHCRUaE")
-
+    assert view_pub_key == bytes.fromhex(OXEN_VIEW_PUB_KEY)
+    assert spend_pub_key == bytes.fromhex(OXEN_SPEND_PUB_KEY)
+    assert address == (OXEN_TESTNET_ADDRESS)
 
 def test_private_view_key(monero, button):
     view_priv_key: bytes = monero.get_private_view_key(button)
 
-    assert view_priv_key == bytes.fromhex("0f3fe25d0c6d4c94dde0c0bcc214b233"
-                                          "e9c72927f813728b0f01f28f9d5e1201")
-
+    assert view_priv_key == bytes.fromhex(OXEN_VIEW_PRIV_KEY)
 
 def test_keygen_and_verify(monero):
     pub_key, _priv_key = monero.generate_keypair()  # type: bytes, bytes
@@ -25,13 +26,10 @@ def test_keygen_and_verify(monero):
 
 
 def test_key_image(monero):
-    expected_key_img: bytes = bytes.fromhex("b8af9b11b9391f0cd921863b5f774677"
-                                            "29a188d31f8c7df37bd7f2dfd99defee")
+    expected_key_img: bytes = bytes.fromhex("b0d5e19411f97c4974217d210f8d50d74731bc062fdb0cf690136ee16d7daa9c")
 
-    _priv_key: bytes = bytes.fromhex("6d2f327238555bf7d0eb25b2ef6f85e0"
-                                     "22fb59bf43f05dfeb4d3947ca9acbc53")
-    pub_key: bytes = bytes.fromhex("d8acd4d3bd9e556544284279817dfd4b"
-                                   "95c03f17b3c53df6dddf646abf8b4d19")
+    _priv_key: bytes = bytes.fromhex("38306180e44a3ca14f4f18b505bce76330a7b03df8c8611ac9bd4ed70c6ce454")
+    pub_key: bytes = bytes.fromhex("3cad24457b5b505674af0296976ea36baeab28407bc6f4441ee220aa78900296")
 
     key_image: bytes = monero.generate_key_image(_priv_key=_priv_key,
                                                  pub_key=pub_key)
@@ -40,16 +38,11 @@ def test_key_image(monero):
 
 
 def test_put_key(monero):
-    priv_view_key: bytes = bytes.fromhex("0f3fe25d0c6d4c94dde0c0bcc214b233"
-                                         "e9c72927f813728b0f01f28f9d5e1201")
-    pub_view_key: bytes = bytes.fromhex("865cbfab852a1d1ccdfc7328e4dac90f"
-                                        "78fc2154257d07522e9b79e637326dfa")
-    priv_spend_key: bytes = bytes.fromhex("3b094ca7218f175e91fa2402b4ae239a"
-                                          "2fe8262792a3e718533a1a357a1e4109")
-    pub_spend_key: bytes = bytes.fromhex("dae41d6b13568fdd71ec3d20c2f614c6"
-                                         "5fe819f36ca5da8d24df3bd89b2bad9d")
-    address: str = ("5A8FgbMkmG2e3J41sBdjvjaBUyz8qHohsQcGtRf63qEUTMBvm"
-                    "A45fpp5pSacMdSg7A3b71RejLzB8EkGbfjp5PELVHCRUaE")
+    priv_view_key: bytes = bytes.fromhex(OXEN_VIEW_PRIV_KEY)
+    pub_view_key: bytes = bytes.fromhex(OXEN_VIEW_PUB_KEY)
+    priv_spend_key: bytes = bytes.fromhex(OXEN_SPEND_PRIV_KEY)
+    pub_spend_key: bytes = bytes.fromhex(OXEN_SPEND_PUB_KEY)
+    address: str = (OXEN_TESTNET_ADDRESS)
 
     monero.put_key(priv_view_key=priv_view_key,
                    pub_view_key=pub_view_key,
@@ -60,20 +53,15 @@ def test_put_key(monero):
 
 def test_gen_key_derivation(monero):
     # 8 * r.G
-    expected: bytes = bytes.fromhex("57029f1d2a7453254be1ee81d7d8b540"
-                                    "1db398f0a541315c0095fad27625ebfa")
+    expected_key_derivation: bytes = bytes.fromhex("4e178167e7d8f3c955cc6db27d81ae60645d50700bfd6acfda0df1011fc82580")
     # r
-    priv_key: bytes = bytes.fromhex("0f3fe25d0c6d4c94dde0c0bcc214b233"
-                                    "e9c72927f813728b0f01f28f9d5e1201")
+    _priv_key: bytes = bytes.fromhex("38306180e44a3ca14f4f18b505bce76330a7b03df8c8611ac9bd4ed70c6ce454")
     # r.G
-    pub_key: bytes = bytes.fromhex("865cbfab852a1d1ccdfc7328e4dac90f"
-                                   "78fc2154257d07522e9b79e637326dfa")
-    # encrypt priv_key with XOR cipher (key = 0x55)
-    _priv_key: bytes = monero.xor_cipher(priv_key, b"\x55")
+    pub_key: bytes = bytes.fromhex("3cad24457b5b505674af0296976ea36baeab28407bc6f4441ee220aa78900296")
 
-    _d_in: bytes = monero.gen_key_derivation(
+    key_derivation: bytes = monero.gen_key_derivation(
         pub_key=pub_key,
         _priv_key=_priv_key
     )
 
-    assert expected == monero.xor_cipher(_d_in, b"\x55")  # decrypt _d_in
+    assert expected_key_derivation == key_derivation # decrypt _d_in

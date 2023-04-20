@@ -7,7 +7,7 @@ from .monero_types import InsType
 from .monero_types import Type
 from .io.transport import Transport
 
-PROTOCOL_VERSION: int = 3
+PROTOCOL_VERSION: int = 1
 
 
 class MoneroCryptoCmd:
@@ -94,11 +94,11 @@ class MoneroCryptoCmd:
         if not sw & 0x9000:
             raise DeviceError(sw, ins, "P1=1")
 
-        assert len(response) == 159
+        assert len(response) == 161
 
         view_pub_key = response[:32]
         spend_pub_key = response[32:64]
-        base58_address = response[64:159].decode("ascii")
+        base58_address = response[64:161].decode("ascii")
 
         return view_pub_key, spend_pub_key, base58_address
 
@@ -113,6 +113,7 @@ class MoneroCryptoCmd:
 
         # "Export View Key"
         button.right_click()
+        button.both_click()
 
         sw, response = self.device.recv()  # type: int, bytes
 

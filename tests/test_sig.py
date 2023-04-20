@@ -1,6 +1,7 @@
 import pytest
 
 from monero_client.monero_types import SigType, Keys
+from monero_client.exception import ClientNotSupported
 
 
 @pytest.mark.incremental
@@ -47,10 +48,9 @@ class TestSignature:
 
     @staticmethod
     def test_set_sig(monero):
-        major, minor, patch = monero.reset_and_get_version(
-            monero_client_version=b"0.17.0.0"
-        )  # type: int, int, int
-        assert (major, minor) == (1, 7)  # version of the Monero app
+        monero.reset_and_get_version(
+            monero_client_version=b"10.0.0"
+        )
 
         sig_mode: SigType = monero.set_signature_mode(sig_type=SigType.REAL)
         assert sig_mode == SigType.REAL
@@ -84,16 +84,13 @@ class TestSignature:
 
     @staticmethod
     def test_prefix_hash(monero, button):
-        expected: bytes = bytes.fromhex("9a259973bf721120aceae3d8d40696c0"
-                                        "7470331e386028753123f37fee36926b")
+        expected: bytes = bytes.fromhex("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470")
         # should ask for timelock validation
-        monero.prefix_hash_init(button=button, version=0, timelock=2147483650)
+        monero.prefix_hash_init(button=button, version=4, timelock=2147483650)
         result: bytes = monero.prefix_hash_update(
-            index=1,
             payload=b"",
             is_last=True
         )
-
         assert result == expected
 
     @staticmethod

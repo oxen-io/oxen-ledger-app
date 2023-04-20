@@ -96,9 +96,18 @@ int monero_apdu_put_key(void) {
     unsigned char raw[32];
     unsigned char pub[32];
     unsigned char sec[32];
+    int address_size = 95;
+    switch (N_oxen_state->network_id) {
+        case TESTNET:
+        case DEVNET:
+            address_size = 97;
+            break;
+        default:
+            break;
+    }
 
     // option + priv/pub view key + priv/pub spend key + base58 address
-    if (G_oxen_state.io_length != (1 + 32 * 2 + 32 * 2 + 95)) {
+    if (G_oxen_state.io_length != (1 + 32 * 2 + 32 * 2 + address_size)) {
         THROW(SW_WRONG_LENGTH);
         return SW_WRONG_LENGTH;
     }

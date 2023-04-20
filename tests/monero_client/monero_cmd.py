@@ -27,7 +27,7 @@ from .exception.device_error import DeviceError
 from .io.button import Button
 from .utils.varint import encode_varint
 
-PROTOCOL_VERSION: int = 3
+PROTOCOL_VERSION: int = 1
 
 
 class MoneroCmd(MoneroCryptoCmd):
@@ -92,14 +92,16 @@ class MoneroCmd(MoneroCryptoCmd):
         ins: InsType = InsType.INS_OPEN_TX
 
         # 4 bytes
-        account: bytes = struct.pack(">I", 0)
+        version = 4
+        txtype = 0
+        payload: bytes = struct.pack(">HH", version, txtype)
 
         self.device.send(cla=PROTOCOL_VERSION,
                          ins=ins,
                          p1=1,
                          p2=0,
                          option=0,
-                         payload=account)
+                         payload=payload)
 
         sw, response = self.device.recv()  # type: int, bytes
 
@@ -162,7 +164,7 @@ class MoneroCmd(MoneroCryptoCmd):
         ins: InsType = InsType.INS_GEN_TXOUT_KEYS
 
         payload: bytes = b"".join((
-            struct.pack('>I', 0),  # tx_version
+            struct.pack('>I', 4),  # tx_version
             _tx_priv_key,  # r (encrypted)
             hmac_sha256(_tx_priv_key,
                         MoneroCryptoCmd.HMAC_KEY,
@@ -203,8 +205,10 @@ class MoneroCmd(MoneroCryptoCmd):
     def prefix_hash_init(self, button: Button, version: int, timelock: int) -> None:
         ins: InsType = InsType.INS_PREFIX_HASH
 
+        txtype = 0
         payload: bytes = b"".join([
             encode_varint(version),
+            encode_varint(txtype),
             encode_varint(timelock)
         ])
 
@@ -217,8 +221,6 @@ class MoneroCmd(MoneroCryptoCmd):
 
         # "Timelock" -> go down
         button.right_click()
-        # "Reject Timelock" -> go down
-        button.right_click()
         # "Accept Timelock" -> accept
         button.both_click()
 
@@ -229,14 +231,13 @@ class MoneroCmd(MoneroCryptoCmd):
 
         assert len(response) == 0
 
-    def prefix_hash_update(self, index: int, payload: bytes, is_last: bool) -> bytes:
+    def prefix_hash_update(self, payload: bytes, is_last: bool) -> bytes:
         ins: InsType = InsType.INS_PREFIX_HASH
 
         self.device.send(cla=PROTOCOL_VERSION,
                          ins=InsType.INS_PREFIX_HASH,
                          p1=2,
-                         p2=index,
-                         option=0 if is_last else 0x80,
+                         p2=0,
                          payload=payload)
 
         sw, response = self.device.recv()  # type: int, bytes
@@ -362,8 +363,6 @@ class MoneroCmd(MoneroCryptoCmd):
                          payload=payload)
 
         # "Fee" -> go down
-        button.right_click()
-        # "Reject Fee" -> go down
         button.right_click()
         # "Accept Fee" -> accept
         button.both_click()

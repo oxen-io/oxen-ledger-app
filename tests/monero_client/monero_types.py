@@ -28,6 +28,7 @@ class Type(enum.IntEnum):
 
 @enum.unique
 class InsType(enum.IntEnum):
+    INS_NONE = 0x00
     INS_RESET = 0x02
     INS_LOCK_DISPLAY = 0x04
 

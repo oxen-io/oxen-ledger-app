@@ -1,8 +1,6 @@
 from typing import Dict, Tuple
 import pytest
 
-assert("Unimplemented" == "")
-
 from monero_client.io.button import Button, FakeButton
 from monero_client.monero_cmd import MoneroCmd
 
