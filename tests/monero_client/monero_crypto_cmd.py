@@ -112,8 +112,8 @@ class MoneroCryptoCmd:
                          option=0)
 
         # "Export View Key"
-        button.right_click()
-        button.both_click()
+        # button.right_click()
+        # button.both_click()
 
         sw, response = self.device.recv()  # type: int, bytes
 
@@ -260,3 +260,100 @@ class MoneroCryptoCmd:
             assert len(response) == 32
 
         return _d_in
+
+    def generate_unlock_signature(self, button, _priv_key: bytes, pub_key: bytes) -> bytes:
+        ins: InsType = InsType.INS_GEN_UNLOCK_SIGNATURE
+        self.device.send(cla=PROTOCOL_VERSION,
+                         ins=ins,
+                         p1=0,
+                         p2=0,
+                         option=0,
+                         payload=b"")
+
+
+        # Click accept unlock
+        button.right_click()
+        button.both_click()
+        sw, response = self.device.recv()  # type: int, bytes
+
+        if not sw & 0x9000:
+            raise DeviceError(sw, ins)
+
+        assert len(response) == 0
+
+        payload: bytes = b"".join([
+            pub_key,
+            _priv_key,
+            hmac_sha256(_priv_key,
+                        MoneroCryptoCmd.HMAC_KEY,
+                        Type.SCALAR),  # hmac
+        ])
+
+        self.device.send(cla=PROTOCOL_VERSION,
+                         ins=ins,
+                         p1=1,
+                         p2=0,
+                         option=0,
+                         payload=payload)
+
+        sw, response = self.device.recv()  # type: int, bytes
+
+        if not sw & 0x9000:
+            raise DeviceError(sw, ins)
+
+        assert len(response) == 64
+
+        return response  # signature
+
+    def generate_ons_signature(self, button, name) -> bytes:
+        ins: InsType = InsType.INS_GEN_LNS_SIGNATURE
+        self.device.send(cla=PROTOCOL_VERSION,
+                         ins=ins,
+                         p1=0,
+                         p2=0,
+                         option=0,
+                         payload=b"")
+
+
+        # Click accept lns
+        button.right_click()
+        button.both_click()
+        sw, response = self.device.recv()  # type: int, bytes
+
+        if not sw & 0x9000:
+            raise DeviceError(sw, ins)
+
+        assert len(response) == 0
+
+        payload: bytes = name.encode()
+
+        self.device.send(cla=PROTOCOL_VERSION,
+                         ins=ins,
+                         p1=1,
+                         p2=0,
+                         option=0,
+                         payload=payload)
+        sw, response = self.device.recv()  # type: int, bytes
+
+        if not sw & 0x9000:
+            raise DeviceError(sw, ins)
+
+        assert len(response) == 0
+
+        payload2: bytes = struct.pack("Q", 0)
+
+        self.device.send(cla=PROTOCOL_VERSION,
+                         ins=ins,
+                         p1=2,
+                         p2=0,
+                         option=0,
+                         payload=payload2)
+
+        sw, response = self.device.recv()  # type: int, bytes
+
+        if not sw & 0x9000:
+            raise DeviceError(sw, ins)
+
+        assert len(response) == 64
+
+        return response  # signature

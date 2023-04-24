@@ -65,3 +65,14 @@ def test_gen_key_derivation(monero):
     )
 
     assert expected_key_derivation == key_derivation # decrypt _d_in
+
+def test_unlock_signature(monero, button):
+    _priv_key: bytes = bytes.fromhex("38306180e44a3ca14f4f18b505bce76330a7b03df8c8611ac9bd4ed70c6ce454")
+    pub_key: bytes = bytes.fromhex("3cad24457b5b505674af0296976ea36baeab28407bc6f4441ee220aa78900296")
+
+    monero.generate_unlock_signature(button, _priv_key=_priv_key, pub_key=pub_key)
+    monero.reset_and_get_version(b"10.0.0")
+
+def test_ons_signature(monero, button):
+    monero.generate_ons_signature(button, name="hello")
+    monero.reset_and_get_version(b"10.0.0")
