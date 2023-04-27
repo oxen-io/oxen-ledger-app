@@ -36,6 +36,7 @@ int monero_dispatch(void);
 void clear_protocol(void);
 
 int monero_apdu_get_network(void);
+int monero_apdu_reset_network(void);  // Only allowed in a debug build
 int monero_apdu_put_key(void);
 int monero_apdu_get_key(void);
 int monero_apdu_display_address(void);

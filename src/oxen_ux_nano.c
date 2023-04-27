@@ -691,6 +691,8 @@ void ui_menu_any_pubaddr_display(unsigned char* pub_view,
                 memmove(G_oxen_state.ux_addr_info, "(testnet)", 9);
             else if (N_oxen_state->network_id == DEVNET)
                 memmove(G_oxen_state.ux_addr_info, "(devnet)", 8);
+            else if (N_oxen_state->network_id == FAKECHAIN)
+                memmove(G_oxen_state.ux_addr_info, "(fakenet)", 9);
             break;
 
         case DISP_SUB:

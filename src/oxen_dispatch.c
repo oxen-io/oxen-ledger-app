@@ -73,6 +73,7 @@ int check_ins_access(void) {
         case INS_LOCK_DISPLAY:
         case INS_RESET:
         case INS_GET_NETWORK:
+        case INS_RESET_NETWORK:
         case INS_PUT_KEY:
         case INS_GET_KEY:
         case INS_DISPLAY_ADDRESS:
@@ -148,6 +149,9 @@ int monero_dispatch(void) {
             break;
         case INS_GET_NETWORK:
             sw = monero_apdu_get_network();
+            break;
+        case INS_RESET_NETWORK:
+            sw = monero_apdu_reset_network();
             break;
         /* --- KEYS --- */
         case INS_PUT_KEY:

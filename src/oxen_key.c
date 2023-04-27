@@ -166,6 +166,27 @@ int monero_apdu_get_network(void) {
     return SW_OK;
 }
 
+int monero_apdu_reset_network(void) {
+#ifdef DEBUG_HWDEVICE
+    monero_io_discard(1);
+    // On (and only on) a debug build we allow this command to reset the wallet to a requested
+    // network (without any confirmation).  This is used for testing purposes (and is the only way
+    // to put the ledger into FAKECHAIN mode).
+    uint8_t nettype = G_oxen_state.io_p1;
+    if (
+#ifndef OXEN_ALPHA
+        nettype == MAINNET ||
+#endif
+        nettype == TESTNET || nettype == DEVNET || nettype == FAKECHAIN) {
+        oxen_install(nettype);
+        monero_init();
+        return SW_OK;
+    }
+#endif
+    // On a non-debug build this command always fails.
+    THROW(SW_COMMAND_NOT_ALLOWED);
+}
+
 /* ----------------------------------------------------------------------- */
 /* ---                                                                 --- */
 /* ----------------------------------------------------------------------- */

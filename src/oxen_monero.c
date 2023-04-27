@@ -154,6 +154,7 @@ unsigned char oxen_wallet_address(char* str_b58,
             break;
 #ifndef OXEN_ALPHA
         case MAINNET:
+        case FAKECHAIN:
             if (paymentID)
                 prefix = MAINNET_CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
             else if (is_subbadress)
