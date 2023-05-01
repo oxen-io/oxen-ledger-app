@@ -579,10 +579,10 @@ int oxen_apdu_generate_unlock_signature(void) {
     return SW_OK;
 }
 
-// Generates an LNS hash
+// Generates an ONS hash
 int oxen_apdu_generate_lns_hash(void) {
     if (G_oxen_state.io_p1 == 0) {
-        // Confirm the LNS initialization with the user
+        // Confirm the ONS initialization with the user
         monero_io_discard(1);
         ui_menu_lns_validation_display();
         return 0;

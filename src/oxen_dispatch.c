@@ -86,7 +86,7 @@ int check_ins_access(void) {
         case INS_GEN_KEY_IMAGE:
         case INS_GEN_KEY_IMAGE_SIGNATURE:
         case INS_GEN_UNLOCK_SIGNATURE:
-        case INS_GEN_LNS_SIGNATURE:
+        case INS_GEN_ONS_SIGNATURE:
         case INS_SECRET_KEY_TO_PUBLIC_KEY:
         case INS_SECRET_KEY_ADD:
         case INS_GENERATE_KEYPAIR:
@@ -244,7 +244,7 @@ int monero_dispatch(void) {
         case INS_OPEN_TX:
             // state machine check
             if (!(G_oxen_state.tx_state_ins == 0 ||
-                  G_oxen_state.tx_state_ins == INS_GEN_LNS_SIGNATURE)) {
+                  G_oxen_state.tx_state_ins == INS_GEN_ONS_SIGNATURE)) {
                 THROW(SW_COMMAND_NOT_ALLOWED);
             }
             // 2. command process
@@ -457,20 +457,20 @@ int monero_dispatch(void) {
             update_protocol();
             break;
 
-        /* --- LNS --- */
-        case INS_GEN_LNS_SIGNATURE:
+        /* --- ONS --- */
+        case INS_GEN_ONS_SIGNATURE:
             if (G_oxen_state.tx_in_progress) THROW(SW_COMMAND_NOT_ALLOWED);
             // Initialization: must not be in the middle of something else
             if (OXEN_IO_P_EQUALS(0, 0) && G_oxen_state.tx_state_ins == 0)
                 sw = oxen_apdu_generate_lns_hash();
             // [0,0]->[1,x] or [1,x]->[1,y] -- we receive data to hash in multiple parts
-            else if (G_oxen_state.tx_state_ins == INS_GEN_LNS_SIGNATURE &&
+            else if (G_oxen_state.tx_state_ins == INS_GEN_ONS_SIGNATURE &&
                      (OXEN_TX_STATE_P_EQUALS(0, 0) || G_oxen_state.tx_state_p1 == 1) &&
                      G_oxen_state.io_p1 == 1)
                 sw = oxen_apdu_generate_lns_hash();
             // [1,0] -> [2,0] gives the account indices and uses the hash built in the [1,x] steps
             // to make the signature
-            else if (OXEN_TX_STATE_INS_P_EQUALS(INS_GEN_LNS_SIGNATURE, 1, 0) &&
+            else if (OXEN_TX_STATE_INS_P_EQUALS(INS_GEN_ONS_SIGNATURE, 1, 0) &&
                      OXEN_IO_P_EQUALS(2, 0))
                 sw = oxen_apdu_generate_lns_signature();
             else

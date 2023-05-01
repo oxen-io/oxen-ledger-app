@@ -122,7 +122,7 @@ typedef struct oxen_nv_state_t {
 
 enum device_mode { NONE, TRANSACTION_CREATE_REAL, TRANSACTION_CREATE_FAKE, TRANSACTION_PARSE };
 
-enum txtype { TXTYPE_STANDARD, TXTYPE_STATE_CHANGE, TXTYPE_UNLOCK, TXTYPE_STAKE, TXTYPE_LNS };
+enum txtype { TXTYPE_STANDARD, TXTYPE_STATE_CHANGE, TXTYPE_UNLOCK, TXTYPE_STAKE, TXTYPE_ONS };
 
 #define DISP_MAIN       0x51
 #define DISP_SUB        0x52
@@ -322,7 +322,7 @@ typedef struct oxen_v_state_t {
 
 #define INS_GET_TX_PROOF            0xA0
 #define INS_GEN_UNLOCK_SIGNATURE    0xA2
-#define INS_GEN_LNS_SIGNATURE       0xA3
+#define INS_GEN_ONS_SIGNATURE       0xA3
 #define INS_GEN_KEY_IMAGE_SIGNATURE 0xA4
 
 #define INS_GET_RESPONSE 0xc0

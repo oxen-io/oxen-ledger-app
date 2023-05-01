@@ -52,7 +52,7 @@ int monero_apdu_open_tx(void) {
 
     if (txversion != 4) THROW(SW_WRONG_DATA_RANGE);
     if (!(txtype == TXTYPE_STANDARD || txtype == TXTYPE_UNLOCK || txtype == TXTYPE_STAKE ||
-          txtype == TXTYPE_LNS))
+          txtype == TXTYPE_ONS))
         THROW(SW_WRONG_DATA_RANGE);
 
     monero_io_discard(1);

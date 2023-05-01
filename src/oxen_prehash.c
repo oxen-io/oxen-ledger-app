@@ -39,9 +39,9 @@ int monero_apdu_clsag_prehash_init(void) {
             cx_keccak_init(&G_oxen_state.keccak_alt, 256);
         }
     }
-    // We always confirm fees for LNS because often this is the *only* confirmation for an LNS tx
+    // We always confirm fees for ONS because often this is the *only* confirmation for an ONS tx
     unsigned char confirm_fee_mode =
-        G_oxen_state.tx_type == TXTYPE_LNS ? CONFIRM_FEE_ALWAYS : N_oxen_state->confirm_fee_mode;
+        G_oxen_state.tx_type == TXTYPE_ONS ? CONFIRM_FEE_ALWAYS : N_oxen_state->confirm_fee_mode;
 
     oxen_hash_update(&G_oxen_state.keccak_alt,
                      G_oxen_state.io_buffer + G_oxen_state.io_offset,
@@ -71,7 +71,7 @@ int monero_apdu_clsag_prehash_init(void) {
         if (amount > 0) {
             // ask user
             oxen_currency_str(amount, G_oxen_state.ux_amount);
-            if (G_oxen_state.tx_type == TXTYPE_LNS)
+            if (G_oxen_state.tx_type == TXTYPE_ONS)
                 ui_menu_lns_fee_validation_display();
             else
                 ui_menu_fee_validation_display();
@@ -123,7 +123,7 @@ int monero_apdu_clsag_prehash_update(void) {
 
     if (G_oxen_state.tx_sig_mode == TRANSACTION_CREATE_REAL) {
         if (!is_change && G_oxen_state.tx_type != TXTYPE_STAKE &&
-            G_oxen_state.tx_type != TXTYPE_LNS) {
+            G_oxen_state.tx_type != TXTYPE_ONS) {
             // encode dest adress
             unsigned char pos =
                 oxen_wallet_address(G_oxen_state.ux_address, Aout, Bout, is_subaddress, NULL);
@@ -180,8 +180,8 @@ int monero_apdu_clsag_prehash_update(void) {
         if (amount) {
             oxen_currency_str(amount, G_oxen_state.ux_amount);
             if (!is_change) {
-                if (G_oxen_state.tx_type == TXTYPE_STAKE || G_oxen_state.tx_type == TXTYPE_LNS) {
-                    // If this is a stake or LNS tx then the non-change recipient must be ourself.
+                if (G_oxen_state.tx_type == TXTYPE_STAKE || G_oxen_state.tx_type == TXTYPE_ONS) {
+                    // If this is a stake or ONS tx then the non-change recipient must be ourself.
                     if (memcmp(Aout, G_oxen_state.view_pub, 32) ||
                         memcmp(Bout, G_oxen_state.spend_pub, 32))
                         monero_lock_and_throw(SW_SECURITY_INTERNAL);

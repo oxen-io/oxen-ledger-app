@@ -124,7 +124,7 @@ void ui_menu_info_display(void) {
 /* -------------------------------- OPEN TX UX --------------------------------- */
 static const char* processing_tx(void) {
     return G_oxen_state.tx_type == TXTYPE_STAKE    ? "Processing Stake"
-           : G_oxen_state.tx_type == TXTYPE_LNS    ? "Processing LNS"
+           : G_oxen_state.tx_type == TXTYPE_ONS    ? "Processing ONS"
            : G_oxen_state.tx_type == TXTYPE_UNLOCK ? "Processing Unlck"
                                                    : "Processing TX";
 }
@@ -151,7 +151,7 @@ void ui_menu_amount_validation_action(unsigned int value);
     UX_STEP_NOCB(name, bn, {title, G_oxen_state.ux_amount})
 
 OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_fee_step, "Confirm Fee");
-OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_lns_fee_step, "Confirm LNS Fee");
+OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_lns_fee_step, "Confirm ONS Fee");
 OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_change_step, "Amount (change)");
 OXEN_UX_CONFIRM_AMOUNT_STEP(ux_menu_validation_timelock_step, "Timelock");
 
@@ -255,7 +255,7 @@ void ui_menu_stake_validation_display(void) {
     ux_flow_init(0, ux_flow_stake_validation, NULL);
 }
 
-/** Common menu items for special transaction (i.e. unlocks and LNS) */
+/** Common menu items for special transaction (i.e. unlocks and ONS) */
 void ui_menu_special_validation_action(unsigned int value) {
     unsigned short sw;
     if (value == ACCEPT) {
@@ -281,7 +281,7 @@ void ui_menu_unlock_validation_display(void) {
     ux_flow_init(0, ux_flow_unlock_validation, NULL);
 }
 
-/* LNS */
+/* ONS */
 UX_STEP_NOCB(ux_menu_lns_validation_step, nn, {"Confirm Oxen", "Name Service TX"});
 UX_FLOW(ux_flow_lns_validation,
         &ux_menu_lns_validation_step,
