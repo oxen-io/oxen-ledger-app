@@ -149,23 +149,23 @@ void oxen_install(unsigned char netId) {
     unsigned char c;
 
     // full reset data
-    nvm_write(N_oxen_state, NULL, sizeof(oxen_nv_state_t));
+    nvm_write((void*) N_oxen_state, NULL, sizeof(oxen_nv_state_t));
 
     // set mode key
     c = KEY_MODE_SEED;
-    nvm_write(&N_oxen_state->key_mode, &c, 1);
+    nvm_write((void*) &N_oxen_state->key_mode, &c, 1);
 
     // set net id
-    nvm_write(&N_oxen_state->network_id, &netId, 1);
+    nvm_write((void*) &N_oxen_state->network_id, &netId, 1);
 
     // write magic
-    nvm_write(N_oxen_state->magic, (void*) C_MAGIC, sizeof(C_MAGIC));
+    nvm_write((void*) N_oxen_state->magic, (void*) C_MAGIC, sizeof(C_MAGIC));
 
 #if DEBUG_HWDEVICE
     // Default into always-export-view-key mode when doing a debug build because it's annoying to
     // have to confirm the view key export every time when doing dev/debugging work.
     unsigned char always_export = VIEWKEY_EXPORT_ALWAYS_ALLOW;
-    nvm_write(&N_oxen_state->viewkey_export_mode, &always_export, 1);
+    nvm_write((void*) &N_oxen_state->viewkey_export_mode, &always_export, 1);
 #endif
 }
 
