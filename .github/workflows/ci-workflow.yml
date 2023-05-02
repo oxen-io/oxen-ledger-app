@@ -93,7 +93,7 @@ jobs:
 
   job_test:
     name: Test
-    needs: job_build_debug
+    needs: job_nanoS_build_debug
     runs-on: ubuntu-latest
 
     container:
