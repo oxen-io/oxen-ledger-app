@@ -161,7 +161,7 @@ void oxen_install(unsigned char netId) {
     // write magic
     nvm_write((void*) N_oxen_state->magic, (void*) C_MAGIC, sizeof(C_MAGIC));
 
-#if DEBUG_HWDEVICE
+#ifdef DEBUG_HWDEVICE
     // Default into always-export-view-key mode when doing a debug build because it's annoying to
     // have to confirm the view key export every time when doing dev/debugging work.
     unsigned char always_export = VIEWKEY_EXPORT_ALWAYS_ALLOW;
