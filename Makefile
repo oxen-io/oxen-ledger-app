@@ -158,13 +158,3 @@ dep/%.d: %.c Makefile
 
 listvariants:
 	@echo VARIANTS COIN oxen
-
-
-# We probably don't need this as the nanox default is 1500 and nanos default is 1024
-# ifeq ($(TARGET_NAME),TARGET_NANOS)
-# Rewrite the bolos sdk script to increase the stack size slightly
-
-# script.ld: $(BOLOS_SDK)/script.ld Makefile
-# 	sed -e 's/^STACK_SIZE\s*=\s*[0-9]\+;/STACK_SIZE = 712;/' $< >$@
-# endif
-
