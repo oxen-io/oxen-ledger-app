@@ -44,7 +44,7 @@
 /* cannot send more that F0 bytes in CCID, why? do not know for now
  *  So set up length to F0 minus 2 bytes for SW
  */
-#define MONERO_APDU_LENGTH 0xFE
+#define MONERO_APDU_LENGTH 0xEE
 
 /* --- ... --- */
 #define MAINNET_CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX            114
