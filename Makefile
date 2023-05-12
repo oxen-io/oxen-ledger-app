@@ -15,12 +15,7 @@ endif
 
 #Oxen /44'/240'
 APP_LOAD_PARAMS  =  --path "44'/240'" --curve secp256k1
-# OR MAYBE ? APP_LOAD_PARAMS=  --path "44'" --curve secp256k1 # based on boilerplate
-ifeq ($(TARGET_NAME), TARGET_NANOX)
-APP_LOAD_PARAMS+=--appFlags 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
-else
-APP_LOAD_PARAMS+=--appFlags 0x40
-endif
+APP_LOAD_PARAMS += --appFlags 0x240  # APPLICATION_FLAG_BOLOS_SETTINGS & global pin
 APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
 APPNAME = "Oxen"
