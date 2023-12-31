@@ -226,7 +226,7 @@ def spendkey_to_words(seed, language):
 def convert_mnemonic(language, ledger_mnemonic, passphrase):
     s = mnemonic_to_seed(ledger_mnemonic, passphrase)
     mkey = seed_to_master_key(s)
-    monero_ki, monero_ci = master_key_to_child_key(mkey, u"m/44'/10343'/0'/0/0")
+    monero_ki, monero_ci = master_key_to_child_key(mkey, u"m/44'/240'/0'/0/0")
     monero_seed = monero_ki
     monero_view_key, monero_spend_key = monero_seed_to_monero_keys(monero_seed)
     monero_words = spendkey_to_words(monero_spend_key, language)
